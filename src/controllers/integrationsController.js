@@ -4,6 +4,7 @@ const integrationService = require('../services/integrationService');
 const subscriptionService = require('../services/subscriptionService');
 const integrationHistoryService = require('../services/integrationHistoryService');
 const pedidoService = require('../services/pedidoService');
+const { body, validationResult } = require('express-validator');
 
 // Dicionário de tradutores para cada plataforma
 const platformMappers = {
@@ -138,37 +139,55 @@ exports.regenerateApiKey = async (req, res) => {
     }
 };
 
-exports.criarIntegracao = async (req, res) => {
-    const { platform, name } = req.body;
-    const clienteId = req.user.id;
-    try {
-        const novaIntegracao = await integrationService.createIntegration(req.db, clienteId, platform, name);
-        res.status(201).json(novaIntegracao);
-    } catch (err) {
-        res.status(500).json({ error: 'Falha ao criar integração.' });
-    }
-};
-
-exports.atualizarIntegracao = async (req, res) => {
-    const { id } = req.params;
-    const clienteId = req.user.id;
-    const { name, secret_key } = req.body;
-    try {
-        const result = await integrationService.updateIntegration(
-            req.db,
-            id,
-            { name, secret_key },
-            clienteId
-        );
-        if (result.changes === 0) {
-            return res.status(404).json({ error: 'Integração não encontrada.' });
+exports.criarIntegracao = [
+    body('platform').trim().notEmpty().withMessage('A plataforma é obrigatória.'),
+    body('name').trim().notEmpty().withMessage('O nome é obrigatório.'),
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
         }
-        res.status(200).json({ message: 'Integração atualizada com sucesso.' });
-    } catch (err) {
-        console.error('Erro ao atualizar integração', err);
-        res.status(500).json({ error: 'Falha ao atualizar integração' });
+
+        const { platform, name, secret_key } = req.body;
+        const clienteId = req.user.id;
+        try {
+            const novaIntegracao = await integrationService.createIntegration(req.db, clienteId, platform, name, secret_key);
+            res.status(201).json(novaIntegracao);
+        } catch (err) {
+            res.status(500).json({ error: 'Falha ao criar integração.' });
+        }
     }
-};
+];
+
+exports.atualizarIntegracao = [
+    body('name').optional().trim().notEmpty().withMessage('O nome é obrigatório.'),
+    body('secret_key').optional().notEmpty().withMessage('A chave não pode ser vazia.'),
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { id } = req.params;
+        const clienteId = req.user.id;
+        const { name, secret_key } = req.body;
+        try {
+            const result = await integrationService.updateIntegration(
+                req.db,
+                id,
+                { name, secret_key },
+                clienteId
+            );
+            if (result.changes === 0) {
+                return res.status(404).json({ error: 'Integração não encontrada.' });
+            }
+            res.status(200).json({ message: 'Integração atualizada com sucesso.' });
+        } catch (err) {
+            console.error('Erro ao atualizar integração', err);
+            res.status(500).json({ error: 'Falha ao atualizar integração' });
+        }
+    }
+];
 
 exports.deletarIntegracao = async (req, res) => {
     const { id } = req.params;
