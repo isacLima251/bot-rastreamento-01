@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsShip - Automação Pós-Venda para Vendedores de Encapsulados</title>
+    <link rel="stylesheet" href="landing.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Menu -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h3>WhatsShip</h3>
+            </div>
+            <div class="nav-menu">
+                <a href="#features" class="nav-link">Funcionalidades</a>
+                <a href="#benefits" class="nav-link">Benefícios</a>
+                <a href="#pricing" class="nav-link">Preços</a>
+                <a href="#demo" class="nav-link">Demo</a>
+                <a href="#contact" class="nav-link">Contato</a>
+
+                <div class="nav-actions">
+                    <a href="/login.html" class="btn btn-nav-secondary">Entrar</a>
+                    <a href="/register.html" class="btn btn-nav-primary">Começar Grátis</a>
+                </div>
+            </div>
+            <div class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header/Hero Section -->
+    <header class="hero">
+        <div class="hero-background"></div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span>🚀 Revolucione seu pós-venda</span>
+                </div>
+                <h1 class="hero-title">
+                    Cansado de <span class="highlight">"Cadê Meu Pedido?"</span><br>
+                    Libere Seu Suporte e <span class="highlight-secondary">Venda Mais!</span>
+                </h1>
+                <p class="hero-subtitle">
+                    O WhatsShip automatiza 100% da comunicação pós-venda no WhatsApp para vendedores de encapsulados. 
+                    Elimine chamados de suporte, reduza reembolsos e crie uma experiência premium que fideliza clientes.
+                </p>
+                <div class="hero-cta">
+                    <a href="#pricing" class="btn btn-primary">
+                        <span>Começar Agora - Grátis</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    <a href="#demo" class="btn btn-secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="5,3 19,12 5,21" fill="currentColor"/>
+                        </svg>
+                        <span>Ver Demo</span>
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">95%</span>
+                        <span class="stat-label">Redução em chamados</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">80%</span>
+                        <span class="stat-label">Menos reembolsos</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-label">Automação ativa</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="phone-mockup">
+                    <div class="phone-screen">
+                        <div class="whatsapp-chat">
+                            <div class="chat-header">
+                                <div class="chat-avatar"></div>
+                                <div class="chat-info">
+                                    <span class="chat-name">WhatsShip</span>
+                                    <span class="chat-status">online</span>
+                                </div>
+                            </div>
+                            <div class="chat-messages">
+                                <div class="message received">
+                                    <p>Olá João! 📦 Seu pedido #12345 foi postado nos Correios!</p>
+                                    <span class="message-time">09:15</span>
+                                </div>
+                                <div class="message received">
+                                    <p>Código de rastreio: BR123456789BR</p>
+                                    <span class="message-time">09:15</span>
+                                </div>
+                                <div class="message received">
+                                    <p>🚚 Seu pedido saiu de São Paulo e está indo para Rio de Janeiro!</p>
+                                    <span class="message-time">14:22</span>
+                                </div>
+                                <div class="message received">
+                                    <p>🎉 Chegou no Rio de Janeiro! Entrega prevista para amanhã.</p>
+                                    <span class="message-time">16:45</span>
+                                </div>
+                                <div class="message received">
+                                    <p>✅ Pedido entregue com sucesso! Obrigado pela preferência! 😊</p>
+                                    <span class="message-time">10:30</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Problem Section -->
+    <section class="problem">
+        <div class="container">
+            <div class="section-header">
+                <h2>O Problema Que Tira Seu Sono</h2>
+                <p>No universo dos encapsulados, cada venda é uma vitória, mas o pós-venda pode se tornar um pesadelo.</p>
+            </div>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">😰</div>
+                    <h3>Suporte Sobregregado</h3>
+                    <p>Sua equipe perde tempo respondendo "Cadê meu pedido?" em vez de focar em vendas e problemas complexos.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">💸</div>
+                    <h3>Reembolsos e Chargebacks</h3>
+                    <p>Clientes ansiosos cancelam compras por falta de informação, gerando prejuízos desnecessários.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">📉</div>
+                    <h3>Perda de Recompra</h3>
+                    <p>Experiência pós-venda ruim significa clientes que não voltam. Fidelizar é mais barato que adquirir.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution" id="features">
+        <div class="solution-background"></div>
+        <div class="container">
+            <div class="solution-header">
+                <div class="section-badge">
+                    <span>✨ A Solução Definitiva</span>
+                </div>
+                <h2>
+                    Sua Máquina de <span class="highlight">Automação Inteligente</span> no WhatsApp
+                </h2>
+                <p>
+                    Não é apenas uma ferramenta de rastreamento; é o seu novo braço direito para a tranquilidade do cliente e a eficiência do vendedor.
+                </p>
+            </div>
+
+            <div class="solution-visual">
+                <div class="dashboard-mockup">
+                    <div class="dashboard-header">
+                        <div class="dashboard-title">WhatsShip Dashboard</div>
+                        <div class="dashboard-stats">
+                            <div class="mini-stat">
+                                <span class="mini-stat-number">1,247</span>
+                                <span class="mini-stat-label">Mensagens enviadas</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="mini-stat-number">98.5%</span>
+                                <span class="mini-stat-label">Taxa de entrega</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-content">
+                        <div class="tracking-item">
+                            <div class="tracking-status delivered"></div>
+                            <div class="tracking-info">
+                                <span class="tracking-code">BR123456789BR</span>
+                                <span class="tracking-customer">João Silva</span>
+                            </div>
+                            <div class="tracking-badge success">Entregue</div>
+                        </div>
+                        <div class="tracking-item">
+                            <div class="tracking-status in-transit"></div>
+                            <div class="tracking-info">
+                                <span class="tracking-code">BR987654321BR</span>
+                                <span class="tracking-customer">Maria Santos</span>
+                            </div>
+                            <div class="tracking-badge warning">Em trânsito</div>
+                        </div>
+                        <div class="tracking-item">
+                            <div class="tracking-status posted"></div>
+                            <div class="tracking-info">
+                                <span class="tracking-code">BR456789123BR</span>
+                                <span class="tracking-customer">Carlos Lima</span>
+                            </div>
+                            <div class="tracking-badge info">Postado</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="solution-features">
+                <div class="feature-item">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-content">
+                        <h4>Comunicação Proativa</h4>
+                        <p>Antecipa a ansiedade enviando atualizações personalizadas em cada etapa da entrega.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-content">
+                        <h4>Rastreamento 100% Automático</h4>
+                        <p>Basta adicionar o código. Nosso sistema verifica continuamente o status do pedido.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">💬</div>
+                    <div class="feature-content">
+                        <h4>Mensagens Humanizadas</h4>
+                        <p>Comunicação pessoal com nome do cliente, código de rastreio e informações do produto.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits" id="benefits">
+        <div class="container">
+            <div class="section-header">
+                <h2>Por Que o WhatsShip é "Foda" para Quem Vende Encapsulados?</h2>
+                <p>Transforme suas maiores dores em vantagens competitivas</p>
+            </div>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-number">01</div>
+                    <h3>Zera o Suporte de "Cadê Meu Pedido?"</h3>
+                    <p>Liberte sua equipe para focar em vendas e problemas complexos. Automatize as atualizações e veja sua produtividade disparar.</p>
+                    <div class="benefit-result">
+                        <span class="result-label">Resultado:</span>
+                        <span class="result-value">Mais vendas, menos custos</span>
+                    </div>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-number">02</div>
+                    <h3>Reduz Drasticamente Reembolsos</h3>
+                    <p>Clientes informados são clientes confiantes. Notificações proativas eliminam a ansiedade que leva aos cancelamentos.</p>
+                    <div class="benefit-result">
+                        <span class="result-label">Resultado:</span>
+                        <span class="result-value">Menos prejuízo, mais lucro</span>
+                    </div>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-number">03</div>
+                    <h3>Escala Sem Aumentar Custos</h3>
+                    <p>Passe de 10 para 1.000 vendas diárias sem contratar mais pessoas para suporte. O WhatsShip faz o trabalho pesado.</p>
+                    <div class="benefit-result">
+                        <span class="result-label">Resultado:</span>
+                        <span class="result-value">Crescimento sustentável</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="demo" id="demo">
+        <div class="container">
+            <div class="section-header">
+                <h2>Veja o WhatsShip em Ação</h2>
+                <p>Demonstração real de como seus clientes recebem as atualizações</p>
+            </div>
+            <div class="demo-content">
+                <div class="demo-phone">
+                    <div class="phone-mockup large">
+                        <div class="phone-screen">
+                            <div class="whatsapp-chat">
+                                <div class="chat-header">
+                                    <div class="chat-avatar"></div>
+                                    <div class="chat-info">
+                                        <span class="chat-name">Sua Loja</span>
+                                        <span class="chat-status">online</span>
+                                    </div>
+                                </div>
+                                <div class="chat-messages">
+                                    <div class="message received">
+                                        <p>Oi Maria! 🎉 Seu pedido de Colágeno Hidrolisado foi confirmado!</p>
+                                        <span class="message-time">08:30</span>
+                                    </div>
+                                    <div class="message received">
+                                        <p>📦 Pedido #45678 foi postado nos Correios!</p>
+                                        <p>Código: BR987654321BR</p>
+                                        <span class="message-time">10:15</span>
+                                    </div>
+                                    <div class="message received">
+                                        <p>🚚 Seu Colágeno saiu de São Paulo e está indo para Belo Horizonte!</p>
+                                        <span class="message-time">14:22</span>
+                                    </div>
+                                    <div class="message received">
+                                        <p>📍 Chegou em Belo Horizonte! Entrega prevista para amanhã entre 9h-17h.</p>
+                                        <span class="message-time">16:45</span>
+                                    </div>
+                                    <div class="message received">
+                                        <p>🎯 Saiu para entrega! O carteiro está a caminho da sua casa.</p>
+                                        <span class="message-time">09:20</span>
+                                    </div>
+                                    <div class="message received">
+                                        <p>✅ Entregue com sucesso! Aproveite seu Colágeno e obrigado pela confiança! 😊</p>
+                                        <span class="message-time">11:30</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-features">
+                    <div class="demo-feature">
+                        <div class="demo-icon">🎯</div>
+                        <h4>Mensagens Personalizadas</h4>
+                        <p>Cada mensagem inclui o nome do cliente, produto comprado e informações específicas do pedido.</p>
+                    </div>
+                    <div class="demo-feature">
+                        <div class="demo-icon">📍</div>
+                        <h4>Rastreamento Detalhado</h4>
+                        <p>Atualizações em tempo real sobre a localização e status do pedido, de São Paulo ao destino final.</p>
+                    </div>
+                    <div class="demo-feature">
+                        <div class="demo-icon">⏰</div>
+                        <h4>Timing Perfeito</h4>
+                        <p>Mensagens enviadas nos momentos certos para manter o cliente informado sem ser invasivo.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-header">
+                <h2>Planos Feitos Para Escalar Seu Negócio</h2>
+                <p>Comece gratuitamente. Mude de plano quando quiser. Sem pegadinhas.</p>
+            </div>
+            <div class="pricing-toggle">
+                <span class="toggle-label">Mensal</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="pricing-toggle">
+                    <label for="pricing-toggle"></label>
+                </div>
+                <span class="toggle-label">Anual <span class="discount-badge">-20%</span></span>
+            </div>
+            <div class="pricing-grid-horizontal">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Start</h3>
+                        <p>Ideal para quem está começando</p>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="price-currency">R$</span>
+                        <span class="price-amount">39,99</span>
+                        <span class="price-period">/mês</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Até 50 rastreios/mês</li>
+                        <li>✅ Automações de mensagens</li>
+                        <li>✅ Suporte via email</li>
+                        <li>✅ Dashboard básico</li>
+                    </ul>
+                    <a href="https://payment.ticto.app/O6073F635" target="_blank" class="btn btn-outline">Começar com Start</a>
+                </div>
+                
+                <div class="pricing-card popular">
+                    <div class="popular-badge">Mais Popular</div>
+                    <div class="pricing-header">
+                        <h3>Basic</h3>
+                        <p>Perfeito para operações médias</p>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="price-currency">R$</span>
+                        <span class="price-amount">59,99</span>
+                        <span class="price-period">/mês</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Até 100 rastreios/mês</li>
+                        <li>✅ Automações de mensagens</li>
+                        <li>✅ Relatórios de entrega</li>
+                        <li>✅ Suporte via email</li>
+                        <li>✅ Dashboard avançado</li>
+                    </ul>
+                    <a href="https://payment.ticto.app/O8EC5C302" target="_blank" class="btn btn-primary">Escolher Basic</a>
+                </div>
+                
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Pro</h3>
+                        <p>Para operações de alto volume</p>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="price-currency">R$</span>
+                        <span class="price-amount">99,99</span>
+                        <span class="price-period">/mês</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Até 250 rastreios/mês</li>
+                        <li>✅ Automações de mensagens</li>
+                        <li>✅ Relatórios de entrega</li>
+                        <li>✅ Suporte prioritário</li>
+                        <li>✅ Dashboard completo</li>
+                        <li>✅ API personalizada</li>
+                    </ul>
+                    <a href="https://payment.ticto.app/OEE2CBEAA" target="_blank" class="btn btn-outline">Escolher Pro</a>
+                </div>
+            </div>
+            
+            <!-- Custom Plan Section -->
+            <div class="custom-plan">
+                <div class="custom-plan-content">
+                    <h3>Mais de 250 rastreios por mês?</h3>
+                    <p>Temos planos personalizados para operações de alto volume. Fale com nosso suporte e descubra a melhor solução para seu negócio.</p>
+                    <div class="custom-plan-cta">
+                        <a href="#contact" class="btn btn-secondary">Falar com Suporte</a>
+                        <span class="custom-plan-note">Resposta em até 2 horas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>O Que Nossos Clientes Dizem</h2>
+                <p>Vendedores de encapsulados que já transformaram seu pós-venda</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Antes do WhatsShip, minha equipe passava 4 horas por dia só respondendo 'cadê meu pedido'. Agora esse tempo virou vendas. Faturamento aumentou 40%!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">RC</div>
+                        <div class="author-info">
+                            <span class="author-name">Rafael Costa</span>
+                            <span class="author-role">Vendedor de Colágeno</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Reduzi 80% dos reembolsos! Os clientes ficam tranquilos sabendo onde está o pedido. Minha reputação no Reclame Aqui melhorou muito."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MS</div>
+                        <div class="author-info">
+                            <span class="author-name">Mariana Silva</span>
+                            <span class="author-role">Vendedora de Suplementos</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Escalei de 50 para 500 vendas por mês sem contratar ninguém para suporte. O WhatsShip é o melhor investimento que já fiz!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">JL</div>
+                        <div class="author-info">
+                            <span class="author-name">João Lima</span>
+                            <span class="author-role">Vendedor de Vitaminas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="cta-background"></div>
+        <div class="container">
+            <div class="cta-content">
+                <h2>Não Deixe a Ansiedade do Cliente Frear Suas Vendas</h2>
+                <p>Chega de perder tempo e dinheiro com problemas de pós-venda. O WhatsShip é a ferramenta que você precisa para escalar seu negócio de encapsulados, fidelizar clientes e construir uma reputação impecável.</p>
+                <div class="cta-buttons">
+                    <a href="/register.html" class="btn btn-primary btn-large">
+                        <span>Começar Agora - Grátis</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                </div>
+                <div class="cta-guarantee">
+                    <span>🔒 Sem compromisso • Sem cartão de crédito • Cancele quando quiser</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>WhatsShip</h3>
+                    <p>Automação pós-venda inteligente para vendedores de encapsulados.</p>
+                    <div class="footer-contact">
+                        <p><strong>Suporte:</strong> suporte@whatsship.com</p>
+                        <p><strong>WhatsApp:</strong> (11) 99999-9999</p>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Produto</h4>
+                        <ul>
+                            <li><a href="#features">Funcionalidades</a></li>
+                            <li><a href="#pricing">Preços</a></li>
+                            <li><a href="#demo">Demo</a></li>
+                            <li><a href="#benefits">Benefícios</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Suporte</h4>
+                        <ul>
+                            <li><a href="#help">Central de Ajuda</a></li>
+                            <li><a href="#contact">Contato</a></li>
+                            <li><a href="#status">Status</a></li>
+                            <li><a href="#api">API</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Empresa</h4>
+                        <ul>
+                            <li><a href="#about">Sobre</a></li>
+                            <li><a href="#blog">Blog</a></li>
+                            <li><a href="#careers">Carreiras</a></li>
+                            <li><a href="#privacy">Privacidade</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 WhatsShip. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const navMenu = document.querySelector('.nav-menu');
+        
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            navToggle.classList.toggle('active');
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Pricing toggle
+        const pricingToggle = document.getElementById('pricing-toggle');
+        const priceAmounts = document.querySelectorAll('.price-amount');
+        
+        pricingToggle.addEventListener('change', () => {
+            priceAmounts.forEach(amount => {
+                const monthlyPrice = parseFloat(amount.textContent.replace(',', '.'));
+                const annualPrice = (monthlyPrice * 12 * 0.8 / 12).toFixed(2).replace('.', ',');
+                
+                if (pricingToggle.checked) {
+                    amount.textContent = annualPrice;
+                } else {
+                    amount.textContent = monthlyPrice.toFixed(2).replace('.', ',');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

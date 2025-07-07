@@ -1,0 +1,39 @@
+# Node modules
+node_modules/
+
+# Pastas locais do Venom e Chromium
+.venom/
+.local-chromium/
+
+# Arquivos de banco de dados locais
+*.db
+
+# Variáveis de ambiente
+.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Pastas temporárias
+tmp/
+temp/
+token/
+
+# Pastas de build (se houver)
+dist/
+build/
+out/
+
+# Pastas de upload de mídia (se tiver)
+uploads/
+media/
+
+# Arquivos de lock do sistema
+*.lock
+
+# Pastas ocultas de sistema
+.DS_Store
+Thumbs.db

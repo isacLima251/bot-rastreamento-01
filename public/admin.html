@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Administração</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="main-nav" style="width:200px;position:fixed;height:100%;">
+        <ul>
+            <li><button class="nav-btn active" id="nav-dashboard">Dashboard</button></li>
+            <li><button class="nav-btn" id="nav-clients">Clientes</button></li>
+            <li><button class="nav-btn" id="nav-config">Configurações</button></li>
+        </ul>
+    </nav>
+    <div style="margin-left:200px;padding:20px;">
+        <section id="view-dashboard">
+            <h1>Dashboard</h1>
+            <p>Total de usuários: <span id="total-users">0</span></p>
+            <div id="plans-stats"></div>
+            <p>MRR: R$ <span id="mrr">0</span></p>
+        </section>
+        <section id="view-clients" class="hidden">
+            <h1>Gerenciamento de Clientes</h1>
+            <button id="btn-new-client" class="btn-primary">Novo Cliente</button>
+            <table id="clients-table" style="width:100%;margin-top:20px;border-collapse:collapse;">
+                <thead>
+                    <tr><th>Email</th><th>Ativo</th><th>Requests</th><th>Ações</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+        <section id="view-config" class="hidden">
+            <h1>Configurações</h1>
+            <p>Funcionalidades futuras.</p>
+        </section>
+    </div>
+
+    <div id="client-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-title">Novo Cliente</h3>
+            <form id="client-form">
+                <input type="email" id="client-email" placeholder="Email" required>
+                <input type="password" id="client-password" placeholder="Senha">
+                <select id="client-plan"></select>
+                <div class="modal-acoes" style="margin-top:10px;">
+                    <button type="button" class="btn-cancelar" id="modal-cancel">Cancelar</button>
+                    <button type="submit" class="btn-salvar">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

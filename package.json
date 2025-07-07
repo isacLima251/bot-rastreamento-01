@@ -1,0 +1,32 @@
+{
+  "name": "meu-bot-rastreamento",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-admin": "node criar-admin.js",
+    "clean-users": "node limpar-usuarios.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "moment": "^2.30.1",
+    "resend": "^4.6.0",
+    "sqlite3": "^5.1.7",
+    "stripe": "^13.8.0",
+    "venom-bot": "^5.3.0",
+    "winston": "^3.17.0",
+    "ws": "^8.18.2",
+    "xlsx": "^0.18.5"
+  }
+}

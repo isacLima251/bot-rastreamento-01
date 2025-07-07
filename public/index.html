@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel WhatsShip</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="main-nav">
+            <ul>
+                <li><button class="nav-btn active" data-view="chat-view" title="Conversas"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></button></li>
+                <li><button class="nav-btn" data-view="contacts-view" title="Contatos"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></button></li>
+                <li><button class="nav-btn" data-view="automations-view" title="Automações"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 16.5 3.5 10l.9-8.6L13 1l8.6.9L18 10l-4 1 3 3-3 3-4-1zM2 22l4-4"></path><path d="m14.2 11.2 4.6-4.6"></path></svg></button></li>
+                <li><button class="nav-btn" data-view="integrations-view" title="Integrações"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg></button></li>
+                <li><button class="nav-btn" data-view="reports-view" title="Relatórios"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18.7 8a6 6 0 0 0-6-6H3.3"></path><path d="M7 12h5"></path><path d="M7 16h9"></path></svg></button></li>
+                <li><button class="nav-btn" data-view="logs-view" title="Consumo"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"></path><path d="M8 6h8"></path><path d="M8 10h8"></path><path d="M8 14h8"></path></svg></button></li>
+                <li><button class="nav-btn" data-view="plans-view" title="Planos"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg></button></li>
+            </ul>
+            <ul>
+                <li><button class="nav-btn" data-view="settings-view" title="Configurações"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button></li>
+            </ul>
+        </nav>
+        
+        <div class="content-wrapper">
+            <div id="chat-view" class="view-container">
+                <div class="app-layout">
+                    <aside class="sidebar">
+                        <header class="sidebar-header">
+                            <div id="plan-status" class="plan-info"></div>
+                            <button id="btn-adicionar-novo" class="btn-icon" title="Adicionar Novo Pedido">+</button>
+                        </header>
+                        <div id="connection-status" class="status-indicator disconnected">
+                            <span class="status-dot"></span>
+                            <div class="status-text">
+                                <span id="connection-status-text">Desconectado</span>
+                                <span id="status-bot-info"></span>
+                            </div>
+                            <div id="bot-avatar-container" class="hidden">
+                                <img id="bot-avatar-img" src="https://i.imgur.com/z28n3Nz.png" alt="Avatar do Bot">
+                            </div>
+                        </div>
+                        <div class="list-controls">
+                            <div class="search-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="barra-busca" placeholder="Buscar por nome ou telefone...">
+                            </div>
+                            <div class="filter-container" id="filter-container">
+                                <button class="filter-btn active" data-filtro="todos">Todos</button>
+                                <button class="filter-btn" data-filtro="caminho">A Caminho</button>
+                                <button class="filter-btn" data-filtro="entregue">Entregue</button>
+                            </div>
+                        </div>
+                        <div class="contact-list" id="lista-contactos"></div>
+                    </aside>
+
+                    <main class="main-content" id="main-content-area">
+                        <div id="chat-window">
+                            <div class="placeholder">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                <h3>Selecione uma conversa</h3>
+                                <p>Escolha alguém na lista ao lado para ver as mensagens.</p>
+                            </div>
+                        </div>
+                        <footer class="chat-footer" id="chat-footer">
+                            <form id="form-enviar-mensagem">
+                                <input type="text" id="input-mensagem" placeholder="Digite a sua mensagem..." autocomplete="off" disabled>
+                                <button type="submit" aria-label="Enviar" disabled><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
+                            </form>
+                        </footer>
+                    </main>
+
+                    <aside class="details-panel" id="details-panel">
+                        <div class="placeholder-details">
+                            <p>Selecione um contato para ver os detalhes</p>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+            <div id="contacts-view" class="view-container hidden">
+                <div class="page-container">
+                    <header class="page-header">
+                        <div><h1>Contatos <span id="total-contacts-count"></span></h1><p>Aqui você pode gerenciar as informações dos seus contatos</p></div>
+                        <button class="btn-primary" id="btn-novo-contato-page">Novo contato</button>
+                    </header>
+                    <div class="import-section">
+                        <a href="/modelo_importacao.csv" download class="btn-secondary">Descarregar Modelo</a>
+                        <div>
+                            <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                            <button class="btn-primary" id="btn-importar-csv">Importar Contatos</button>
+                        </div>
+                        <p class="import-hint">Use o modelo para importar seus contatos. Todos os campos são obrigatórios.</p>
+                    </div>
+                    <div class="page-controls">
+                        <div class="search-container-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="barra-busca-contatos" placeholder="Pesquisar por nome ou telefone">
+                        </div>
+                        <button class="btn-filter">Etiquetas</button><button class="btn-filter">Ordenar por: Nome</button>
+                    </div>
+                    <div class="contact-list-full" id="lista-contactos-completa"></div>
+                    <div id="contacts-pagination" class="pagination"></div>
+                </div>
+            </div>
+
+            <div id="automations-view" class="view-container">
+    <div class="page-container">
+        <header class="page-header">
+            <div>
+                <h1>Automações de Mensagens</h1>
+                <p>Ative e personalize as mensagens que serão enviadas automaticamente.</p>
+            </div>
+            <button class="btn-primary" id="btn-salvar-automacoes">Salvar Alterações</button>
+        </header>
+
+        <div class="automations-layout">
+
+            <aside class="variables-sidebar">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 16.5 3.5 10l.9-8.6L13 1l8.6.9L18 10l-4 1 3 3-3 3-4-1z"/></svg>
+                    Variáveis Disponíveis
+                </h3>
+                
+                <div class="accordion-item">
+                    <button class="accordion-header">
+                        <span>Cliente</span>
+                        <svg class="accordion-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="accordion-content">
+                        <strong class="variable-highlight" data-value="{{primeiro_nome}}"><span>{{primeiro_nome}}</span></strong>
+                        <strong class="variable-highlight" data-value="{{nome_cliente}}"><span>{{nome_cliente}}</span></strong>
+                        <strong class="variable-highlight" data-value="{{telefone}}"><span>{{telefone}}</span></strong>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header">
+                        <span>Pedido</span>
+                        <svg class="accordion-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="accordion-content">
+                        <strong class="variable-highlight" data-value="{{produto_nome}}"><span>{{produto_nome}}</span></strong>
+                        <strong class="variable-highlight" data-value="{{codigo_rastreio}}"><span>{{codigo_rastreio}}</span></strong>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <button class="accordion-header">
+                        <span>Rastreio</span>
+                        <svg class="accordion-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="accordion-content">
+                        <strong class="variable-highlight" data-value="{{status_rastreio}}" data-tooltip="Mostra o status resumido do rastreamento (Ex: 'A caminho', 'Entregue', 'Postado')."><span>{{status_rastreio}}</span></strong>
+                        <strong class="variable-highlight" data-value="{{data_postagem_formatada}}" data-tooltip="A data em que o pedido foi postado, no formato dd/mm/aaaa."><span>{{data_postagem_formatada}}</span></strong>
+                        <strong class="variable-highlight" data-value="{{data_atualizacao_formatada}}" data-tooltip="A data e a hora da última atualização do rastreio, no formato dd/mm/aaaa HH:mm."><span>{{data_atualizacao_formatada}}</span></strong>
+                        <strong class="variable-highlight" data-value="{{cidade_etapa_origem}}" data-tooltip="Mostra a cidade de ONDE o pacote saiu na última movimentação registrada pelos Correios."><span>{{cidade_etapa_origem}}</span></strong>
+                        <strong class="variable-highlight" data-value="{{cidade_etapa_destino}}" data-tooltip="Mostra a cidade para ONDE o pacote está indo na última movimentação registrada."><span>{{cidade_etapa_destino}}</span></strong>
+                        <strong class="variable-highlight" data-value="{{link_rastreio}}" data-tooltip="Insere o link completo e clicável para a página de rastreamento dos Correios."><span>{{link_rastreio}}</span></strong>
+                    </div>
+                </div>
+
+                <div class="variables-footer">
+                    <p>Clique num grupo para ver as variáveis e depois clique na variável para copiar.</p>
+                </div>
+            </aside>
+            
+            <div class="automations-list">
+                <div class="automation-card" data-automation-id="boas_vindas">
+                    <div class="automation-header"><h3>Mensagem de Boas-Vindas</h3><p>Enviada quando um novo contato é adicionado.</p></div>
+                    <div class="automation-body">
+                        <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
+                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
+                    </div>
+                </div>
+                <div class="automation-card" data-automation-id="envio_rastreio">
+                    <div class="automation-header"><h3>Envio do Código de Rastreio</h3><p>Enviada quando um código de rastreio é adicionado.</p></div>
+                    <div class="automation-body">
+                        <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
+                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
+                    </div>
+                </div>
+                <div class="automation-card" data-automation-id="pedido_a_caminho">
+                    <div class="automation-header"><h3>Pedido a Caminho</h3><p>Enviada quando o status do pedido muda para "A caminho".</p></div>
+                    <div class="automation-body">
+                        <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
+                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
+                    </div>
+                </div>
+                <div class="automation-card" data-automation-id="pedido_atrasado">
+                    <div class="automation-header"><h3>Alerta de Pedido em Atraso</h3><p>Enviada quando o sistema detecta um possível atraso na entrega.</p></div>
+                    <div class="automation-body">
+                        <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
+                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
+                    </div>
+                </div>
+                <div class="automation-card" data-automation-id="pedido_a_espera">
+                    <div class="automation-header"><h3>Alerta de Pedido em Espera</h3><p>Enviada quando o pedido fica em espera ou aguardando retirada.</p></div>
+                    <div class="automation-body">
+                        <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
+                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
+                    </div>
+                </div>
+                <div class="automation-card" data-automation-id="pedido_devolvido">
+                    <div class="automation-header"><h3>Alerta de Pedido Devolvido</h3><p>Enviada quando o rastreio indica que o objeto foi devolvido.</p></div>
+                    <div class="automation-body">
+                        <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
+                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
+                    </div>
+                </div>
+                <div class="automation-card" data-automation-id="pedido_cancelado">
+                    <div class="automation-header"><h3>Notificação de Pedido Cancelado</h3><p>Enviada quando um pedido é cancelado.</p></div>
+                    <div class="automation-body">
+                        <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
+                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+            <div id="integrations-view" class="view-container hidden">
+                <div class="page-container">
+                    <header class="page-header">
+                        <div>
+                            <h1>Minhas Integrações</h1>
+                            <p>Conecte o WhatsShip às suas plataformas de venda.</p>
+                        </div>
+                        <button class="btn-primary" id="btn-add-integration">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+                            <span>Nova Integração</span>
+                        </button>
+                    </header>
+
+                    <div id="integrations-list" class="integrations-list">
+                        <div class="placeholder-view">
+                            <p>Nenhuma integração configurada ainda.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="integration-setup-view" class="hidden" style="padding: 30px;">
+                    <div class="page-header">
+                        <div>
+                            <h1 id="setup-title">Configurar Integração</h1>
+                            <p id="setup-subtitle">Dê um nome à sua integração e siga os passos abaixo.</p>
+                        </div>
+                        <div>
+                            <button class="btn-secondary" id="btn-cancel-setup">Cancelar</button>
+                            <button class="btn-primary" id="btn-save-integration">Salvar Integração</button>
+                        </div>
+                    </div>
+
+                    <div class="setup-grid">
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <h3>1. Identificação</h3>
+                            </div>
+                            <div class="settings-card-body">
+                                <label for="integration-name">Apelido da Integração</label>
+                                <input type="text" id="integration-name" placeholder="Ex: Minha Loja na Kiwify">
+
+                                <label for="integration-secret">Chave Secreta (ou Token)</label>
+                                <input type="text" id="integration-secret" placeholder="Cole a chave da sua plataforma aqui">
+
+                                <label for="integration-webhook-url">Sua URL de Webhook</label>
+                                <div class="webhook-url-container">
+                                    <div id="integration-webhook-url" class="webhook-url-display">Aguardando...</div>
+                                    <button class="btn-secondary" id="btn-copy-setup-webhook">Copiar</button>
+                                </div>
+                                <p class="form-hint">Cole esta URL no campo "Postback" ou "Webhook" na sua plataforma de vendas.</p>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <h3>2. Instruções da Plataforma</h3>
+                            </div>
+                            <div id="platform-instructions" class="settings-card-body instructions-text">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="modal-platform-select" class="modal-overlay">
+                    <div class="modal-content modal-platform-content">
+                        <div class="modal-platform-header">
+                            <h3>Selecione uma plataforma</h3>
+                            <button id="btn-close-platform-modal" class="btn-icon" title="Fechar">&times;</button>
+                        </div>
+                        <div id="platform-grid" class="platform-grid"></div>
+                        <div class="modal-platform-footer">
+                            <p>Não encontrou a sua plataforma? <a href="#">Avise-nos!</a> Estamos sempre a adicionar novas integrações.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings-view" class="view-container hidden">
+                <div class="page-container">
+                    <header class="page-header">
+                        <div>
+                            <h1>Configurações Gerais</h1>
+                            <p>Ajuste as opções de conexão, preferências e da sua conta.</p>
+                        </div>
+                    </header>
+
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <h3>Conexão com o WhatsApp</h3>
+                                <p>Faça a leitura do QR Code para ativar o serviço de mensagens.</p>
+                            </div>
+                            <div class="settings-card-body">
+                                <div id="settings-status-container">
+                                    <div id="settings-profile-info" class="hidden">
+                                        <img id="settings-bot-avatar" src="https://i.imgur.com/z28n3Nz.png" alt="Avatar do Bot Conectado">
+                                        <h3 id="settings-bot-name"></h3>
+                                        <p id="settings-bot-number"></p>
+                                    </div>
+                                    <div id="settings-connection-status">
+                                        <p>Status atual: <strong id="settings-status-text">Desconhecido</strong></p>
+                                    </div>
+                                    <div id="qr-code-container"></div>
+                                    <div class="settings-actions">
+                                        <button id="btn-conectar" class="btn-settings-action connect">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.85 7.85 0 0 0 7.978 0a7.85 7.85 0 0 0-5.623 2.326C.978 3.756 0 5.765 0 7.85c0 2.086.978 4.094 2.355 5.524A7.85 7.85 0 0 0 7.978 15.7a7.85 7.85 0 0 0 5.623-2.326c1.377-1.43 2.354-3.438 2.354-5.524s-.977-4.094-2.354-5.524M7.978 14.5a6.65 6.65 0 0 1-4.753-1.928A6.65 6.65 0 0 1 1.3 7.85c0-1.848.729-3.555 1.925-4.753A6.65 6.65 0 0 1 7.978 1.15a6.65 6.65 0 0 1 4.753 1.928A6.65 6.65 0 0 1 14.65 7.85c0 1.848-.729 3.555-1.925 4.753A6.65 6.65 0 0 1 7.978 14.5m-2.13-3.085a.5.5 0 0 0-.7-.7l-1.5 1.5a.5.5 0 1 0 .708.707zM9.39 8.615a1.5 1.5 0 1 0-2.122-2.121 1.5 1.5 0 0 0 2.122 2.121m2.121-2.121a.5.5 0 0 0-.707 0l-1.5 1.5a.5.5 0 0 0 .707.707l1.5-1.5a.5.5 0 0 0 0-.707M11.95 4.59a.5.5 0 0 0-.707 0l-1.5 1.5a.5.5 0 1 0 .707.707l1.5-1.5a.5.5 0 0 0 0-.707"/></svg>
+                                            <span>Conectar WhatsApp</span>
+                                        </button>
+                                        <button id="btn-desconectar" class="btn-settings-action disconnect">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.85 7.85 0 0 0 7.978 0a7.85 7.85 0 0 0-5.623 2.326C.978 3.756 0 5.765 0 7.85c0 2.086.978 4.094 2.355 5.524A7.85 7.85 0 0 0 7.978 15.7a7.85 7.85 0 0 0 5.623-2.326c1.377-1.43 2.354-3.438 2.354-5.524s-.977-4.094-2.354-5.524M7.978 14.5a6.65 6.65 0 0 1-4.753-1.928A6.65 6.65 0 0 1 1.3 7.85c0-1.848.729-3.555 1.925-4.753A6.65 6.65 0 0 1 7.978 1.15a6.65 6.65 0 0 1 4.753 1.928A6.65 6.65 0 0 1 14.65 7.85c0 1.848-.729 3.555-1.925 4.753A6.65 6.65 0 0 1 7.978 14.5m-1.06-5.136a.5.5 0 0 0-1.06.708l1.652 2.477a.5.5 0 0 0 .848-.567zM9.53 5.59a.5.5 0 0 0-.567.848l1.652 2.477a.5.5 0 0 0 .848-.567z"/></svg>
+                                            <span>Desconectar</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-column">
+                            <div class="settings-card">
+                                <div class="settings-card-header">
+                                    <h3>Preferências Gerais</h3>
+                                    <p>Controle comportamentos automáticos do sistema.</p>
+                                </div>
+                                <div class="settings-card-body preference-item">
+                                    <div class="preference-text">
+                                        <strong>Criar contato ao receber mensagem</strong>
+                                        <span>Se ativado, um novo contato será criado automaticamente se você receber uma mensagem de um número desconhecido.</span>
+                                    </div>
+                                    <div class="toggle-container">
+                                        <label class="switch">
+                                            <input type="checkbox" id="toggle-create-contact">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-card">
+                                <div class="settings-card-header">
+                                    <h3>Gerenciamento da Conta</h3>
+                                    <p>Ações permanentes relacionadas à sua conta.</p>
+                                </div>
+                                <div class="settings-card-body">
+                                    <div class="settings-actions vertical">
+                                        <div style="text-align: center; color: var(--text-secondary); font-size: 0.9em; margin-bottom: 20px;">Versão Beta 0.1</div>
+                                        <button id="logout-btn" class="btn-settings-action logout" title="Sair">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/></svg>
+                                            <span>Sair da Conta</span>
+                                        </button>
+                                        <button id="btn-delete-account" class="btn-settings-action disconnect">Excluir minha conta</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="reports-view" class="view-container hidden">
+                <div class="page-container">
+                    <header class="page-header">
+                        <div>
+                            <h1>Relatórios</h1>
+                            <p>Veja um resumo da performance e das atividades da sua operação.</p>
+                        </div>
+                    </header>
+                    <div class="report-cards-grid">
+                        <div class="report-card">
+                            <div class="report-card-icon">🚚</div>
+                            <div>
+                                <h4>Pedidos em Trânsito</h4>
+                                <p id="orders-in-transit-card">0</p>
+                            </div>
+                        </div>
+                        <div class="report-card">
+                            <div class="report-card-icon">⏳</div>
+                            <div>
+                                <h4>Tempo Médio de Entrega</h4>
+                                <p id="average-delivery-time-card">0</p>
+                            </div>
+                        </div>
+                        <div class="report-card alert-card">
+                            <div class="report-card-icon">⚠️</div>
+                            <div>
+                                <h4>Pedidos em Atraso</h4>
+                                <p id="delayed-orders-card">0</p>
+                            </div>
+                        </div>
+                        <div class="report-card danger-card">
+                            <div class="report-card-icon">❌</div>
+                            <div>
+                                <h4>Pedidos Cancelados</h4>
+                                <p id="cancelled-orders-card">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h3>Novos Contatos (Últimos 7 dias )</h3>
+                            <canvas id="new-contacts-chart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Distribuição de Status</h3>
+                            <canvas id="status-pie-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="logs-view" class="view-container hidden">
+                <div class="page-container">
+                    <header class="page-header">
+                        <div>
+                            <h1>Relatório de Consumo</h1>
+                            <p id="billing-summary">Pedidos contabilizados neste ciclo.</p>
+                        </div>
+                    </header>
+                    <div id="billing-list-container">
+                    </div>
+                </div>
+            </div>
+            <div id="plans-view" class="view-container hidden">
+                <div class="page-container">
+                    <header class="page-header">
+                        <div>
+                            <h1>Planos e Assinatura</h1>
+                            <p>Escolha um plano que atenda suas necessidades.</p>
+                        </div>
+                    </header>
+                    <div id="current-plan-display" class="hidden">
+                    </div>
+                    <div id="plans-list" class="plans-list">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-pedido" class="modal-overlay"><div class="modal-content"><h3 id="modal-titulo">Adicionar Novo Pedido</h3><form id="form-pedido"><input type="hidden" id="pedido-id" name="id"><input type="text" id="nome" name="nome" placeholder="Nome do Cliente" required><input type="text" id="telefone" name="telefone" placeholder="Telefone (com DDD)" required><input type="text" id="produto" name="produto" placeholder="Nome do Produto"><input type="text" id="codigoRastreio" name="codigoRastreio" placeholder="Código de Rastreio" required><div class="modal-acoes"><button type="button" id="btn-modal-cancelar" class="btn-cancelar">Cancelar</button><button type="submit" id="btn-modal-salvar" class="btn-salvar">Salvar</button></div></form></div></div>
+    <div id="notificacao" class="toast"><span id="notificacao-icon"></span><p id="notificacao-texto"></p><button id="notificacao-close-btn" aria-label="Fechar">&times;</button></div>
+    <div id="modal-confirmacao" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-confirmacao-titulo">Confirmar Ação</h3>
+            <p id="modal-confirmacao-texto">Tem a certeza que deseja continuar?</p>
+            <div class="modal-acoes">
+                <button type="button" id="btn-confirmacao-cancelar" class="btn-cancelar">Cancelar</button>
+                <button type="button" id="btn-confirmacao-confirmar" class="btn-salvar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+    <div id="modal-upgrade" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Limite Atingido</h3>
+            <p>Você atingiu o limite do seu plano gratuito. Para continuar, por favor, faça o upgrade.</p>
+            <div class="modal-acoes">
+                <button type="button" id="btn-upgrade-plans" class="btn-salvar">Ver Planos</button>
+            </div>
+        </div>
+    </div>
+    <div id="modal-aviso" class="modal-overlay">
+        <div class="modal-content modal-aviso-content">
+            <div class="modal-aviso-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 8c.828 0 1.5-.895 1.5-2S8.828 4 8 4s-1.5.895-1.5 2S7.172 8 8 8Z"/>
+                    <path d="M7.5 11.5a.5.5 0 0 1 .5-.5h.001a.5.5 0 0 1 .5.5v.001a.5.5 0 0 1-.5.5h-.001a.5.5 0 0 1-.5-.5V11.5Z"/>
+                    <path d="M4.5 11.5a.5.5 0 0 1 .5-.5h.001a.5.5 0 0 1 .5.5v.001a.5.5 0 0 1-.5.5h-.001a.5.5 0 0 1-.5-.5V11.5Z"/>
+                    <path d="M10.5 11.5a.5.5 0 0 1 .5-.5h.001a.5.5 0 0 1 .5.5v.001a.5.5 0 0 1-.5.5h-.001a.5.5 0 0 1-.5-.5V11.5Z"/>
+                    <path d="M.25 2.5a.25.25 0 0 1 .25-.25h15a.25.25 0 0 1 .25.25v11a.25.25 0 0 1-.25.25h-15a.25.25 0 0 1-.25-.25v-11ZM1 3v10h14V3H1Z"/>
+                </svg>
+            </div>
+            <h3 id="modal-aviso-titulo"></h3>
+            <p id="modal-aviso-texto"></p>
+            <button id="btn-modal-aviso-ok" class="btn-primary" style="width: 100%;">Entendi</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
