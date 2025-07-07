@@ -12,6 +12,9 @@ const initDb = () => {
             }
             console.log('✅ Conectado ao banco de dados SQLite.');
 
+            // Habilita o suporte a chaves estrangeiras
+            db.run('PRAGMA foreign_keys = ON');
+
             const createStmts = [
                 `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL UNIQUE, password TEXT NOT NULL, api_key TEXT UNIQUE, is_admin INTEGER NOT NULL DEFAULT 0, is_active INTEGER NOT NULL DEFAULT 1, precisa_trocar_senha INTEGER NOT NULL DEFAULT 1, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`,
                 `CREATE TABLE IF NOT EXISTS plans (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, price REAL NOT NULL, monthly_limit INTEGER NOT NULL, checkout_url TEXT);`,
@@ -31,7 +34,28 @@ const initDb = () => {
                 db.run("COMMIT", (err) => {
                     if (err) return reject(err);
                     console.log("✔️ Todas as tabelas foram criadas ou já existem.");
-                    resolve(db);
+
+                    // Verifica se a tabela de planos esta vazia e insere planos padrao
+                    db.get('SELECT COUNT(*) AS count FROM plans', (countErr, row) => {
+                        if (countErr) return reject(countErr);
+                        if (row.count === 0) {
+                            const stmt = db.prepare('INSERT INTO plans (name, price, monthly_limit, checkout_url) VALUES (?, ?, ?, ?)');
+                            const defaultPlans = [
+                                ['Grátis', 0, 10, null],
+                                ['Start', 39.99, 50, 'https://payment.ticto.app/O6073F635'],
+                                ['Basic', 59.99, 100, 'https://payment.ticto.app/O8EC5C302'],
+                                ['Pro', 99.99, 250, 'https://payment.ticto.app/OEE2CBEAA'],
+                            ];
+                            defaultPlans.forEach(p => stmt.run(p));
+                            stmt.finalize((e) => {
+                                if (e) return reject(e);
+                                console.log('✔️ Planos padrões inseridos.');
+                                resolve(db);
+                            });
+                        } else {
+                            resolve(db);
+                        }
+                    });
                 });
             });
         });
