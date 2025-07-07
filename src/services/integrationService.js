@@ -1,11 +1,11 @@
 const crypto = require('crypto');
 
-function createIntegration(db, userId, platform, name) {
+function createIntegration(db, userId, platform, name, secretKey = null) {
     return new Promise((resolve, reject) => {
         const unique_path = crypto.randomBytes(16).toString('hex');
-        const sql = 'INSERT INTO integrations (user_id, platform, name, unique_path) VALUES (?, ?, ?, ?)';
+        const sql = 'INSERT INTO integrations (user_id, platform, name, unique_path, secret_key) VALUES (?, ?, ?, ?, ?)';
 
-        db.run(sql, [userId, platform, name, unique_path], function(err) {
+        db.run(sql, [userId, platform, name, unique_path, secretKey], function(err) {
             if (err) return reject(err);
             const newId = this.lastID;
             const baseUrl = process.env.APP_URL || `http://localhost:${process.env.PORT || 3000}`;
