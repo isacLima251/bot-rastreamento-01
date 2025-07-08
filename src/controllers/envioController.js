@@ -63,7 +63,7 @@ async function enviarMensagensComRegras(db, broadcast, sessions) {
                     mensagemParaEnviar = personalizarMensagem(mensagemBase, pedido);
                 }
             }
-            else if (codigoRastreio && !['envio_rastreio', 'pedido_a_caminho', 'pedido_atrasado', 'pedido_devolvido', 'pedido_a_espera', 'boas_cancelado'].includes(mensagemUltimoStatus)) {
+            else if (codigoRastreio && !['envio_rastreio', 'pedido_a_caminho', 'pedido_atrasado', 'pedido_devolvido', 'pedido_a_espera', 'pedido_cancelado'].includes(mensagemUltimoStatus)) {
                 const config = automacoes.envio_rastreio;
                  if (config && config.ativo) {
                     novoStatusDaMensagem = 'envio_rastreio';
