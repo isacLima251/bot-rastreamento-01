@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const integrationConfigService = require('./integrationConfigService');
+const automationService = require('./automationService');
 
 function generateApiKey() {
     return crypto.randomBytes(20).toString('hex');
@@ -14,7 +15,10 @@ function createUser(db, email, password, isAdmin = 0, isActive = 1, needsPasswor
         stmt.run(email, hashed, apiKey, isAdmin, isActive, needsPasswordChange, function(err) {
             if (err) return reject(err);
             const userId = this.lastID;
-            integrationConfigService.createDefault(db, userId)
+            Promise.all([
+                integrationConfigService.createDefault(db, userId),
+                automationService.createDefaultAutomations(db, userId)
+            ])
                 .then(() => {
                     resolve({ id: userId, email, api_key: apiKey, is_admin: isAdmin, is_active: isActive, precisa_trocar_senha: needsPasswordChange });
                 })
