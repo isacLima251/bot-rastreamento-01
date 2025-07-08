@@ -9,7 +9,10 @@ function createWrapper(sequelize) {
     run(sql, params = [], cb) {
       sequelize.query(sql, { replacements: params })
         .then(([res, meta]) => {
-          const ctx = { lastID: res && res[0] && res[0].id, changes: meta && meta.rowCount };
+          const ctx = {
+            lastID: (meta && (meta.lastID || meta.insertId)) || (res && res[0] && res[0].id),
+            changes: meta && (meta.rowCount || meta.affectedRows)
+          };
           if (cb) cb.call(ctx, null);
         })
         .catch(err => cb && cb(err));
@@ -30,7 +33,10 @@ function createWrapper(sequelize) {
           const cb = typeof args[args.length - 1] === 'function' ? args.pop() : null;
           sequelize.query(sql, { replacements: args })
             .then(([res, meta]) => {
-              const ctx = { lastID: res && res[0] && res[0].id, changes: meta && meta.rowCount };
+              const ctx = {
+                lastID: (meta && (meta.lastID || meta.insertId)) || (res && res[0] && res[0].id),
+                changes: meta && (meta.rowCount || meta.affectedRows)
+              };
               if (cb) cb.call(ctx, null);
             })
             .catch(err => cb && cb(err));
