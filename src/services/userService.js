@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const integrationConfigService = require('./integrationConfigService');
 const automationService = require('./automationService');
+const { ensureFreePlan } = require('./planService');
 
 function generateApiKey() {
     return crypto.randomBytes(20).toString('hex');
@@ -26,6 +27,64 @@ function createUser(db, email, password, isAdmin = 0, isActive = 1, needsPasswor
         });
         stmt.finalize();
     });
+}
+
+async function createUserWithSubscription(db, email, password) {
+    let tx = db;
+    try {
+        await new Promise((resolve, reject) => {
+            tx.run('BEGIN TRANSACTION', [], err => {
+                if (err) return reject(err);
+                resolve();
+            });
+        });
+
+        await ensureFreePlan(tx);
+
+        const hashedPass = await bcrypt.hash(password, 10);
+        const userResult = await new Promise((resolve, reject) => {
+            tx.run(
+                'INSERT INTO users (email, password, status) VALUES (?, ?, ?)',
+                [email, hashedPass, 'active'],
+                function(err) {
+                    if (err) return reject(err);
+                    resolve({ lastID: this.lastID });
+                }
+            );
+        });
+
+        await new Promise((resolve, reject) => {
+            tx.run(
+                'INSERT INTO subscriptions (user_id, plan_id, status) VALUES (?, ?, ?)',
+                [userResult.lastID, 1, 'active'],
+                err => {
+                    if (err) return reject(err);
+                    resolve();
+                }
+            );
+        });
+
+        await new Promise((resolve, reject) => {
+            tx.run('COMMIT', [], err => {
+                if (err) return reject(err);
+                resolve();
+            });
+        });
+
+        return { success: true, userId: userResult.lastID };
+    } catch (error) {
+        if (tx) {
+            try {
+                await new Promise((resolve, reject) => {
+                    tx.run('ROLLBACK', [], err => {
+                        if (err) return reject(err);
+                        resolve();
+                    });
+                });
+            } catch (e) {}
+        }
+        throw new Error('Não foi possível registrar o usuário.');
+    }
 }
 
 function findUserByEmail(db, email) {
@@ -140,6 +199,7 @@ function deleteUserCascade(db, userId) {
 
 module.exports = {
     createUser,
+    createUserWithSubscription,
     findUserByEmail,
     findUserById,
     findUserByApiKey,
