@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const userService = require('../services/userService');
 const subscriptionService = require('../services/subscriptionService');
+const planService = require('../services/planService');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
@@ -11,10 +12,21 @@ exports.register = async (req, res) => {
     try {
         const existing = await userService.findUserByEmail(req.db, email);
         if (existing) return res.status(409).json({ error: 'Usuário já existe.' });
+
+        // Garante que o plano gratuito exista antes de criar a assinatura
+        await planService.ensureFreePlan(req.db);
+
         // Indica que o usuário não precisa trocar a senha ao primeiro login
         // (isAdmin=0, isActive=1, needsPasswordChange=0)
         const user = await userService.createUser(req.db, email, password, 0, 1, 0);
-        await subscriptionService.createSubscription(req.db, user.id, 1);
+
+        try {
+            await subscriptionService.createSubscription(req.db, user.id, 1);
+        } catch (subErr) {
+            await userService.deleteUserCascade(req.db, user.id);
+            throw subErr;
+        }
+
         res.status(201).json({ id: user.id, email: user.email, apiKey: user.api_key });
     } catch (err) {
         console.error('Erro ao registrar usuario:', err);
