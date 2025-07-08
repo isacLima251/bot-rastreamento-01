@@ -26,15 +26,15 @@ exports.register = async (req, res) => {
         const hashedPass = await bcrypt.hash(password, 10);
         const userResult = await new Promise((resolve, reject) => {
             tx.run(
-                'INSERT INTO users (email, password) VALUES (?, ?)',
-                [email, hashedPass],
+                'INSERT INTO users (email, password, status) VALUES (?, ?, ?)',
+                [email, hashedPass, 'active'],
                 function(err) {
                     if (err) return reject(err);
                     resolve({ lastID: this.lastID });
                 }
             );
         });
-        console.log('Usuário inserido com sucesso na transação.');
+        console.log('Usuário inserido com sucesso na transação com status active.');
 
         // 3. Criar a assinatura USANDO A TRANSAÇÃO 'tx'
         console.log('Tentando criar a assinatura na transação...');
