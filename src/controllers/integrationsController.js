@@ -73,7 +73,7 @@ exports.receberPostback = async (req, res) => {
                 }, req.venomClient, nossoUsuario.id);
 
                 // AVISA O FRONTEND QUE UM NOVO CONTATO FOI CRIADO
-                req.broadcast({ type: 'novo_contato', pedido: pedidoCriado });
+                req.broadcast(nossoUsuario.id, { type: 'novo_contato', pedido: pedidoCriado });
                 console.log(`[Webhook] Contato para ${dados.clientName} criado e notificação enviada.`);
                 break;
             }
@@ -100,7 +100,7 @@ exports.receberPostback = async (req, res) => {
                 await subscriptionService.incrementUsage(req.db, sub.id);
                 
                 // AVISA O FRONTEND QUE UM PEDIDO FOI ATUALIZADO
-                req.broadcast({ type: 'pedido_atualizado', pedidoId: pedido.id });
+                req.broadcast(nossoUsuario.id, { type: 'pedido_atualizado', pedidoId: pedido.id });
                 console.log(`[Webhook] Rastreio ${dados.trackingCode} adicionado ao pedido ${pedido.id} e notificação enviada.`);
                 break;
             }

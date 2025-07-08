@@ -109,7 +109,7 @@ exports.criarPedido = [
             await subscriptionService.incrementUsage(db, sub.id);
 
             await envioController.enviarMensagemBoasVindas(db, pedidoCriado, req.broadcast, client);
-            req.broadcast({ type: 'novo_contato', pedido: pedidoCriado });
+            req.broadcast(clienteId, { type: 'novo_contato', pedido: pedidoCriado });
             await logService.addLog(db, clienteId, 'pedido_criado', JSON.stringify({ pedidoId: pedidoCriado.id }));
 
             res.status(201).json({
@@ -149,7 +149,7 @@ exports.atualizarPedido = async (req, res) => {
         }
         
         // Notifica o frontend
-        req.broadcast({ type: 'pedido_atualizado', pedidoId: id });
+        req.broadcast(clienteId, { type: 'pedido_atualizado', pedidoId: id });
 
         res.json({ message: `Pedido com ID ${id} atualizado com sucesso.` });
     } catch(err) {
@@ -169,7 +169,7 @@ exports.deletarPedido = (req, res) => {
             if (this.changes === 0) return res.status(404).json({ error: `Pedido com ID ${id} não encontrado.` });
 
             // Notifica o frontend
-            req.broadcast({ type: 'pedido_deletado', pedidoId: id });
+            req.broadcast(clienteId, { type: 'pedido_deletado', pedidoId: id });
 
             res.json({ message: `Pedido com ID ${id} deletado com sucesso.` });
         });
@@ -215,7 +215,7 @@ exports.enviarMensagemManual = async (req, res) => {
         await logService.addLog(db, clienteId, 'mensagem_manual', JSON.stringify({ pedidoId: id }));
         
         // MUDANÇA: Notifica todos os painéis abertos sobre a nova mensagem
-        broadcast({ type: 'nova_mensagem', pedidoId: parseInt(id) });
+        broadcast(clienteId, { type: 'nova_mensagem', pedidoId: parseInt(id) });
 
         res.status(200).json({ message: "Mensagem enviada com sucesso!" });
     } catch (error) {
@@ -246,7 +246,7 @@ exports.atualizarFotoDoPedido = async (req, res) => {
         
         if (fotoUrl) {
             await pedidoService.updateCamposPedido(db, id, { fotoPerfilUrl: fotoUrl }, clienteId);
-            req.broadcast({ type: 'pedido_atualizado', pedidoId: id });
+            req.broadcast(clienteId, { type: 'pedido_atualizado', pedidoId: id });
             res.status(200).json({ message: "Foto de perfil atualizada com sucesso!", data: { fotoUrl } });
         } else {
              res.status(200).json({ message: "Nenhuma foto de perfil foi encontrada para este contato.", data: { fotoUrl: null } });
@@ -265,7 +265,7 @@ exports.marcarComoLido = async (req, res) => {
     const { id } = req.params;
     try {
         await pedidoService.marcarComoLido(db, id, clienteId);
-        req.broadcast({ type: 'pedido_atualizado', pedidoId: id });
+        req.broadcast(clienteId, { type: 'pedido_atualizado', pedidoId: id });
         res.status(200).json({ message: "Mensagens marcadas como lidas." });
     } catch (error) {
         res.status(500).json({ error: "Falha ao marcar como lido." });
