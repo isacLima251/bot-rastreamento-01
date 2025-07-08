@@ -68,6 +68,12 @@ O acompanhamento dos pedidos é feito de forma automática enquanto o WhatsApp e
 Após iniciar, abra [http://localhost:3000](http://localhost:3000/) no navegador para acessar a página de apresentação.
 Nela há um botão que direciona para o fluxo de login e cadastro.
 
+Para receber atualizações em tempo real, conecte-se ao WebSocket passando seu token JWT na URL:
+
+```javascript
+const socket = new WebSocket('ws://localhost:3000/?token=SEU_TOKEN');
+```
+
 ### 2. Criar ou promover administradores
 
 Para gerenciar contas de administrador via terminal execute o script `criar-admin.js`:

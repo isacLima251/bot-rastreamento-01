@@ -103,7 +103,7 @@ async function enviarMensagensComRegras(db, broadcast, sessions) {
                 await pedidoService.updateCamposPedido(db, id, { mensagemUltimoStatus: novoStatusDaMensagem }, userId);
 
                 await logService.addLog(db, pedido.cliente_id || 1, 'mensagem_automatica', JSON.stringify({ pedidoId: id, tipo: novoStatusDaMensagem }));
-                if (broadcast) broadcast({ type: 'nova_mensagem', pedidoId: id });
+                if (broadcast) broadcast(userId, { type: 'nova_mensagem', pedidoId: id });
             }
         }
     }
@@ -125,7 +125,7 @@ async function enviarMensagemBoasVindas(db, pedido, broadcast, client) {
         await pedidoService.addMensagemHistorico(db, pedido.id, msg, 'boas_vindas', 'bot', pedido.cliente_id);
         await pedidoService.updateCamposPedido(db, pedido.id, { mensagemUltimoStatus: 'boas_vindas' }, pedido.cliente_id);
         await logService.addLog(db, pedido.cliente_id || 1, 'mensagem_automatica', JSON.stringify({ pedidoId: pedido.id, tipo: 'boas_vindas' }));
-        if (broadcast) broadcast({ type: 'nova_mensagem', pedidoId: pedido.id });
+        if (broadcast) broadcast(pedido.cliente_id, { type: 'nova_mensagem', pedidoId: pedido.id });
     }
 }
 

@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const venom = require('venom-bot');
 const http = require('http');
 const { WebSocketServer } = require('ws');
+const jwt = require('jsonwebtoken');
 const { initDb } = require('./src/database/database.js');
 const logger = require('./src/logger');
 
@@ -42,15 +43,31 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
-const clients = new Set();
+const wsClients = new Map();
+const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 // --- Funções de Broadcast e WebSocket ---
-function broadcast(data) {
+function addClient(userId, ws) {
+    if (!wsClients.has(userId)) wsClients.set(userId, new Set());
+    wsClients.get(userId).add(ws);
+}
+
+function removeClient(userId, ws) {
+    const set = wsClients.get(userId);
+    if (set) {
+        set.delete(ws);
+        if (set.size === 0) wsClients.delete(userId);
+    }
+}
+
+function broadcastToUser(userId, data) {
+    const userSockets = wsClients.get(userId);
+    if (!userSockets) return;
     const jsonData = JSON.stringify(data);
-    console.log(`[WebSocket] A transmitir: ${jsonData}`);
-    for (const client of clients) {
-        if (client.readyState === client.OPEN) {
-            client.send(jsonData);
+    console.log(`[WebSocket] A transmitir para ${userId}: ${jsonData}`);
+    for (const ws of userSockets) {
+        if (ws.readyState === ws.OPEN) {
+            ws.send(jsonData);
         }
     }
 }
@@ -66,22 +83,29 @@ function broadcastStatus(userId, newStatus, data = {}) {
     }
     activeSessions.set(userId, session);
     console.log(`Status do WhatsApp do usuário ${userId} alterado para: ${newStatus}`);
-    broadcast({ type: 'status_update', userId, status: newStatus, ...data });
+    broadcastToUser(userId, { type: 'status_update', userId, status: newStatus, ...data });
 }
 
-wss.on('connection', (ws) => {
-    console.log('🔗 Novo painel conectado via WebSocket.');
-    clients.add(ws);
-    for (const [uid, session] of activeSessions.entries()) {
+wss.on('connection', (ws, req) => {
+    try {
+        const url = new URL(req.url, `http://${req.headers.host}`);
+        const token = url.searchParams.get('token');
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const userId = decoded.id;
+        ws.userId = userId;
+        addClient(userId, ws);
+        const session = activeSessions.get(userId) || {};
         ws.send(JSON.stringify({
             type: 'status_update',
-            userId: uid,
+            userId,
             status: session.status || 'DISCONNECTED',
             qrCode: session.qrCode || null,
             botInfo: session.botInfo || null
         }));
+        ws.on('close', () => removeClient(userId, ws));
+    } catch (err) {
+        ws.close();
     }
-    ws.on('close', () => clients.delete(ws));
 });
 
 // --- Lógica de Conexão e Desconexão do WhatsApp ---
@@ -180,7 +204,7 @@ function start(client, userId) {
                     const novoPedidoData = { nome: nomeContato, telefone: telefoneCliente };
                     pedido = await pedidoService.criarPedido(db, novoPedidoData, client, userId);
                     await pedidoService.updateCamposPedido(db, pedido.id, { mensagemUltimoStatus: 'boas_vindas' }, userId);
-                    broadcast({ type: 'novo_contato', pedido });
+                    broadcastToUser(userId, { type: 'novo_contato', pedido });
                 } else {
                     console.log('Criação automática de contato desativada - ignorando mensagem.');
                     return;
@@ -189,7 +213,7 @@ function start(client, userId) {
                 await pedidoService.incrementarNaoLidas(db, pedido.id, userId);
             }
             await pedidoService.addMensagemHistorico(db, pedido.id, message.body, 'recebida', 'cliente', userId);
-            broadcast({ type: 'nova_mensagem', pedidoId: pedido.id });
+            broadcastToUser(userId, { type: 'nova_mensagem', pedidoId: pedido.id });
         } catch (error) {
             console.error("[onMessage] Erro CRÍTICO ao processar mensagem:", error);
         }
@@ -228,7 +252,6 @@ const startApp = async () => {
 
         app.use((req, res, next) => {
             req.db = db;
-            req.broadcast = broadcast;
             next();
         });
 
@@ -255,6 +278,7 @@ const startApp = async () => {
         app.use((req, res, next) => {
             const session = activeSessions.get(req.user.id);
             req.venomClient = session ? session.client : null;
+            req.broadcast = (uid, data) => broadcastToUser(uid, data);
             next();
         });
 
@@ -367,12 +391,14 @@ const startApp = async () => {
             console.log(`Verificando rastreios para ${activeSessions.size} sessões ativas...`);
             for (const [uid, session] of activeSessions.entries()) {
                 if (session.status === 'CONNECTED') {
-                    rastreamentoController.verificarRastreios(db, session.client, uid, broadcast);
+                    rastreamentoController.verificarRastreios(db, session.client, uid, (data) => broadcastToUser(uid, data));
                 }
             }
         }, 300000);
         setInterval(() => {
-            if (activeSessions.size > 0) envioController.enviarMensagensComRegras(db, broadcast, activeSessions);
+            if (activeSessions.size > 0) {
+                envioController.enviarMensagensComRegras(db, (userId, data) => broadcastToUser(userId, data), activeSessions);
+            }
         }, 60000);
         
         server.listen(PORT, () => logger.info(`🚀 Servidor rodando em http://localhost:${PORT}`));
