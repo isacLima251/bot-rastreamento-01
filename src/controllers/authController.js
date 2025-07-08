@@ -17,6 +17,7 @@ exports.register = async (req, res) => {
         await subscriptionService.createSubscription(req.db, user.id, 1);
         res.status(201).json({ id: user.id, email: user.email, apiKey: user.api_key });
     } catch (err) {
+        console.error('Erro ao registrar usuario:', err);
         res.status(500).json({ error: 'Falha ao registrar usuário.' });
     }
 };
