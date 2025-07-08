@@ -1,67 +1,201 @@
-const sqlite3 = require('sqlite3').verbose();
+const { Sequelize, DataTypes, QueryTypes } = require('sequelize');
 const path = require('path');
 
+const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../../whatsship.db');
 
-const initDb = () => {
-    return new Promise((resolve, reject) => {
-        const db = new sqlite3.Database(DB_PATH, (err) => {
-            if (err) {
-                console.error("❌ Erro ao conectar ao banco de dados:", err.message);
-                return reject(err);
-            }
-            console.log('✅ Conectado ao banco de dados SQLite.');
+function createWrapper(sequelize) {
+  return {
+    run(sql, params = [], cb) {
+      sequelize.query(sql, { replacements: params })
+        .then(([res, meta]) => {
+          const ctx = { lastID: res && res[0] && res[0].id, changes: meta && meta.rowCount };
+          if (cb) cb.call(ctx, null);
+        })
+        .catch(err => cb && cb(err));
+    },
+    get(sql, params = [], cb) {
+      sequelize.query(sql, { replacements: params, type: QueryTypes.SELECT })
+        .then(rows => cb(null, rows[0]))
+        .catch(err => cb(err));
+    },
+    all(sql, params = [], cb) {
+      sequelize.query(sql, { replacements: params, type: QueryTypes.SELECT })
+        .then(rows => cb(null, rows))
+        .catch(err => cb(err));
+    },
+    prepare(sql) {
+      return {
+        run(...args) {
+          const cb = typeof args[args.length - 1] === 'function' ? args.pop() : null;
+          sequelize.query(sql, { replacements: args })
+            .then(([res, meta]) => {
+              const ctx = { lastID: res && res[0] && res[0].id, changes: meta && meta.rowCount };
+              if (cb) cb.call(ctx, null);
+            })
+            .catch(err => cb && cb(err));
+        },
+        finalize(cb) { if (cb) cb(); }
+      };
+    },
+    serialize(cb) { if (cb) cb(); }
+  };
+}
 
-            // Habilita o suporte a chaves estrangeiras
-            db.run('PRAGMA foreign_keys = ON');
+function defineModels(sequelize) {
+  const User = sequelize.define('User', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    email: { type: DataTypes.STRING, unique: true, allowNull: false },
+    password: { type: DataTypes.STRING, allowNull: false },
+    api_key: { type: DataTypes.STRING, unique: true },
+    is_admin: { type: DataTypes.INTEGER, defaultValue: 0 },
+    is_active: { type: DataTypes.INTEGER, defaultValue: 1 },
+    precisa_trocar_senha: { type: DataTypes.INTEGER, defaultValue: 1 },
+    created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+  }, { tableName: 'users', timestamps: false });
 
-            const createStmts = [
-                `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL UNIQUE, password TEXT NOT NULL, api_key TEXT UNIQUE, is_admin INTEGER NOT NULL DEFAULT 0, is_active INTEGER NOT NULL DEFAULT 1, precisa_trocar_senha INTEGER NOT NULL DEFAULT 1, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`,
-                `CREATE TABLE IF NOT EXISTS plans (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, price REAL NOT NULL, monthly_limit INTEGER NOT NULL, checkout_url TEXT);`,
-                `CREATE TABLE IF NOT EXISTS subscriptions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL UNIQUE, plan_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'active', usage INTEGER NOT NULL DEFAULT 0, renewal_date TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (plan_id) REFERENCES plans(id));`,
-                `CREATE TABLE IF NOT EXISTS pedidos (id INTEGER PRIMARY KEY AUTOINCREMENT, cliente_id INTEGER, nome TEXT, email TEXT, telefone TEXT NOT NULL, produto TEXT, codigoRastreio TEXT, dataPostagem TEXT, statusInterno TEXT, ultimaAtualizacao TEXT, ultimaLocalizacao TEXT, origemUltimaMovimentacao TEXT, destinoUltimaMovimentacao TEXT, descricaoUltimoEvento TEXT, mensagemUltimoStatus TEXT, fotoPerfilUrl TEXT, dataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP, mensagensNaoLidas INTEGER DEFAULT 0 NOT NULL, ultimaMensagem TEXT, dataUltimaMensagem DATETIME, UNIQUE(cliente_id, telefone));`,
-                `CREATE TABLE IF NOT EXISTS historico_mensagens (id INTEGER PRIMARY KEY AUTOINCREMENT, pedido_id INTEGER NOT NULL, cliente_id INTEGER, mensagem TEXT NOT NULL, tipo_mensagem TEXT, origem TEXT NOT NULL, data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (pedido_id) REFERENCES pedidos (id) ON DELETE CASCADE);`,
-                `CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY AUTOINCREMENT, cliente_id INTEGER, acao TEXT NOT NULL, detalhe TEXT, data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`,
-                `CREATE TABLE IF NOT EXISTS automacoes (gatilho TEXT, cliente_id INTEGER, ativo INTEGER NOT NULL DEFAULT 0, mensagem TEXT, PRIMARY KEY (gatilho, cliente_id));`,
-                `CREATE TABLE IF NOT EXISTS integrations (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, platform TEXT NOT NULL, name TEXT NOT NULL, unique_path TEXT NOT NULL UNIQUE, secret_key TEXT, status TEXT DEFAULT 'active', FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE);`,
-                `CREATE TABLE IF NOT EXISTS integration_settings (user_id INTEGER PRIMARY KEY, postback_secret TEXT, rastreio_api_key TEXT, webhook_url TEXT, FOREIGN KEY (user_id) REFERENCES users(id));`,
-                `CREATE TABLE IF NOT EXISTS user_settings (user_id INTEGER PRIMARY KEY, create_contact_on_message INTEGER DEFAULT 0, FOREIGN KEY (user_id) REFERENCES users(id));`,
-            ];
+  const Plan = sequelize.define('Plan', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    name: { type: DataTypes.STRING, allowNull: false },
+    price: { type: DataTypes.FLOAT, allowNull: false },
+    monthly_limit: { type: DataTypes.INTEGER, allowNull: false },
+    checkout_url: { type: DataTypes.STRING }
+  }, { tableName: 'plans', timestamps: false });
 
-            db.serialize(() => {
-                db.run("BEGIN TRANSACTION");
-                createStmts.forEach(stmt => {
-                    db.run(stmt, (err) => { if (err) reject(err); });
-                });
-                db.run("COMMIT", (err) => {
-                    if (err) return reject(err);
-                    console.log("✔️ Todas as tabelas foram criadas ou já existem.");
+  const Subscription = sequelize.define('Subscription', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    user_id: { type: DataTypes.INTEGER, allowNull: false, unique: true },
+    plan_id: { type: DataTypes.INTEGER, allowNull: false },
+    status: { type: DataTypes.STRING, defaultValue: 'active' },
+    usage: { type: DataTypes.INTEGER, defaultValue: 0 },
+    renewal_date: { type: DataTypes.DATE }
+  }, { tableName: 'subscriptions', timestamps: false });
 
-                    // Verifica se a tabela de planos esta vazia e insere planos padrao
-                    db.get('SELECT COUNT(*) AS count FROM plans', (countErr, row) => {
-                        if (countErr) return reject(countErr);
-                        if (row.count === 0) {
-                            const stmt = db.prepare('INSERT INTO plans (name, price, monthly_limit, checkout_url) VALUES (?, ?, ?, ?)');
-                            const defaultPlans = [
-                                ['Grátis', 0, 10, null],
-                                ['Start', 39.99, 50, 'https://payment.ticto.app/O6073F635'],
-                                ['Basic', 59.99, 100, 'https://payment.ticto.app/O8EC5C302'],
-                                ['Pro', 99.99, 250, 'https://payment.ticto.app/OEE2CBEAA'],
-                            ];
-                            defaultPlans.forEach(p => stmt.run(p));
-                            stmt.finalize((e) => {
-                                if (e) return reject(e);
-                                console.log('✔️ Planos padrões inseridos.');
-                                resolve(db);
-                            });
-                        } else {
-                            resolve(db);
-                        }
-                    });
-                });
-            });
-        });
-    });
-};
+  const Pedido = sequelize.define('Pedido', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    cliente_id: DataTypes.INTEGER,
+    nome: DataTypes.STRING,
+    email: DataTypes.STRING,
+    telefone: { type: DataTypes.STRING, allowNull: false },
+    produto: DataTypes.STRING,
+    codigoRastreio: DataTypes.STRING,
+    dataPostagem: DataTypes.STRING,
+    statusInterno: DataTypes.STRING,
+    ultimaAtualizacao: DataTypes.STRING,
+    ultimaLocalizacao: DataTypes.STRING,
+    origemUltimaMovimentacao: DataTypes.STRING,
+    destinoUltimaMovimentacao: DataTypes.STRING,
+    descricaoUltimoEvento: DataTypes.STRING,
+    mensagemUltimoStatus: DataTypes.STRING,
+    fotoPerfilUrl: DataTypes.STRING,
+    dataCriacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    mensagensNaoLidas: { type: DataTypes.INTEGER, defaultValue: 0 },
+    ultimaMensagem: DataTypes.STRING,
+    dataUltimaMensagem: DataTypes.DATE
+  }, {
+    tableName: 'pedidos',
+    timestamps: false,
+    indexes: [{ unique: true, fields: ['cliente_id', 'telefone'] }]
+  });
+
+  const Historico = sequelize.define('HistoricoMensagem', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    pedido_id: { type: DataTypes.INTEGER, allowNull: false },
+    cliente_id: DataTypes.INTEGER,
+    mensagem: { type: DataTypes.TEXT, allowNull: false },
+    tipo_mensagem: DataTypes.STRING,
+    origem: { type: DataTypes.STRING, allowNull: false },
+    data_envio: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+  }, { tableName: 'historico_mensagens', timestamps: false });
+
+  const Log = sequelize.define('Log', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    cliente_id: DataTypes.INTEGER,
+    acao: { type: DataTypes.STRING, allowNull: false },
+    detalhe: DataTypes.STRING,
+    data_criacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+  }, { tableName: 'logs', timestamps: false });
+
+  const Automacao = sequelize.define('Automacao', {
+    gatilho: { type: DataTypes.STRING, primaryKey: true },
+    cliente_id: { type: DataTypes.INTEGER, primaryKey: true },
+    ativo: { type: DataTypes.INTEGER, defaultValue: 0 },
+    mensagem: DataTypes.STRING
+  }, { tableName: 'automacoes', timestamps: false });
+
+  const Integration = sequelize.define('Integration', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    user_id: { type: DataTypes.INTEGER, allowNull: false },
+    platform: { type: DataTypes.STRING, allowNull: false },
+    name: { type: DataTypes.STRING, allowNull: false },
+    unique_path: { type: DataTypes.STRING, allowNull: false, unique: true },
+    secret_key: DataTypes.STRING,
+    status: { type: DataTypes.STRING, defaultValue: 'active' }
+  }, { tableName: 'integrations', timestamps: false });
+
+  const IntegrationSetting = sequelize.define('IntegrationSetting', {
+    user_id: { type: DataTypes.INTEGER, primaryKey: true },
+    postback_secret: DataTypes.STRING,
+    rastreio_api_key: DataTypes.STRING,
+    webhook_url: DataTypes.STRING
+  }, { tableName: 'integration_settings', timestamps: false });
+
+  const UserSetting = sequelize.define('UserSetting', {
+    user_id: { type: DataTypes.INTEGER, primaryKey: true },
+    create_contact_on_message: { type: DataTypes.INTEGER, defaultValue: 0 }
+  }, { tableName: 'user_settings', timestamps: false });
+
+  // relationships
+  User.hasOne(Subscription, { foreignKey: 'user_id' });
+  Subscription.belongsTo(User, { foreignKey: 'user_id' });
+  Plan.hasMany(Subscription, { foreignKey: 'plan_id' });
+  Subscription.belongsTo(Plan, { foreignKey: 'plan_id' });
+
+  Pedido.hasMany(Historico, { foreignKey: 'pedido_id' });
+  Historico.belongsTo(Pedido, { foreignKey: 'pedido_id' });
+
+  return { User, Plan, Subscription, Pedido, Historico, Log, Automacao, Integration, IntegrationSetting, UserSetting };
+}
+
+async function initDb() {
+  let sequelize;
+  if (DB_CLIENT === 'postgres') {
+    sequelize = new Sequelize(
+      process.env.POSTGRES_DB || 'botdb',
+      process.env.POSTGRES_USER || 'botuser',
+      process.env.POSTGRES_PASSWORD || 'botpass',
+      {
+        host: process.env.POSTGRES_HOST || 'db',
+        port: process.env.POSTGRES_PORT || 5432,
+        dialect: 'postgres',
+        logging: false,
+      }
+    );
+  } else {
+    sequelize = new Sequelize({ dialect: 'sqlite', storage: DB_PATH, logging: false });
+  }
+
+  await sequelize.authenticate();
+  defineModels(sequelize);
+  await sequelize.sync();
+
+  // inserir planos padrao se tabela estiver vazia
+  const [rows] = await sequelize.query('SELECT COUNT(*) AS count FROM plans');
+  const count = parseInt(rows[0].count, 10);
+  if (count === 0) {
+    const defaultPlans = [
+      ['Gr\u00e1tis', 0, 10, null],
+      ['Start', 39.99, 50, 'https://payment.ticto.app/O6073F635'],
+      ['Basic', 59.99, 100, 'https://payment.ticto.app/O8EC5C302'],
+      ['Pro', 99.99, 250, 'https://payment.ticto.app/OEE2CBEAA'],
+    ];
+    for (const p of defaultPlans) {
+      await sequelize.query('INSERT INTO plans (name, price, monthly_limit, checkout_url) VALUES (?, ?, ?, ?)', { replacements: p });
+    }
+  }
+
+  console.log(`\u2705 Conectado ao banco de dados ${DB_CLIENT}.`);
+  return createWrapper(sequelize);
+}
 
 module.exports = { initDb };

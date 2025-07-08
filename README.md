@@ -52,6 +52,17 @@ Edite o `.env` com suas chaves e URLs de callback. As principais variáveis são
 - `PORT` – porta em que o servidor irá rodar (padrão 3000)
 - `DB_PATH` – caminho para o arquivo SQLite (opcional)
 
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` e `POSTGRES_HOST` podem ser definidos para usar PostgreSQL em container.
+- `DB_CLIENT` deve ser `postgres` para conectar ao banco no docker-compose.
+### Usando Docker
+
+```bash
+docker compose up --build
+
+```
+
+A aplicacao sera exposta na porta 3000 e o banco PostgreSQL persistira no volume `db_data`.
+
 ---
 
 ## 🔹 Como Usar
