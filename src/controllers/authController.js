@@ -15,22 +15,27 @@ exports.register = async (req, res) => {
         const existing = await userService.findUserByEmail(req.db, email);
         if (existing) return res.status(409).json({ error: 'Usuário já existe.' });
 
+        await req.db.run('BEGIN TRANSACTION');
+        const tx = req.db;
+
         // Garante que o plano gratuito exista antes de criar a assinatura
-        await planService.ensureFreePlan(req.db);
+        await planService.ensureFreePlan(tx);
         console.log('Helper ensureFreePlan executado.');
 
         // Indica que o usuário não precisa trocar a senha ao primeiro login
         // (isAdmin=0, isActive=1, needsPasswordChange=0)
-        const user = await userService.createUser(req.db, email, password, 0, 1, 0);
-        console.log('Usuário criado com ID:', user.id);
+        const user = await userService.createUser(tx, email, password, 0, 1, 0);
+        console.log('Usuário inserido com sucesso na transação.');
 
         try {
             console.log('Tentando criar assinatura para o usuário ID:', user.id);
-            await subscriptionService.createSubscription(req.db, user.id, 1);
+            await subscriptionService.createSubscription(tx, user.id, 1);
             console.log('Assinatura criada com sucesso.');
+            await tx.run('COMMIT');
         } catch (subErr) {
             console.error('ERRO na transação:', subErr.message);
-            await userService.deleteUserCascade(req.db, user.id);
+            await userService.deleteUserCascade(tx, user.id);
+            await tx.run('ROLLBACK');
             console.log('Executando rollback...');
             throw subErr;
         }
@@ -38,6 +43,7 @@ exports.register = async (req, res) => {
         console.log('Confirmando transação (commit).');
         res.status(201).json({ id: user.id, email: user.email, apiKey: user.api_key });
     } catch (err) {
+        await req.db.run('ROLLBACK').catch(() => {});
         console.error('Erro ao registrar usuario:', err);
         res.status(500).json({ error: 'Falha ao registrar usuário.' });
     }
