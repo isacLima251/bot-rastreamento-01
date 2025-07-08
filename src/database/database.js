@@ -24,6 +24,8 @@ const initDb = () => {
                 `CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY AUTOINCREMENT, cliente_id INTEGER, acao TEXT NOT NULL, detalhe TEXT, data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`,
                 `CREATE TABLE IF NOT EXISTS automacoes (gatilho TEXT, cliente_id INTEGER, ativo INTEGER NOT NULL DEFAULT 0, mensagem TEXT, PRIMARY KEY (gatilho, cliente_id));`,
                 `CREATE TABLE IF NOT EXISTS integrations (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, platform TEXT NOT NULL, name TEXT NOT NULL, unique_path TEXT NOT NULL UNIQUE, secret_key TEXT, status TEXT DEFAULT 'active', FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE);`,
+                `CREATE TABLE IF NOT EXISTS integration_settings (user_id INTEGER PRIMARY KEY, postback_secret TEXT, rastreio_api_key TEXT, webhook_url TEXT, FOREIGN KEY (user_id) REFERENCES users(id));`,
+                `CREATE TABLE IF NOT EXISTS user_settings (user_id INTEGER PRIMARY KEY, create_contact_on_message INTEGER DEFAULT 0, FOREIGN KEY (user_id) REFERENCES users(id));`,
             ];
 
             db.serialize(() => {
