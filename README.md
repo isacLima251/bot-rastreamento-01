@@ -41,6 +41,9 @@ cd bot-rastreamento
 # Instalar dependências
 npm install
 
+# Executar a suíte de testes (opcional)
+npm test
+
 # Copiar o arquivo de exemplo de variáveis de ambiente
 cp .env.example .env
 ```
@@ -51,6 +54,8 @@ Edite o `.env` com suas chaves e URLs de callback. As principais variáveis são
 - `TICTO_SECRET` – token para validar os webhooks da Ticto (enviado no header `X-Ticto-Token`)
 - `PORT` – porta em que o servidor irá rodar (padrão 3000)
 - `DB_PATH` – caminho para o arquivo SQLite (opcional)
+- `APP_URL` – URL base para gerar links nos e-mails enviados
+- `RESEND_API_KEY` – chave para o serviço de e-mails Resend
 
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` e `POSTGRES_HOST` podem ser definidos para usar PostgreSQL em container.
 - `DB_CLIENT` deve ser `postgres` para conectar ao banco no docker-compose.
@@ -62,6 +67,12 @@ docker compose up --build
 ```
 
 A aplicacao sera exposta na porta 3000 e o banco PostgreSQL persistira no volume `db_data`.
+
+Para rodar os testes automatizados dentro do container, execute:
+
+```bash
+docker compose exec app npm test
+```
 
 ---
 
