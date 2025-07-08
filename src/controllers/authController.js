@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const userService = require('../services/userService');
-const subscriptionService = require('../services/subscriptionService');
 const planService = require('../services/planService');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
@@ -18,33 +17,47 @@ exports.register = async (req, res) => {
         await req.db.run('BEGIN TRANSACTION');
         const tx = req.db;
 
-        // Garante que o plano gratuito exista antes de criar a assinatura
+        // 1. O Helper (que já está funcionando)
         await planService.ensureFreePlan(tx);
         console.log('Helper ensureFreePlan executado.');
 
-        // Indica que o usuário não precisa trocar a senha ao primeiro login
-        // (isAdmin=0, isActive=1, needsPasswordChange=0)
-        const user = await userService.createUser(tx, email, password, 0, 1, 0);
+        // 2. Criar o usuário USANDO A TRANSAÇÃO 'tx'
+        console.log('Tentando criar o registro do usuário na transação...');
+        const hashedPass = await bcrypt.hash(password, 10);
+        const userResult = await new Promise((resolve, reject) => {
+            tx.run(
+                'INSERT INTO users (email, password) VALUES (?, ?)',
+                [email, hashedPass],
+                function(err) {
+                    if (err) return reject(err);
+                    resolve({ lastID: this.lastID });
+                }
+            );
+        });
         console.log('Usuário inserido com sucesso na transação.');
 
-        try {
-            console.log('Tentando criar assinatura para o usuário ID:', user.id);
-            await subscriptionService.createSubscription(tx, user.id, 1);
-            console.log('Assinatura criada com sucesso.');
-            await tx.run('COMMIT');
-        } catch (subErr) {
-            console.error('ERRO na transação:', subErr.message);
-            await userService.deleteUserCascade(tx, user.id);
-            await tx.run('ROLLBACK');
-            console.log('Executando rollback...');
-            throw subErr;
-        }
+        // 3. Criar a assinatura USANDO A TRANSAÇÃO 'tx'
+        console.log('Tentando criar a assinatura na transação...');
+        await new Promise((resolve, reject) => {
+            tx.run(
+                'INSERT INTO subscriptions (user_id, plan_id, status) VALUES (?, ?, ?)',
+                [userResult.lastID, 1, 'active'],
+                err => {
+                    if (err) return reject(err);
+                    resolve();
+                }
+            );
+        });
+        console.log('Assinatura criada com sucesso na transação.');
 
-        console.log('Confirmando transação (commit).');
-        res.status(201).json({ id: user.id, email: user.email, apiKey: user.api_key });
+        // 4. Se tudo deu certo, confirmar a transação
+        await tx.run('COMMIT');
+        console.log('Transação finalizada com sucesso (commit).');
+
+        res.status(201).json({ id: userResult.lastID, email });
     } catch (err) {
+        console.error('ERRO na transação, executando ROLLBACK:', err);
         await req.db.run('ROLLBACK').catch(() => {});
-        console.error('Erro ao registrar usuario:', err);
         res.status(500).json({ error: 'Falha ao registrar usuário.' });
     }
 };
