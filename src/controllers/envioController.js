@@ -3,18 +3,7 @@ const pedidoService = require('../services/pedidoService');
 const whatsappService = require('../services/whatsappService');
 const automationService = require('../services/automationService');
 const logService = require('../services/logService');
-
-// As mensagens padrão do sistema
-const MENSAGENS_PADRAO = {
-    boas_vindas: "Olá {{primeiro_nome}}! Bem-vindo(a). Agradecemos o seu contato!",
-    envio_rastreio: "Olá {{primeiro_nome}}, o seu pedido foi enviado! O seu código de rastreio é: {{codigo_rastreio}}",
-    pedido_a_caminho: "Boas notícias, {{primeiro_nome}}! O seu pedido está a caminho. Pode acompanhar com o código: {{codigo_rastreio}}",
-    pedido_atrasado: "Olá {{primeiro_nome}}, notamos um possível atraso na entrega do seu pedido. Já estamos a verificar o que aconteceu. Código: {{codigo_rastreio}}",
-    pedido_devolvido: "Atenção {{primeiro_nome}}, o seu pedido foi devolvido ao remetente. Por favor, entre em contato connosco para resolvermos a situação. Código: {{codigo_rastreio}}",
-    // --- NOVAS MENSAGENS PADRÃO AQUI ---
-    pedido_a_espera: 'Olá {{primeiro_nome}}! O seu pedido está a espera. Agradecemos o seu contato!',
-    boas_cancelado: 'Olá {{primeiro_nome}}! seu pedido foi cancelado. Agradecemos o seu contato!'
-};
+const DEFAULT_MESSAGES = require('../constants/defaultMessages');
 
 // ... (o resto do seu ficheiro envioController.js continua exatamente igual)
 // A lógica que já temos é inteligente o suficiente para usar os novos status
@@ -70,7 +59,7 @@ async function enviarMensagensComRegras(db, broadcast, sessions) {
                 const config = automacoes.boas_vindas;
                 if (config && config.ativo) {
                     novoStatusDaMensagem = 'boas_vindas';
-                    const mensagemBase = config.mensagem || MENSAGENS_PADRAO.boas_vindas;
+                    const mensagemBase = config.mensagem || DEFAULT_MESSAGES.boas_vindas;
                     mensagemParaEnviar = personalizarMensagem(mensagemBase, pedido);
                 }
             }
@@ -78,7 +67,7 @@ async function enviarMensagensComRegras(db, broadcast, sessions) {
                 const config = automacoes.envio_rastreio;
                  if (config && config.ativo) {
                     novoStatusDaMensagem = 'envio_rastreio';
-                    const mensagemBase = config.mensagem || MENSAGENS_PADRAO.envio_rastreio;
+                    const mensagemBase = config.mensagem || DEFAULT_MESSAGES.envio_rastreio;
                     mensagemParaEnviar = personalizarMensagem(mensagemBase, pedido);
                 }
             }
@@ -88,7 +77,7 @@ async function enviarMensagensComRegras(db, broadcast, sessions) {
 
                 if (config && config.ativo) {
                     novoStatusDaMensagem = statusInterno.toLowerCase();
-                    const mensagemBase = config.mensagem || MENSAGENS_PADRAO[gatilhoStatus];
+                    const mensagemBase = config.mensagem || DEFAULT_MESSAGES[gatilhoStatus];
                     if (mensagemBase) {
                         mensagemParaEnviar = personalizarMensagem(mensagemBase, pedido);
                     }
@@ -117,7 +106,7 @@ async function enviarMensagemBoasVindas(db, pedido, broadcast, client) {
     const automacoes = await automationService.getAutomations(db, pedido.cliente_id);
     const config = automacoes.boas_vindas;
     if (config && config.ativo) {
-        const mensagemBase = config.mensagem || MENSAGENS_PADRAO.boas_vindas;
+        const mensagemBase = config.mensagem || DEFAULT_MESSAGES.boas_vindas;
         const msg = personalizarMensagem(mensagemBase, pedido);
         if (client) {
             await whatsappService.enviarMensagem(client, pedido.telefone, msg);
