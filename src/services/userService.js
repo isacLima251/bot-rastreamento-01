@@ -44,8 +44,8 @@ async function createUserWithSubscription(db, email, password) {
         const hashedPass = await bcrypt.hash(password, 10);
         const userResult = await new Promise((resolve, reject) => {
             tx.run(
-                'INSERT INTO users (email, password, is_active) VALUES (?, ?, ?)',
-                [email, hashedPass, 1],
+                'INSERT INTO users (email, password, is_active, precisa_trocar_senha) VALUES (?, ?, ?, ?)',
+                [email, hashedPass, 1, 0],
                 function(err) {
                     if (err) return reject(err);
                     resolve({ lastID: this.lastID });
