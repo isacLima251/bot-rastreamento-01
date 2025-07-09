@@ -33,7 +33,13 @@ function updateConfig(db, userId, fields) {
     });
 }
 
-function createDefault(db, userId) {
+const { getModels } = require('../database/database');
+
+function createDefault(db, userId, options = {}) {
+    if (options.transaction) {
+        const { IntegrationSetting } = getModels();
+        return IntegrationSetting.create({ user_id: userId }, { transaction: options.transaction });
+    }
     return new Promise((resolve, reject) => {
         db.run('INSERT INTO integration_settings (user_id) VALUES (?)', [userId], function(err) {
             if (err) return reject(err);

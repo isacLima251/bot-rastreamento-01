@@ -41,7 +41,13 @@ function resetUsageIfNeeded(db, subscriptionId) {
     });
 }
 
-function createSubscription(db, userId, planId) {
+const { getModels } = require('../database/database');
+
+function createSubscription(db, userId, planId, options = {}) {
+    if (options.transaction) {
+        const { Subscription } = getModels();
+        return Subscription.create({ user_id: userId, plan_id: planId, status: 'active', usage: 0 }, { transaction: options.transaction });
+    }
     return new Promise((resolve, reject) => {
         const sql = 'INSERT INTO subscriptions (user_id, plan_id, status, usage) VALUES (?, ?, "active", 0)';
         db.run(sql, [userId, planId], function(err) {

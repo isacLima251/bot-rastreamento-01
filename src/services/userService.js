@@ -3,12 +3,33 @@ const crypto = require('crypto');
 const integrationConfigService = require('./integrationConfigService');
 const automationService = require('./automationService');
 const { ensureFreePlan } = require('./planService');
+const { getModels } = require('../database/database');
 
 function generateApiKey() {
     return crypto.randomBytes(20).toString('hex');
 }
 
-function createUser(db, email, password, isAdmin = 0, isActive = 1, needsPasswordChange = 1) {
+function createUser(db, email, password, isAdmin = 0, isActive = 1, needsPasswordChange = 1, options = {}) {
+    if (options.transaction) {
+        const { User } = getModels();
+        const hashed = bcrypt.hashSync(password, 10);
+        const apiKey = generateApiKey();
+        return User.create({
+            email,
+            password: hashed,
+            api_key: apiKey,
+            is_admin: isAdmin,
+            is_active: isActive,
+            precisa_trocar_senha: needsPasswordChange
+        }, { transaction: options.transaction }).then(async user => {
+            await Promise.all([
+                integrationConfigService.createDefault(null, user.id, options),
+                automationService.createDefaultAutomations(null, user.id, options)
+            ]);
+            return user.get({ plain: true });
+        });
+    }
+
     return new Promise((resolve, reject) => {
         const hashed = bcrypt.hashSync(password, 10);
         const apiKey = generateApiKey();
@@ -87,7 +108,11 @@ async function createUserWithSubscription(db, email, password) {
     }
 }
 
-function findUserByEmail(db, email) {
+function findUserByEmail(db, email, options = {}) {
+    if (options.transaction) {
+        const { User } = getModels();
+        return User.findOne({ where: { email }, transaction: options.transaction, raw: true });
+    }
     return new Promise((resolve, reject) => {
         db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
             if (err) return reject(err);

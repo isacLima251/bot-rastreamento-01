@@ -32,4 +32,19 @@ async function ensureFreePlan(tx) {
   }
 }
 
-module.exports = { ensureFreePlan };
+const { getModels } = require('../database/database');
+
+function findPlanByName(db, name, options = {}) {
+  if (options.transaction) {
+    const { Plan } = getModels();
+    return Plan.findOne({ where: { name }, transaction: options.transaction, raw: true });
+  }
+  return new Promise((resolve, reject) => {
+    db.get('SELECT * FROM plans WHERE name = ?', [name], (err, row) => {
+      if (err) return reject(err);
+      resolve(row);
+    });
+  });
+}
+
+module.exports = { ensureFreePlan, findPlanByName };

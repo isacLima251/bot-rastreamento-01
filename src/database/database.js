@@ -164,8 +164,10 @@ function defineModels(sequelize) {
   return { User, Plan, Subscription, Pedido, Historico, Log, Automacao, Integration, IntegrationSetting, UserSetting };
 }
 
+let sequelize;
+let models;
+
 async function initDb() {
-  let sequelize;
   if (DB_CLIENT === 'postgres') {
     sequelize = new Sequelize(
       process.env.POSTGRES_DB || 'botdb',
@@ -183,7 +185,7 @@ async function initDb() {
   }
 
   await sequelize.authenticate();
-  defineModels(sequelize);
+  models = defineModels(sequelize);
   await sequelize.sync();
 
   // inserir planos padrao se tabela estiver vazia
@@ -202,7 +204,17 @@ async function initDb() {
   }
 
   console.log(`\u2705 Conectado ao banco de dados ${DB_CLIENT}.`);
+  module.exports.sequelize = sequelize;
+  module.exports.models = models;
   return createWrapper(sequelize);
 }
 
-module.exports = { initDb };
+function getSequelize() {
+  return sequelize;
+}
+
+function getModels() {
+  return models;
+}
+
+module.exports = { initDb, getSequelize, getModels };
