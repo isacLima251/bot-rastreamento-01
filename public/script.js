@@ -1483,13 +1483,13 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                     await authFetch(`/api/integrations/${integrationId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: { name: integrationName, secret_key: secretKey }
+                        body: JSON.stringify({ name: integrationName, secret_key: secretKey })
                     });
                 } else {
                     const response = await authFetch('/api/integrations', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: { platform: platformId, name: integrationName, secret_key: secretKey }
+                        body: JSON.stringify({ platform: platformId, name: integrationName, secret_key: secretKey })
                     });
                     const result = await response.json();
                     if (!response.ok) throw new Error(result.error || 'Erro ao criar integração');
