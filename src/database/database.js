@@ -93,6 +93,7 @@ function defineModels(sequelize) {
     destinoUltimaMovimentacao: DataTypes.STRING,
     descricaoUltimoEvento: DataTypes.STRING,
     mensagemUltimoStatus: DataTypes.STRING,
+    notas: DataTypes.TEXT,
     fotoPerfilUrl: DataTypes.STRING,
     dataCriacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     mensagensNaoLidas: { type: DataTypes.INTEGER, defaultValue: 0 },

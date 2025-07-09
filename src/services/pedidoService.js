@@ -268,7 +268,7 @@ const marcarComoLido = (db, pedidoId, clienteId = null) => {
  */
 const criarPedido = (db, dadosPedido, client, clienteId = null) => {
     return new Promise(async (resolve, reject) => {
-        const { nome, telefone, email, produto, codigoRastreio } = dadosPedido;
+        const { nome, telefone, email, produto, codigoRastreio, notas } = dadosPedido;
         const telefoneValidado = normalizeTelefone(telefone);
 
         if (!telefoneValidado || !nome) {
@@ -285,13 +285,13 @@ const criarPedido = (db, dadosPedido, client, clienteId = null) => {
             }
         }
 
-        const sql = 'INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, codigoRastreio, fotoPerfilUrl) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        const params = [clienteId, nome, email || null, telefoneValidado, produto || null, codigoRastreio || null, fotoUrl];
+        const sql = 'INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, codigoRastreio, notas, fotoPerfilUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+        const params = [clienteId, nome, email || null, telefoneValidado, produto || null, codigoRastreio || null, notas || null, fotoUrl];
 
         db.run(sql, params, function (err) {
             if (err) return reject(err);
             resolve({
-                id: this.lastID, nome, telefone: telefoneValidado, email, produto, codigoRastreio, fotoPerfilUrl: fotoUrl
+                id: this.lastID, nome, telefone: telefoneValidado, email, produto, codigoRastreio, notas, fotoPerfilUrl: fotoUrl
             });
         });
     });
