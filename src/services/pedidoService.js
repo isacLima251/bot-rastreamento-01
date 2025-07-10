@@ -47,7 +47,7 @@ const getAllPedidos = (db, clienteId = null) => {
     return new Promise((resolve, reject) => {
         let sql = "SELECT * FROM pedidos";
         const params = [];
-        if (clienteId !== null) {
+        if (clienteId !== null && clienteId !== undefined) {
             sql += " WHERE cliente_id = ?";
             params.push(clienteId);
         }
@@ -69,7 +69,7 @@ const getPedidoById = (db, id, clienteId = null) => {
     return new Promise((resolve, reject) => {
         let sql = "SELECT * FROM pedidos WHERE id = ?";
         const params = [id];
-        if (clienteId !== null) {
+        if (clienteId !== null && clienteId !== undefined) {
             sql += " AND cliente_id = ?";
             params.push(clienteId);
         }
@@ -98,7 +98,7 @@ const findPedidoByTelefone = (db, telefone, clienteId = null) => {
         
         let sql = "SELECT * FROM pedidos WHERE telefone = ?";
         const params = [telefoneNormalizado];
-        if (clienteId !== null) {
+        if (clienteId !== null && clienteId !== undefined) {
             sql += " AND cliente_id = ?";
             params.push(clienteId);
         }
@@ -116,7 +116,7 @@ const findPedidoByTelefone = (db, telefone, clienteId = null) => {
 /**
  * Busca um pedido pelo e-mail do cliente.
  */
-const findPedidoByEmail = (db, email, clienteId) => {
+const findPedidoByEmail = (db, email, clienteId = null) => {
     return new Promise((resolve, reject) => {
         const sql = "SELECT * FROM pedidos WHERE email = ? AND cliente_id = ? ORDER BY id DESC LIMIT 1";
         db.get(sql, [email, clienteId], (err, row) => {
@@ -138,7 +138,7 @@ const updateCamposPedido = (db, pedidoId, campos, clienteId = null) => {
     const fields = Object.keys(campos).map(k => `${k} = ?`).join(', ');
     const values = [...Object.values(campos), pedidoId];
     let sql = `UPDATE pedidos SET ${fields} WHERE id = ?`;
-    if (clienteId !== null) {
+    if (clienteId !== null && clienteId !== undefined) {
         sql += ' AND cliente_id = ?';
         values.push(clienteId);
     }
@@ -172,7 +172,7 @@ const addMensagemHistorico = (db, pedidoId, mensagem, tipoMensagem, origem, clie
             const dataAgora = new Date().toISOString();
             let sqlUpdate = `UPDATE pedidos SET ultimaMensagem = ?, dataUltimaMensagem = ? WHERE id = ?`;
             const valuesUpdate = [mensagem, dataAgora, pedidoId];
-            if (clienteId !== null) {
+            if (clienteId !== null && clienteId !== undefined) {
                 sqlUpdate += ' AND cliente_id = ?';
                 valuesUpdate.push(clienteId);
             }
@@ -228,7 +228,7 @@ const incrementarNaoLidas = (db, pedidoId, clienteId = null) => {
     return new Promise((resolve, reject) => {
         let sql = 'UPDATE pedidos SET mensagensNaoLidas = mensagensNaoLidas + 1 WHERE id = ?';
         const params = [pedidoId];
-        if (clienteId !== null) {
+        if (clienteId !== null && clienteId !== undefined) {
             sql += ' AND cliente_id = ?';
             params.push(clienteId);
         }
@@ -249,7 +249,7 @@ const marcarComoLido = (db, pedidoId, clienteId = null) => {
     return new Promise((resolve, reject) => {
         let sql = 'UPDATE pedidos SET mensagensNaoLidas = 0 WHERE id = ?';
         const params = [pedidoId];
-        if (clienteId !== null) {
+        if (clienteId !== null && clienteId !== undefined) {
             sql += ' AND cliente_id = ?';
             params.push(clienteId);
         }
