@@ -806,6 +806,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             return response.json();
         })
         .then(data => {
+            trackingDataCache = Array.isArray(data) ? data : [];
             const tabelaCorpo = document.getElementById('corpo-tabela-relatorio');
 
             if (!tabelaCorpo) {
