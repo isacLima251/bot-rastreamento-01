@@ -434,26 +434,26 @@
 
             <div id="tracking-view" class="view-container hidden">
                 <div class="page-container">
-                    <header class="page-header">
-                        <div>
-                            <h1>Clientes com Rastreamento</h1>
-                            <input type="text" id="tracking-search-input" placeholder="Buscar por nome, produto ou código" />
+                    <div class="card-relatorio">
+                        <div class="card-header">
+                            <h3>Relatório de Clientes com Rastreamento</h3>
+                            <input type="text" id="filtro-relatorio" placeholder="Buscar por nome, produto ou código...">
                         </div>
-                    </header>
-                    <div class="table-wrapper">
-                        <table id="tracking-table">
-                            <thead>
-                                <tr>
-                                    <th>Cliente</th>
-                                    <th>Contato</th>
-                                    <th>Produto</th>
-                                    <th>Código</th>
-                                    <th>Data de Envio</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tracking-table-body"></tbody>
-                        </table>
+                        <div class="card-body">
+                            <table class="tabela-moderna">
+                                <thead>
+                                    <tr>
+                                        <th>Data de Chegada</th>
+                                        <th>Nome do Cliente</th>
+                                        <th>Produto</th>
+                                        <th>Código de Rastreio</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="corpo-tabela-relatorio">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
