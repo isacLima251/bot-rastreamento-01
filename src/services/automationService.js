@@ -55,8 +55,21 @@ exports.saveAutomations = (db, configs, clienteId = null) => {
     });
 };
 
+const { getModels } = require('../database/database');
+
 // Cria registros padrão de automações para um novo usuário
-exports.createDefaultAutomations = (db, clienteId) => {
+exports.createDefaultAutomations = (db, clienteId, options = {}) => {
+    if (options.transaction) {
+        const { Automacao } = getModels();
+        const records = Object.entries(DEFAULT_MESSAGES).map(([gatilho, mensagem]) => ({
+            gatilho,
+            cliente_id: clienteId,
+            ativo: 1,
+            mensagem
+        }));
+        return Automacao.bulkCreate(records, { transaction: options.transaction, ignoreDuplicates: true });
+    }
+
     return new Promise((resolve, reject) => {
         const stmt = db.prepare(
             'INSERT OR IGNORE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, 1, ?)'

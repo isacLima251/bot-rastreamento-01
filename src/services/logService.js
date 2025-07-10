@@ -1,4 +1,10 @@
-const addLog = (db, clienteId, acao, detalhe = null) => {
+const { getModels } = require('../database/database');
+
+const addLog = (db, clienteId, acao, detalhe = null, options = {}) => {
+    if (options.transaction) {
+        const { Log } = getModels();
+        return Log.create({ cliente_id: clienteId, acao, detalhe }, { transaction: options.transaction });
+    }
     return new Promise((resolve, reject) => {
         const sql = `INSERT INTO logs (cliente_id, acao, detalhe) VALUES (?, ?, ?)`;
         db.run(sql, [clienteId, acao, detalhe], function(err) {
