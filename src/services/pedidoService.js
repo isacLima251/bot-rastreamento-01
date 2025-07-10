@@ -302,8 +302,8 @@ const criarPedido = (db, dadosPedido, client, clienteId = null) => {
             }
         }
 
-        const sql = 'INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, codigoRastreio, notas, fotoPerfilUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-        const params = [clienteId, nome, email || null, telefoneValidado, produto || null, codigoRastreio || null, notas || null, fotoUrl];
+        const sql = 'INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, codigoRastreio, notas, fotoPerfilUrl, dataCriacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        const params = [clienteId, nome, email || null, telefoneValidado, produto || null, codigoRastreio || null, notas || null, fotoUrl, new Date().toISOString()];
 
         db.run(sql, params, function (err) {
             if (err) return reject(err);
