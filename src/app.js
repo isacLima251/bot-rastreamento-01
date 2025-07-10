@@ -146,6 +146,7 @@ function createExpressApp(db, sessionManager) {
 
   app.get('/api/reports/summary', planCheck, reportsController.getReportSummary);
   app.get('/api/reports/tracking', planCheck, reportsController.getTrackingReport);
+  app.get('/api/reports/clientes-com-rastreio', planCheck, reportsController.getClientesComRastreio);
 
   app.get('/api/logs', planCheck, logsController.listarLogs);
 

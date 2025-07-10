@@ -84,3 +84,25 @@ exports.getTrackingReport = async (req, res) => {
     }
 };
 
+exports.getClientesComRastreio = async (req, res) => {
+    try {
+        const db = req.db;
+        const clienteId = req.user.id;
+
+        const sql = `SELECT nome, produto, codigoRastreio,
+                            statusInterno AS status,
+                            dataCriacao AS createdAt
+                     FROM pedidos
+                     WHERE cliente_id = ?
+                       AND codigoRastreio IS NOT NULL
+                       AND codigoRastreio != ''
+                     ORDER BY dataCriacao DESC`;
+
+        const rows = await runQuery(db, sql, [clienteId]);
+        res.json(rows);
+    } catch (err) {
+        console.error('Erro ao obter clientes com rastreio:', err);
+        res.status(500).json({ error: 'Falha ao gerar relatório.' });
+    }
+};
+
