@@ -323,14 +323,12 @@ input:checked ~ .toggle-label { color: var(--success-color); font-weight: 600; }
 #logs-table th, #logs-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
 #logs-table thead th { background-color: var(--hover-bg); font-weight: 600; color: var(--text-secondary); }
 #logs-table tbody tr:last-child td { border-bottom: none; }
-.billing-empty {
-  text-align: center;
-}
-#billing-table { width: 100%; border-collapse: collapse; }
-#billing-table th, #billing-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
-#billing-table thead th { background-color: var(--hover-bg); font-weight: 600; color: var(--text-secondary); }
-#billing-table tbody tr:nth-child(even) { background-color: var(--hover-bg); }
-#billing-table tbody tr:last-child td { border-bottom: none; }
+#tracking-table { width: 100%; border-collapse: collapse; }
+#tracking-table th, #tracking-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+#tracking-table thead th { background-color: var(--hover-bg); font-weight: 600; color: var(--text-secondary); }
+#tracking-table tbody tr:nth-child(even) { background-color: var(--hover-bg); }
+#tracking-table tbody tr:last-child td { border-bottom: none; }
+.btn-copy-code { background: none; border: none; cursor: pointer; margin-left: 4px; }
 .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
 .status-badge.success { background-color: #dcfce7; color: #166534; }
 .status-badge.error { background-color: #fee2e2; color: #991b1b; }
@@ -1205,116 +1203,6 @@ input:checked ~ .toggle-label { color: var(--success-color); font-weight: 600; }
     outline: none;
 }
 
-/* =================================
-   NOVOS ESTILOS PARA RELATÓRIO DE CONSUMO
-   ================================= */
-
-#billing-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.billing-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background-color: #ffffff;
-    padding: 16px 20px;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    transition: all 0.2s ease-out;
-}
-
-.billing-item:hover {
-    border-color: var(--primary-color);
-    box-shadow: 0 4px 10px -2px rgba(0,0,0,0.05);
-    transform: translateY(-2px);
-}
-
-.billing-status-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.billing-info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.billing-code {
-    font-weight: 600;
-    color: var(--text-color);
-    text-decoration: none;
-    font-size: 1rem;
-}
-.billing-code:hover {
-    text-decoration: underline;
-}
-
-.billing-customer {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-
-.billing-status-tag {
-    padding: 5px 12px;
-    border-radius: 16px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    flex-shrink: 0;
-}
-
-/* Cores para cada Status */
-.status-dot.status-success, .tag-success { background-color: #dcfce7; color: #166534; }
-.billing-status-dot.status-success { background-color: #22c55e; }
-
-.status-dot.status-info, .tag-info { background-color: #e0f2fe; color: #0c4a6e; }
-.billing-status-dot.status-info { background-color: #3b82f6; }
-
-.status-dot.status-warning, .tag-warning { background-color: #fefce8; color: #854d0e; }
-.billing-status-dot.status-warning { background-color: #eab308; }
-
-.status-dot.status-danger, .tag-danger { background-color: #fee2e2; color: #991b1b; }
-.billing-status-dot.status-danger { background-color: #ef4444; }
-
-.status-dot.status-default, .tag-default { background-color: #f3f4f6; color: #4b5563; }
-.billing-status-dot.status-default { background-color: #9ca3af; }
-
-/* =================================
-   ESTILOS PARA OS DETALHES ADICIONAIS
-   ================================= */
-
-.billing-info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.billing-info-main {
-    display: flex;
-    flex-direction: column;
-}
-
-.billing-info-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-.billing-info-meta strong {
-    color: var(--text-color);
-    font-weight: 500;
-}
-
-.meta-divider {
-    color: var(--border-color);
-}
 
 .report-card.danger-card {
     background-color: #fee2e2;

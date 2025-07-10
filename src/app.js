@@ -145,7 +145,7 @@ function createExpressApp(db, sessionManager) {
   app.post('/api/automations', planCheck, automationsController.salvarAutomacoes);
 
   app.get('/api/reports/summary', planCheck, reportsController.getReportSummary);
-  app.get('/api/billing/history', planCheck, reportsController.getBillingHistory);
+  app.get('/api/reports/tracking', planCheck, reportsController.getTrackingReport);
 
   app.get('/api/logs', planCheck, logsController.listarLogs);
 

@@ -62,29 +62,25 @@ exports.getReportSummary = async (req, res) => {
     }
 };
 
-exports.getBillingHistory = async (req, res) => {
+exports.getTrackingReport = async (req, res) => {
     try {
         const db = req.db;
-        const userId = req.user.id;
-        let sub = await subscriptionService.getUserSubscription(db, userId);
-        if (!sub) return res.status(404).json({ error: 'Nenhum plano encontrado' });
-        await subscriptionService.resetUsageIfNeeded(db, sub.id);
-        sub = await subscriptionService.getUserSubscription(db, userId);
+        const clienteId = req.user.id;
 
-        const usage = sub.usage;
-        const end = require('moment')(sub.renewal_date);
-        const start = end.clone().subtract(1, 'month');
-        const pedidos = await pedidoService.getPedidosComCodigoAtivo(
-            db,
-            userId,
-            start.format('YYYY-MM-DD'),
-            end.format('YYYY-MM-DD')
-        );
+        const sql = `SELECT nome, email, telefone, produto, codigoRastreio,
+                             COALESCE(dataPostagem, dataCriacao) as dataEnvio,
+                             statusInterno
+                      FROM pedidos
+                      WHERE cliente_id = ?
+                        AND codigoRastreio IS NOT NULL
+                        AND codigoRastreio != ''
+                      ORDER BY dataCriacao DESC`;
 
-        res.json({ usage, pedidos });
+        const rows = await runQuery(db, sql, [clienteId]);
+        res.json({ data: rows });
     } catch (err) {
-        console.error('Erro ao obter histórico de faturamento:', err);
-        res.status(500).json({ error: 'Falha ao buscar histórico de faturamento' });
+        console.error('Erro ao obter relatório de rastreamento:', err);
+        res.status(500).json({ error: 'Falha ao gerar relatório.' });
     }
 };
 
