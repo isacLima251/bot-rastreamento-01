@@ -78,8 +78,8 @@ const authFetch = async (url, options = {}) => {
     const btnConfirmacaoConfirmarEl = document.getElementById('btn-confirmacao-confirmar');
     const newContactsChartCanvas = document.getElementById('new-contacts-chart');
     const statusPieChartCanvas = document.getElementById('status-pie-chart');
-    const billingTableBodyEl = document.getElementById('billing-table-body');
-    const billingSummaryEl = document.getElementById('billing-summary');
+    const trackingTableBodyEl = document.getElementById('tracking-table-body');
+    const trackingSearchInputEl = document.getElementById('tracking-search-input');
     const integrationHistoryBodyEl = document.getElementById('integration-history-body');
     const integrationPaginationEl = document.getElementById('integration-pagination');
     const toggleCreateContactEl = document.getElementById('toggle-create-contact');
@@ -203,7 +203,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         }
         if (viewId === 'settings-view') loadUserSettings();
         if (viewId === 'reports-view') loadReportData();
-        if (viewId === 'logs-view') loadBillingHistory();
+        if (viewId === 'tracking-view') loadTrackingReport();
         if (viewId === 'plans-view') loadPlans();
     }
 
@@ -767,71 +767,59 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         }
     }
 
-    async function loadBillingHistory() {
-        const billingListContainerEl = document.getElementById('billing-list-container');
-        if (!billingListContainerEl) return;
+    let trackingDataCache = [];
 
-        billingListContainerEl.innerHTML = '<p class="info-mensagem">A carregar...</p>';
+    function renderTrackingRows(rows) {
+        if (!trackingTableBodyEl) return;
+        trackingTableBodyEl.innerHTML = '';
 
+        if (!rows || rows.length === 0) {
+            trackingTableBodyEl.innerHTML = '<tr><td colspan="6">Nenhum registro encontrado.</td></tr>';
+            return;
+        }
+
+        const statusMap = {
+            'entregue': { text: 'Entregue', class: 'success' },
+            'pedido_a_caminho': { text: 'Em Trânsito', class: 'info' },
+            'pedido_atrasado': { text: 'Atrasado', class: 'danger' },
+            'pedido_devolvido': { text: 'Devolvido', class: 'danger' },
+            'pedido_a_espera': { text: 'Aguardando Retirada', class: 'warning' },
+            'postado': { text: 'Postado', class: 'default' },
+            'default': { text: 'Indefinido', class: 'default' }
+        };
+
+        rows.forEach(p => {
+            const contato = p.telefone || p.email || '-';
+            const dataEnvio = p.dataEnvio ? new Date(p.dataEnvio).toLocaleDateString('pt-BR') : '-';
+            const statusInfo = statusMap[p.statusInterno] || statusMap['default'];
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${p.nome || '-'}</td>
+                <td>${contato}</td>
+                <td>${p.produto || '-'}</td>
+                <td><a href="https://www.linkcorreios.com.br/${p.codigoRastreio}" target="_blank">${p.codigoRastreio}</a> <button class="btn-copy-code" data-code="${p.codigoRastreio}" title="Copiar">📋</button></td>
+                <td>${dataEnvio}</td>
+                <td><span class="status-badge ${statusInfo.class}">${statusInfo.text}</span></td>
+            `;
+            trackingTableBodyEl.appendChild(tr);
+        });
+    }
+
+    async function loadTrackingReport() {
+        if (!trackingTableBodyEl) return;
+        trackingTableBodyEl.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
         try {
-            const resp = await authFetch('/api/billing/history');
-            if (!resp.ok) throw new Error('Falha ao carregar histórico.');
-
-            const { pedidos } = await resp.json();
-
-            billingListContainerEl.innerHTML = '';
-
-            if (billingSummaryEl) {
-                const count = pedidos ? pedidos.length : 0;
-                billingSummaryEl.textContent = `Exibindo ${count} pedidos com rastreio ativo que estão contando para o seu ciclo atual.`;
-            }
-
-            if (!pedidos || pedidos.length === 0) {
-                billingListContainerEl.innerHTML = '<div class="placeholder-view"><div style="font-size:2rem">📦</div><h1>Nenhum Rastreio Ativo</h1><p>Adicione um código de rastreio a um dos seus contatos para começar a acompanhar e ver seu consumo aqui.</p></div>';
-                return;
-            }
-
-            const statusMap = {
-                'entregue': { text: 'Entregue', class: 'success' },
-                'pedido_a_caminho': { text: 'Em Trânsito', class: 'info' },
-                'pedido_atrasado': { text: 'Atrasado', class: 'danger' },
-                'pedido_devolvido': { text: 'Devolvido', class: 'danger' },
-                'pedido_a_espera': { text: 'Aguardando Retirada', class: 'warning' },
-                'postado': { text: 'Postado', class: 'default' },
-                'default': { text: 'Indefinido', class: 'default' }
-            };
-
-            pedidos.forEach(p => {
-                const item = document.createElement('div');
-                item.className = 'billing-item';
-
-                const statusInfo = statusMap[p.statusInterno] || statusMap['default'];
-                const link = p.codigoRastreio ? `https://www.linkcorreios.com.br/${p.codigoRastreio}` : '#';
-                const dataFormatada = new Date(p.dataCriacao).toLocaleDateString('pt-BR');
-
-                item.innerHTML = `
-                    <div class="billing-status-dot status-${statusInfo.class}"></div>
-                    <div class="billing-info">
-                        <div class="billing-info-main">
-                            <a href="${link}" target="_blank" class="billing-code">${p.codigoRastreio}</a>
-                            <span class="billing-customer">${p.nome}</span>
-                        </div>
-                        <div class="billing-info-meta">
-                            <span>Produto: <strong>${p.produto || 'Não informado'}</strong></span>
-                            <span class="meta-divider">|</span>
-                            <span>Data: <strong>${dataFormatada}</strong></span>
-                        </div>
-                    </div>
-                    <div class="billing-status-tag tag-${statusInfo.class}">${statusInfo.text}</div>
-                `;
-
-                billingListContainerEl.appendChild(item);
-            });
+            const resp = await authFetch('/api/reports/tracking');
+            if (!resp.ok) throw new Error('Falha ao carregar dados.');
+            const { data } = await resp.json();
+            trackingDataCache = data;
+            renderTrackingRows(data);
         } catch (err) {
-            console.error('Erro ao carregar histórico de faturamento:', err);
-            billingListContainerEl.innerHTML = '<p class="info-mensagem" style="color: red">Erro ao carregar o histórico.</p>';
+            console.error('Erro ao carregar relatório de rastreamento:', err);
+            trackingTableBodyEl.innerHTML = '<tr><td colspan="6" style="color:red">Erro ao carregar dados.</td></tr>';
         }
     }
+
 
     async function loadSubscriptionStatus() {
         if (!planStatusEl) return;
@@ -1671,6 +1659,29 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         if (e.target === modalPlatformSelect) closePlatformModal();
     });
     if (btnCancelSetup) btnCancelSetup.addEventListener('click', showIntegrationsList);
+
+    if (trackingSearchInputEl) {
+        trackingSearchInputEl.addEventListener('input', () => {
+            const q = trackingSearchInputEl.value.trim().toLowerCase();
+            const filtered = trackingDataCache.filter(p =>
+                (p.nome && p.nome.toLowerCase().includes(q)) ||
+                (p.produto && p.produto.toLowerCase().includes(q)) ||
+                (p.codigoRastreio && p.codigoRastreio.toLowerCase().includes(q))
+            );
+            renderTrackingRows(filtered);
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-copy-code');
+        if (btn) {
+            const code = btn.dataset.code;
+            if (code && navigator.clipboard) {
+                navigator.clipboard.writeText(code);
+                showNotification('Código copiado!', 'success');
+            }
+        }
+    });
 
     // --- 7. Inicialização ---
     fetchErenderizarTudo();
