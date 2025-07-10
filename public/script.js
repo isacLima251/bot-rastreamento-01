@@ -519,7 +519,14 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                     historico.forEach(msg => {
                         const msgDiv = document.createElement('div');
                         msgDiv.className = `chat-message ${msg.origem === 'cliente' ? 'recebido' : 'enviado'}`;
-                        const dataUtc = new Date(msg.data_envio.includes('Z') ? msg.data_envio : msg.data_envio.replace(' ', 'T') + 'Z');
+                        let dataEnvio = msg.data_envio;
+                        if (dataEnvio instanceof Date) {
+                            dataEnvio = dataEnvio.toISOString();
+                        }
+                        const dateStr = typeof dataEnvio === 'string'
+                            ? (dataEnvio.includes('Z') ? dataEnvio : dataEnvio.replace(' ', 'T') + 'Z')
+                            : new Date(dataEnvio).toISOString();
+                        const dataUtc = new Date(dateStr);
                         const horaFormatada = dataUtc.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
                         const statusIcon = msg.origem === 'bot' ? `<span class="message-status"><svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="m11.354 4.646l-4.5 4.5l-1.5-1.5a.5.5 0 0 0-.708.708l2 2a.5.5 0 0 0 .708 0l5-5a.5.5 0 0 0-.708-.708M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0"/></svg></span>` : '';
                         msgDiv.innerHTML = `<p>${msg.mensagem.replace(/\n/g, '<br>')}</p><div class="message-meta"><span class="timestamp">${horaFormatada}</span>${statusIcon}</div>`;
