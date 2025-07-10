@@ -793,18 +793,55 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         });
     }
 
-    async function carregarRelatorioClientes() {
-        if (!trackingTableBodyEl) return;
-        trackingTableBodyEl.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
-        try {
-            const resp = await authFetch('/api/reports/clientes-com-rastreio');
-            const data = await resp.json();
-            trackingDataCache = data;
-            renderTrackingRows(data);
-        } catch (error) {
-            console.error("Erro ao carregar relatório:", error);
-            trackingTableBodyEl.innerHTML = '<tr><td colspan="5">Erro ao carregar os dados.</td></tr>';
-        }
+    function carregarRelatorioClientes() {
+        const endpoint = '/api/reports/clientes-com-rastreio';
+
+        fetch(endpoint, {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Falha na rede ou na API: ${response.status} - ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const tabelaCorpo = document.getElementById('corpo-tabela-relatorio');
+
+            if (!tabelaCorpo) {
+                console.error('Erro Crítico: O elemento com id "corpo-tabela-relatorio" não foi encontrado na página HTML.');
+                return;
+            }
+
+            tabelaCorpo.innerHTML = '';
+
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(pedido => {
+                    const row = document.createElement('tr');
+
+                    const status = pedido.status || 'indefinido';
+                    const statusClass = `status-${status.toLowerCase().replace(/ /g, '-')}`;
+
+                    row.innerHTML = `
+                        <td>${new Date(pedido.createdAt).toLocaleDateString('pt-BR')}</td>
+                        <td>${pedido.nome || '-'}</td>
+                        <td>${pedido.produto || 'Não informado'}</td>
+                        <td>${pedido.codigoRastreio || 'N/A'}</td>
+                        <td><span class="status-badge ${statusClass}">${status}</span></td>
+                    `;
+                    tabelaCorpo.appendChild(row);
+                });
+            } else {
+                tabelaCorpo.innerHTML = `<tr><td colspan="5">Nenhum cliente com rastreamento encontrado.</td></tr>`;
+            }
+        })
+        .catch(error => {
+            console.error("Erro detalhado ao carregar relatório:", error);
+            const tabelaCorpo = document.getElementById('corpo-tabela-relatorio');
+            if (tabelaCorpo) {
+                tabelaCorp.innerHTML = `<tr><td colspan="5">Não foi possível carregar o relatório. Erro: ${error.message}</td></tr>`;
+            }
+        });
     }
 
 
@@ -1674,6 +1711,8 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
     fetchErenderizarTudo();
     loadSubscriptionStatus();
     connectWebSocket();
-    carregarRelatorioClientes();
+    if (document.getElementById('corpo-tabela-relatorio')) {
+        carregarRelatorioClientes();
+    }
     showView('chat-view');
 });
