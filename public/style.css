@@ -1515,3 +1515,79 @@ input:checked ~ .toggle-label { color: var(--success-color); font-weight: 600; }
     flex-shrink: 0;
     margin-top: 2px;
 }
+
+/* === Estilos para Relatório de Clientes com Rastreamento === */
+.card-relatorio {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    color: #343a40;
+}
+
+#filtro-relatorio {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    width: 300px;
+}
+
+.card-body {
+    padding: 0;
+}
+
+.tabela-moderna {
+    width: 100%;
+    border-collapse: collapse;
+    color: #495057;
+}
+
+.tabela-moderna th,
+.tabela-moderna td {
+    padding: 16px 24px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.tabela-moderna thead th {
+    background-color: #f8f9fa;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+}
+
+.tabela-moderna tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabela-moderna tbody tr:hover {
+    background-color: #f1f3f5;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #fff;
+}
+
+.status-entregue { background-color: #28a745; }
+.status-em-transito { background-color: #007bff; }
+.status-pendente { background-color: #ffc107; color: #333; }
+.status-falha { background-color: #dc3545; }

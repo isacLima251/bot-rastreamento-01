@@ -78,8 +78,8 @@ const authFetch = async (url, options = {}) => {
     const btnConfirmacaoConfirmarEl = document.getElementById('btn-confirmacao-confirmar');
     const newContactsChartCanvas = document.getElementById('new-contacts-chart');
     const statusPieChartCanvas = document.getElementById('status-pie-chart');
-    const trackingTableBodyEl = document.getElementById('tracking-table-body');
-    const trackingSearchInputEl = document.getElementById('tracking-search-input');
+    const trackingTableBodyEl = document.getElementById('corpo-tabela-relatorio');
+    const trackingSearchInputEl = document.getElementById('filtro-relatorio');
     const integrationHistoryBodyEl = document.getElementById('integration-history-body');
     const integrationPaginationEl = document.getElementById('integration-pagination');
     const toggleCreateContactEl = document.getElementById('toggle-create-contact');
@@ -203,7 +203,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         }
         if (viewId === 'settings-view') loadUserSettings();
         if (viewId === 'reports-view') loadReportData();
-        if (viewId === 'tracking-view') loadTrackingReport();
+        if (viewId === 'tracking-view') carregarRelatorioClientes();
         if (viewId === 'plans-view') loadPlans();
     }
 
@@ -770,53 +770,40 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
     let trackingDataCache = [];
 
     function renderTrackingRows(rows) {
-        if (!trackingTableBodyEl) return;
-        trackingTableBodyEl.innerHTML = '';
+        const tabelaCorpo = trackingTableBodyEl;
+        if (!tabelaCorpo) return;
+        tabelaCorpo.innerHTML = '';
 
         if (!rows || rows.length === 0) {
-            trackingTableBodyEl.innerHTML = '<tr><td colspan="6">Nenhum registro encontrado.</td></tr>';
+            tabelaCorpo.innerHTML = '<tr><td colspan="5">Nenhum cliente com rastreamento encontrado.</td></tr>';
             return;
         }
 
-        const statusMap = {
-            'entregue': { text: 'Entregue', class: 'success' },
-            'pedido_a_caminho': { text: 'Em Trânsito', class: 'info' },
-            'pedido_atrasado': { text: 'Atrasado', class: 'danger' },
-            'pedido_devolvido': { text: 'Devolvido', class: 'danger' },
-            'pedido_a_espera': { text: 'Aguardando Retirada', class: 'warning' },
-            'postado': { text: 'Postado', class: 'default' },
-            'default': { text: 'Indefinido', class: 'default' }
-        };
-
-        rows.forEach(p => {
-            const contato = p.telefone || p.email || '-';
-            const dataEnvio = p.dataEnvio ? new Date(p.dataEnvio).toLocaleDateString('pt-BR') : '-';
-            const statusInfo = statusMap[p.statusInterno] || statusMap['default'];
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${p.nome || '-'}</td>
-                <td>${contato}</td>
-                <td>${p.produto || '-'}</td>
-                <td><a href="https://www.linkcorreios.com.br/${p.codigoRastreio}" target="_blank">${p.codigoRastreio}</a> <button class="btn-copy-code" data-code="${p.codigoRastreio}" title="Copiar">📋</button></td>
-                <td>${dataEnvio}</td>
-                <td><span class="status-badge ${statusInfo.class}">${statusInfo.text}</span></td>
+        rows.forEach(pedido => {
+            const statusClass = `status-${(pedido.status || '').toLowerCase().replace(/ /g, '-')}`;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${new Date(pedido.createdAt).toLocaleDateString('pt-BR')}</td>
+                <td>${pedido.nome || '-'}</td>
+                <td>${pedido.produto || 'Não informado'}</td>
+                <td>${pedido.codigoRastreio || 'N/A'}</td>
+                <td><span class="status-badge ${statusClass}">${pedido.status}</span></td>
             `;
-            trackingTableBodyEl.appendChild(tr);
+            tabelaCorpo.appendChild(row);
         });
     }
 
-    async function loadTrackingReport() {
+    async function carregarRelatorioClientes() {
         if (!trackingTableBodyEl) return;
-        trackingTableBodyEl.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
+        trackingTableBodyEl.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
         try {
-            const resp = await authFetch('/api/reports/tracking');
-            if (!resp.ok) throw new Error('Falha ao carregar dados.');
-            const { data } = await resp.json();
+            const resp = await authFetch('/api/reports/clientes-com-rastreio');
+            const data = await resp.json();
             trackingDataCache = data;
             renderTrackingRows(data);
-        } catch (err) {
-            console.error('Erro ao carregar relatório de rastreamento:', err);
-            trackingTableBodyEl.innerHTML = '<tr><td colspan="6" style="color:red">Erro ao carregar dados.</td></tr>';
+        } catch (error) {
+            console.error("Erro ao carregar relatório:", error);
+            trackingTableBodyEl.innerHTML = '<tr><td colspan="5">Erro ao carregar os dados.</td></tr>';
         }
     }
 
@@ -1687,5 +1674,6 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
     fetchErenderizarTudo();
     loadSubscriptionStatus();
     connectWebSocket();
+    carregarRelatorioClientes();
     showView('chat-view');
 });
