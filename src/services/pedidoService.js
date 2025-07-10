@@ -228,7 +228,7 @@ const getPedidosComCodigoAtivo = (db, clienteId, inicioCiclo, fimCiclo) => {
                  WHERE cliente_id = ?
                    AND codigoRastreio IS NOT NULL
                    AND codigoRastreio != ''
-                   AND statusInterno != 'entregue'
+                   AND (statusInterno IS NULL OR statusInterno != 'entregue')
                    AND dataCriacao >= ? AND dataCriacao < ?`;
     return new Promise((resolve, reject) => {
         db.all(sql, [clienteId, inicioCiclo, fimCiclo], (err, rows) => {
