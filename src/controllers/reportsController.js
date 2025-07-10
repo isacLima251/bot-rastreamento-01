@@ -2,6 +2,7 @@
 
 const subscriptionService = require('../services/subscriptionService');
 const pedidoService = require('../services/pedidoService');
+const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
 
 // Função auxiliar para executar consultas SQL e retornar uma Promise
 const runQuery = (dbInstance, sql, params = []) => {
@@ -18,6 +19,14 @@ exports.getReportSummary = async (req, res) => {
         const db = req.db;
         const clienteId = req.user.id;
 
+        const avgDeliveryQuery = DB_CLIENT === 'postgres'
+            ? `SELECT AVG(EXTRACT(EPOCH FROM (COALESCE("ultimaAtualizacao", CURRENT_TIMESTAMP) - COALESCE("dataPostagem", "dataCriacao"))) / 86400) as "avgDays" FROM pedidos WHERE cliente_id = ? AND "statusInterno" = 'entregue' AND "ultimaAtualizacao" IS NOT NULL`
+            : "SELECT AVG(julianday(COALESCE(ultimaAtualizacao, CURRENT_TIMESTAMP)) - julianday(COALESCE(dataPostagem, dataCriacao))) as avgDays FROM pedidos WHERE cliente_id = ? AND statusInterno = 'entregue' AND ultimaAtualizacao IS NOT NULL";
+
+        const newContactsQuery = DB_CLIENT === 'postgres'
+            ? `SELECT to_char("dataCriacao", 'YYYY-MM-DD') as dia, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND "dataCriacao" >= CURRENT_DATE - INTERVAL '6 days' GROUP BY dia ORDER BY dia ASC`
+            : "SELECT strftime('%Y-%m-%d', dataCriacao) as dia, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND dataCriacao >= date('now', '-6 days') GROUP BY dia ORDER BY dia ASC";
+
         const [
             ordersInTransitRows,
             averageDeliveryRows,
@@ -27,11 +36,11 @@ exports.getReportSummary = async (req, res) => {
             newContactsLast7DaysRows
         ] = await Promise.all([
             runQuery(db, "SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND codigoRastreio IS NOT NULL AND statusInterno NOT IN ('entregue', 'pedido_cancelado')", [clienteId]),
-            runQuery(db, "SELECT AVG(julianday(COALESCE(ultimaAtualizacao, CURRENT_TIMESTAMP)) - julianday(COALESCE(dataPostagem, dataCriacao))) as avgDays FROM pedidos WHERE cliente_id = ? AND statusInterno = 'entregue' AND ultimaAtualizacao IS NOT NULL", [clienteId]),
+            runQuery(db, avgDeliveryQuery, [clienteId]),
             runQuery(db, "SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND statusInterno = 'pedido_atrasado'", [clienteId]),
             runQuery(db, "SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND statusInterno = 'pedido_cancelado'", [clienteId]),
             runQuery(db, 'SELECT statusInterno, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND statusInterno IS NOT NULL GROUP BY statusInterno', [clienteId]),
-            runQuery(db, "SELECT strftime('%Y-%m-%d', dataCriacao) as dia, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND dataCriacao >= date('now', '-7 days') GROUP BY dia ORDER BY dia ASC", [clienteId])
+            runQuery(db, newContactsQuery, [clienteId])
         ]);
 
         const avgDays = parseFloat(averageDeliveryRows[0]?.avgDays || 0);
