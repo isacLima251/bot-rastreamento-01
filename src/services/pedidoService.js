@@ -131,27 +131,42 @@ const findPedidoByEmail = (db, email, clienteId = null) => {
 /**
  * Atualiza um ou mais campos de um pedido específico.
  */
-const updateCamposPedido = (db, pedidoId, campos, clienteId = null) => {
-    if (!campos || Object.keys(campos).length === 0) {
-        return Promise.resolve({ changes: 0 });
-    }
-    const fields = Object.keys(campos).map(k => `${k} = ?`).join(', ');
-    const values = [...Object.values(campos), pedidoId];
-    let sql = `UPDATE pedidos SET ${fields} WHERE id = ?`;
-    if (clienteId !== null && clienteId !== undefined) {
-        sql += ' AND cliente_id = ?';
-        values.push(clienteId);
-    }
+const updateCamposPedido = async (db, pedidoId, campos, clienteId = null) => {
+    try {
+        // Remove campos cujo valor seja undefined, evitando SQL malformado
+        const camposValidos = Object.keys(campos || {}).filter(key => campos[key] !== undefined);
 
-    return new Promise((resolve, reject) => {
-        db.run(sql, values, function(err) {
-            if (err) {
-                console.error(`Erro ao atualizar pedido ${pedidoId}`, err);
-                return reject(err);
-            }
-            resolve({ changes: this.changes });
+        if (camposValidos.length === 0) {
+            console.log(`Nenhum campo válido para atualizar no pedido ${pedidoId}.`);
+            return { changes: 0 };
+        }
+
+        // Monta dinamicamente apenas os campos presentes
+        const setClause = camposValidos.map(key => `${key} = ?`).join(', ');
+        let query = `UPDATE pedidos SET ${setClause} WHERE id = ?`;
+
+        const replacements = camposValidos.map(key => campos[key]).concat(pedidoId);
+
+        if (clienteId !== null && clienteId !== undefined) {
+            query += ' AND cliente_id = ?';
+            replacements.push(clienteId);
+        }
+
+        console.log(`Executando query segura: ${query} com valores: ${JSON.stringify(replacements)}`);
+
+        return await new Promise((resolve, reject) => {
+            db.run(query, replacements, function (err) {
+                if (err) {
+                    console.error(`Erro ao executar update dinâmico para o pedido ${pedidoId} com campos ${JSON.stringify(campos)}:`, err);
+                    return reject(err);
+                }
+                resolve({ changes: this.changes });
+            });
         });
-    });
+    } catch (error) {
+        console.error(`Erro ao executar update dinâmico para o pedido ${pedidoId} com campos ${JSON.stringify(campos)}:`, error);
+        throw error;
+    }
 };
 
 /**
