@@ -177,7 +177,8 @@ const updateCamposPedido = async (db, pedidoId, campos, clienteId = null) => {
 const addMensagemHistorico = (db, pedidoId, mensagem, tipoMensagem, origem, clienteId = null, mediaUrl = null, messageType = 'texto') => {
     return new Promise((resolve, reject) => {
         const sqlInsert = `INSERT INTO historico_mensagens (pedido_id, cliente_id, mensagem, tipo_mensagem, origem, media_url, message_type) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-        const params = [pedidoId, clienteId, mensagem, tipoMensagem, origem, mediaUrl, messageType];
+        const sanitizedMessage = (mensagem === undefined || mensagem === null) ? '' : mensagem;
+        const params = [pedidoId, clienteId ?? null, sanitizedMessage, tipoMensagem, origem, mediaUrl, messageType];
 
         db.run(sqlInsert, params, function(err) {
             if (err) {
