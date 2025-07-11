@@ -328,4 +328,5 @@ module.exports = {
     marcarComoLido,
     criarPedido,
     getPedidosComCodigoAtivo,
+    normalizeTelefone,
 };
