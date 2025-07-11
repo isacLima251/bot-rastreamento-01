@@ -112,6 +112,8 @@ function defineModels(sequelize) {
     mensagem: { type: DataTypes.TEXT, allowNull: false },
     tipo_mensagem: DataTypes.STRING,
     origem: { type: DataTypes.STRING, allowNull: false },
+    media_url: DataTypes.STRING,
+    message_type: { type: DataTypes.STRING, defaultValue: 'texto' },
     data_envio: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
   }, { tableName: 'historico_mensagens', timestamps: false });
 

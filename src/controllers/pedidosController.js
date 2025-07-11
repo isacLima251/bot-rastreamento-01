@@ -210,7 +210,7 @@ exports.enviarMensagemManual = async (req, res) => {
         }
 
         await whatsappService.enviarMensagem(req.venomClient, pedido.telefone, mensagem);
-        await pedidoService.addMensagemHistorico(db, id, mensagem, 'manual', 'bot', clienteId);
+        await pedidoService.addMensagemHistorico(db, id, mensagem, 'manual', 'bot', clienteId, null, 'texto');
 
         await logService.addLog(db, clienteId, 'mensagem_manual', JSON.stringify({ pedidoId: id }));
         

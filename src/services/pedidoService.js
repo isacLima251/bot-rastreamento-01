@@ -174,10 +174,10 @@ const updateCamposPedido = async (db, pedidoId, campos, clienteId = null) => {
 /**
  * Adiciona uma nova entrada ao histórico de mensagens.
  */
-const addMensagemHistorico = (db, pedidoId, mensagem, tipoMensagem, origem, clienteId = null) => {
+const addMensagemHistorico = (db, pedidoId, mensagem, tipoMensagem, origem, clienteId = null, mediaUrl = null, messageType = 'texto') => {
     return new Promise((resolve, reject) => {
-        const sqlInsert = `INSERT INTO historico_mensagens (pedido_id, cliente_id, mensagem, tipo_mensagem, origem) VALUES (?, ?, ?, ?, ?)`;
-        const params = [pedidoId, clienteId, mensagem, tipoMensagem, origem];
+        const sqlInsert = `INSERT INTO historico_mensagens (pedido_id, cliente_id, mensagem, tipo_mensagem, origem, media_url, message_type) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+        const params = [pedidoId, clienteId, mensagem, tipoMensagem, origem, mediaUrl, messageType];
 
         db.run(sqlInsert, params, function(err) {
             if (err) {
