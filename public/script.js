@@ -529,7 +529,26 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                         const dataUtc = new Date(dateStr);
                         const horaFormatada = dataUtc.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
                         const statusIcon = msg.origem === 'bot' ? `<span class="message-status"><svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="m11.354 4.646l-4.5 4.5l-1.5-1.5a.5.5 0 0 0-.708.708l2 2a.5.5 0 0 0 .708 0l5-5a.5.5 0 0 0-.708-.708M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0"/></svg></span>` : '';
-                        msgDiv.innerHTML = `<p>${msg.mensagem.replace(/\n/g, '<br>')}</p><div class="message-meta"><span class="timestamp">${horaFormatada}</span>${statusIcon}</div>`;
+
+                        let bodyHtml = '';
+                        if (msg.media_url) {
+                            if (msg.message_type && msg.message_type.startsWith('image')) {
+                                bodyHtml = `<img src="${msg.media_url}" alt="Imagem" style="max-width: 200px;">`;
+                                if (msg.mensagem) bodyHtml += `<p>${msg.mensagem.replace(/\n/g, '<br>')}</p>`;
+                            } else if (msg.message_type && msg.message_type.startsWith('audio')) {
+                                bodyHtml = `<audio controls src="${msg.media_url}"></audio>`;
+                            } else if (msg.message_type && msg.message_type.startsWith('video')) {
+                                bodyHtml = `<video controls src="${msg.media_url}" style="max-width: 200px;"></video>`;
+                                if (msg.mensagem) bodyHtml += `<p>${msg.mensagem.replace(/\n/g, '<br>')}</p>`;
+                            } else {
+                                const linkText = msg.mensagem ? msg.mensagem.replace(/\n/g, '<br>') : 'Download';
+                                bodyHtml = `<a href="${msg.media_url}" target="_blank">${linkText}</a>`;
+                            }
+                        } else {
+                            bodyHtml = `<p>${msg.mensagem.replace(/\n/g, '<br>')}</p>`;
+                        }
+
+                        msgDiv.innerHTML = `${bodyHtml}<div class="message-meta"><span class="timestamp">${horaFormatada}</span>${statusIcon}</div>`;
                         chatFeedEl.appendChild(msgDiv);
                     });
                     chatFeedEl.scrollTop = chatFeedEl.scrollHeight;
