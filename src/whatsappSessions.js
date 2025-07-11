@@ -1,4 +1,6 @@
 const venom = require('venom-bot');
+const fs = require('fs');
+const path = require('path');
 const whatsappService = require('./services/whatsappService');
 const pedidoService = require('./services/pedidoService');
 const settingsService = require('./services/settingsService');
@@ -19,7 +21,7 @@ function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
     whatsappService.iniciarWhatsApp(client);
 
     client.onMessage(async (message) => {
-      if (message.isGroupMsg || !message.body || message.from === 'status@broadcast') return;
+      if (message.isGroupMsg || message.from === 'status@broadcast') return;
       const telefoneCliente = message.from.replace('@c.us', '');
       try {
         const db = app.get('db');
@@ -38,7 +40,32 @@ function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
         } else {
           await pedidoService.incrementarNaoLidas(db, pedido.id, userId);
         }
-        await pedidoService.addMensagemHistorico(db, pedido.id, message.body, 'recebida', 'cliente', userId);
+
+        let messageContent = message.body;
+        let messageType = 'texto';
+        let mediaUrl = null;
+
+        if (message.isMedia === true || message.isMms === true) {
+          try {
+            const buffer = await client.decryptFile(message);
+            const fileName = `${message.id}.${message.mimetype.split('/')[1]}`;
+            const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
+            if (!fs.existsSync(uploadDir)) {
+              fs.mkdirSync(uploadDir, { recursive: true });
+            }
+            const filePath = path.join(uploadDir, fileName);
+            fs.writeFileSync(filePath, buffer);
+            mediaUrl = `/uploads/${fileName}`;
+            messageContent = message.caption || '';
+            messageType = message.mimetype.startsWith('image') ? 'imagem' : 'audio';
+          } catch (mediaError) {
+            console.error('Erro ao processar mídia:', mediaError);
+            messageContent = '[Mídia não processada]' + (message.caption || '');
+            messageType = 'texto';
+          }
+        }
+
+        await pedidoService.addMensagemHistorico(db, pedido.id, messageContent, 'recebida', 'cliente', userId, mediaUrl, messageType);
         broadcastToUser(userId, { type: 'nova_mensagem', pedidoId: pedido.id });
       } catch (error) {
         console.error('[onMessage] Erro ao processar mensagem:', error);

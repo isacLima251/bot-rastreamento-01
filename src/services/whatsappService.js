@@ -1,5 +1,6 @@
 // src/services/whatsappService.js
 // --- FUNÇÕES DE AJUDA ---
+const path = require('path');
 
 /**
  * Normaliza um número de telefone para o formato internacional brasileiro (55 + DDD + Número).
@@ -88,6 +89,20 @@ async function enviarMensagem(client, telefone, mensagem) {
     await client.sendText(numeroFormatado, mensagem);
 }
 
+async function sendImage(client, telefone, imageUrl, caption = '') {
+    if (!client) throw new Error('Cliente WhatsApp não iniciado.');
+    const numeroNormalizado = normalizeTelefone(telefone);
+    const numeroFormatado = `${numeroNormalizado}@c.us`;
+    await client.sendImage(numeroFormatado, imageUrl, path.basename(imageUrl), caption);
+}
+
+async function sendAudio(client, telefone, audioUrl) {
+    if (!client) throw new Error('Cliente WhatsApp não iniciado.');
+    const numeroNormalizado = normalizeTelefone(telefone);
+    const numeroFormatado = `${numeroNormalizado}@c.us`;
+    await client.sendVoice(numeroFormatado, audioUrl);
+}
+
 /**
  * Busca a URL da foto de perfil, primeiro pela API e depois com fallback via Puppeteer.
  * @param {string} telefone O número do contato.
@@ -122,8 +137,10 @@ async function getProfilePicUrl(client, telefone) {
     }
 }
 
-module.exports = { 
-    iniciarWhatsApp, 
+module.exports = {
+    iniciarWhatsApp,
     enviarMensagem,
+    sendImage,
+    sendAudio,
     getProfilePicUrl
 };

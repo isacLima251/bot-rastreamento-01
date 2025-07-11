@@ -88,7 +88,7 @@ async function enviarMensagensComRegras(db, broadcast, sessions) {
                 const client = sess.client;
                 if (!client) continue;
                 await whatsappService.enviarMensagem(client, telefone, mensagemParaEnviar);
-                await pedidoService.addMensagemHistorico(db, id, mensagemParaEnviar, novoStatusDaMensagem, 'bot', pedido.cliente_id);
+                await pedidoService.addMensagemHistorico(db, id, mensagemParaEnviar, novoStatusDaMensagem, 'bot', pedido.cliente_id, null, 'texto');
                 await pedidoService.updateCamposPedido(db, id, { mensagemUltimoStatus: novoStatusDaMensagem }, userId);
 
                 await logService.addLog(db, pedido.cliente_id || 1, 'mensagem_automatica', JSON.stringify({ pedidoId: id, tipo: novoStatusDaMensagem }));
@@ -111,7 +111,7 @@ async function enviarMensagemBoasVindas(db, pedido, broadcast, client) {
         if (client) {
             await whatsappService.enviarMensagem(client, pedido.telefone, msg);
         }
-        await pedidoService.addMensagemHistorico(db, pedido.id, msg, 'boas_vindas', 'bot', pedido.cliente_id);
+        await pedidoService.addMensagemHistorico(db, pedido.id, msg, 'boas_vindas', 'bot', pedido.cliente_id, null, 'texto');
         await pedidoService.updateCamposPedido(db, pedido.id, { mensagemUltimoStatus: 'boas_vindas' }, pedido.cliente_id);
         await logService.addLog(db, pedido.cliente_id || 1, 'mensagem_automatica', JSON.stringify({ pedidoId: pedido.id, tipo: 'boas_vindas' }));
         if (broadcast) broadcast(pedido.cliente_id, { type: 'nova_mensagem', pedidoId: pedido.id });
