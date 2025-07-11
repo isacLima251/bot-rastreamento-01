@@ -4,6 +4,7 @@ const path = require('path');
 const whatsappService = require('./services/whatsappService');
 const pedidoService = require('./services/pedidoService');
 const settingsService = require('./services/settingsService');
+const { processIncomingMessage } = require('./utils/messageUtils');
 
 function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
   const activeSessions = new Map();
@@ -42,47 +43,7 @@ function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
         }
 
         const clienteId = userId;
-        let messageContent = message.body;
-        let messageType = 'texto';
-        let mediaUrl = null;
-
-        if (message.isMedia === true || message.isMMS === true) {
-          try {
-            const buffer = await client.decryptFile(message);
-            const fileName = `media_${Date.now()}.${message.mimetype.split('/')[1]}`;
-            const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
-            if (!fs.existsSync(uploadDir)) {
-              fs.mkdirSync(uploadDir, { recursive: true });
-            }
-            const filePath = path.join(uploadDir, fileName);
-            fs.writeFileSync(filePath, buffer);
-            mediaUrl = `/uploads/${fileName}`;
-            messageContent = message.caption || '';
-            messageType = message.type;
-          } catch (mediaError) {
-            console.error('Erro ao baixar mídia:', mediaError);
-            messageContent = `[MÍDIA NÃO BAIXADA] ${message.body}`;
-            messageType = 'texto';
-          }
-        } else if (message.type === 'ptt') {
-          try {
-            const buffer = await client.decryptFile(message);
-            const fileName = `audio_${Date.now()}.ogg`;
-            const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
-            if (!fs.existsSync(uploadDir)) {
-              fs.mkdirSync(uploadDir, { recursive: true });
-            }
-            const filePath = path.join(uploadDir, fileName);
-            fs.writeFileSync(filePath, buffer);
-            mediaUrl = `/uploads/${fileName}`;
-            messageContent = '[ÁUDIO]';
-            messageType = 'audio';
-          } catch (audioError) {
-            console.error('Erro ao baixar áudio:', audioError);
-            messageContent = `[ÁUDIO NÃO BAIXADO] ${message.body}`;
-            messageType = 'texto';
-          }
-        }
+        const { messageContent, messageType, mediaUrl } = await processIncomingMessage(client, message);
 
         await pedidoService.addMensagemHistorico(
           db,
