@@ -41,14 +41,15 @@ function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
           await pedidoService.incrementarNaoLidas(db, pedido.id, userId);
         }
 
+        const clienteId = userId;
         let messageContent = message.body;
         let messageType = 'texto';
         let mediaUrl = null;
 
-        if (message.isMedia === true || message.isMms === true) {
+        if (message.isMedia === true || message.isMMS === true) {
           try {
             const buffer = await client.decryptFile(message);
-            const fileName = `${message.id}.${message.mimetype.split('/')[1]}`;
+            const fileName = `media_${Date.now()}.${message.mimetype.split('/')[1]}`;
             const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
             if (!fs.existsSync(uploadDir)) {
               fs.mkdirSync(uploadDir, { recursive: true });
@@ -57,15 +58,42 @@ function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
             fs.writeFileSync(filePath, buffer);
             mediaUrl = `/uploads/${fileName}`;
             messageContent = message.caption || '';
-            messageType = message.mimetype.startsWith('image') ? 'imagem' : 'audio';
+            messageType = message.type;
           } catch (mediaError) {
-            console.error('Erro ao processar mídia:', mediaError);
-            messageContent = '[Mídia não processada]' + (message.caption || '');
+            console.error('Erro ao baixar mídia:', mediaError);
+            messageContent = `[MÍDIA NÃO BAIXADA] ${message.body}`;
+            messageType = 'texto';
+          }
+        } else if (message.type === 'ptt') {
+          try {
+            const buffer = await client.decryptFile(message);
+            const fileName = `audio_${Date.now()}.ogg`;
+            const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
+            if (!fs.existsSync(uploadDir)) {
+              fs.mkdirSync(uploadDir, { recursive: true });
+            }
+            const filePath = path.join(uploadDir, fileName);
+            fs.writeFileSync(filePath, buffer);
+            mediaUrl = `/uploads/${fileName}`;
+            messageContent = '[ÁUDIO]';
+            messageType = 'audio';
+          } catch (audioError) {
+            console.error('Erro ao baixar áudio:', audioError);
+            messageContent = `[ÁUDIO NÃO BAIXADO] ${message.body}`;
             messageType = 'texto';
           }
         }
 
-        await pedidoService.addMensagemHistorico(db, pedido.id, messageContent, 'recebida', 'cliente', userId, mediaUrl, messageType);
+        await pedidoService.addMensagemHistorico(
+          db,
+          pedido.id,
+          messageContent,
+          messageType,
+          'entrada',
+          clienteId,
+          mediaUrl,
+          messageType
+        );
         broadcastToUser(userId, { type: 'nova_mensagem', pedidoId: pedido.id });
       } catch (error) {
         console.error('[onMessage] Erro ao processar mensagem:', error);
