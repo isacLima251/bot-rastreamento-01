@@ -87,6 +87,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
 }
 .placeholder { margin: auto; text-align: center; color: var(--text-secondary); }
 .placeholder svg { stroke: #d1d5db; margin-bottom: 1rem; }
@@ -95,7 +96,7 @@ body {
 .detalhes-body { background-color: var(--sidebar-bg); padding: 20px; line-height: 1.6; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
 .detalhes-body p { margin: 0 0 10px 0; }
 .detalhes-body svg { margin-right: 6px; vertical-align: middle; color: var(--text-secondary); }
-.chat-feed { padding: 20px; display: flex; flex-direction: column; gap: 4px; flex-grow: 1; overflow-y: auto; }
+.chat-feed { padding: 20px; display: flex; flex-direction: column; gap: 4px; flex-grow: 1; overflow-y: auto; min-height: 0; }
 .chat-message { padding: 10px 15px; border-radius: 18px; max-width: 70%; line-height: 1.4; position: relative; word-wrap: break-word; }
 .chat-message p { margin: 0; padding-right: 50px; }
 .chat-message.enviado {
