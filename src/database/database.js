@@ -129,7 +129,10 @@ function defineModels(sequelize) {
     gatilho: { type: DataTypes.STRING, primaryKey: true },
     cliente_id: { type: DataTypes.INTEGER, primaryKey: true },
     ativo: { type: DataTypes.INTEGER, defaultValue: 0 },
-    mensagem: DataTypes.STRING
+    mensagem: DataTypes.STRING,
+    tipo_midia: { type: DataTypes.STRING, defaultValue: 'texto' },
+    url_midia: DataTypes.STRING,
+    legenda_midia: DataTypes.STRING
   }, { tableName: 'automacoes', timestamps: false });
 
   const Integration = sequelize.define('Integration', {

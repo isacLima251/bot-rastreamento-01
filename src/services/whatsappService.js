@@ -103,6 +103,20 @@ async function sendAudio(client, telefone, audioUrl) {
     await client.sendVoice(numeroFormatado, audioUrl);
 }
 
+async function sendFile(client, telefone, fileUrl, fileName, caption = '') {
+    if (!client) throw new Error('Cliente WhatsApp não iniciado.');
+    const numeroNormalizado = normalizeTelefone(telefone);
+    const numeroFormatado = `${numeroNormalizado}@c.us`;
+    await client.sendFile(numeroFormatado, fileUrl, fileName, caption);
+}
+
+async function sendVideo(client, telefone, videoUrl, caption = '') {
+    if (!client) throw new Error('Cliente WhatsApp não iniciado.');
+    const numeroNormalizado = normalizeTelefone(telefone);
+    const numeroFormatado = `${numeroNormalizado}@c.us`;
+    await client.sendVideo(numeroFormatado, videoUrl, caption);
+}
+
 /**
  * Busca a URL da foto de perfil, primeiro pela API e depois com fallback via Puppeteer.
  * @param {string} telefone O número do contato.
@@ -142,5 +156,7 @@ module.exports = {
     enviarMensagem,
     sendImage,
     sendAudio,
+    sendFile,
+    sendVideo,
     getProfilePicUrl
 };
