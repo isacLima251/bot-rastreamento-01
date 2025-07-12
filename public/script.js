@@ -45,6 +45,11 @@ const authFetch = async (url, options = {}) => {
     const modalTituloEl = document.getElementById('modal-titulo');
     const btnModalCancelarEl = document.getElementById('btn-modal-cancelar');
     const formEnviarMensagemEl = document.getElementById('form-enviar-mensagem');
+    const btnAttachMediaEl = document.getElementById('btn-attach-media');
+    const btnAttachFileEl = document.getElementById('btn-attach-file');
+    const btnRecordAudioEl = document.getElementById('btn-record-audio');
+    const inputMediaEl = document.getElementById('input-media');
+    const inputFileEl = document.getElementById('input-file');
     const notificacaoEl = document.getElementById('notificacao');
     const notificacaoTextoEl = document.getElementById('notificacao-texto');
     const notificacaoIconEl = document.getElementById('notificacao-icon');
@@ -468,8 +473,11 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         chatWindowEl.innerHTML = chatHeaderHtml + chatFeedHtml;
         
         chatFooterEl.classList.add('active');
-        formEnviarMensagemEl.querySelector('input').disabled = false;
-        formEnviarMensagemEl.querySelector('button').disabled = false;
+        formEnviarMensagemEl.querySelector('#input-mensagem').disabled = false;
+        formEnviarMensagemEl.querySelector('button[type="submit"]').disabled = false;
+        if(btnAttachMediaEl) btnAttachMediaEl.disabled = false;
+        if(btnAttachFileEl) btnAttachFileEl.disabled = false;
+        if(btnRecordAudioEl) btnRecordAudioEl.disabled = false;
 
         // 2. PREENCHER A COLUNA 3: PAINEL DE DETALHES
         detailsPanelEl.innerHTML = `
@@ -576,8 +584,11 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                     pedidoAtivoId = null;
                     chatWindowEl.innerHTML = `<div class="placeholder"><h3>Selecione um contacto</h3><p>O contacto anterior não foi encontrado no filtro atual.</p></div>`;
                     chatFooterEl.classList.remove('active');
-                    formEnviarMensagemEl.querySelector('input').disabled = true;
-                    formEnviarMensagemEl.querySelector('button').disabled = true;
+                    formEnviarMensagemEl.querySelector('#input-mensagem').disabled = true;
+                    formEnviarMensagemEl.querySelector('button[type="submit"]').disabled = true;
+                    if(btnAttachMediaEl) btnAttachMediaEl.disabled = true;
+                    if(btnAttachFileEl) btnAttachFileEl.disabled = true;
+                    if(btnRecordAudioEl) btnRecordAudioEl.disabled = true;
                 }
             }
         } catch (e) {
@@ -1464,10 +1475,75 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             const pedidoAtivo = todosOsPedidos.find(p => p.id === pedidoAtivoId);
             await selecionarPedidoErenderizarDetalhes(pedidoAtivo);
             loadSubscriptionStatus();
-        } catch (error) { 
+        } catch (error) {
             showNotification(error.message, 'error');
         }
     });
+
+    async function enviarArquivo(tipo, file, legenda = '') {
+        if (!pedidoAtivoId || !file) return;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('tipo', tipo);
+        formData.append('legenda', legenda);
+        try {
+            const response = await authFetch(`/api/pedidos/${pedidoAtivoId}/enviar-midia`, { method: 'POST', body: formData });
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Falha ao enviar arquivo.');
+            }
+            const pedidoAtivo = todosOsPedidos.find(p => p.id === pedidoAtivoId);
+            await selecionarPedidoErenderizarDetalhes(pedidoAtivo);
+            inputMediaEl.value = '';
+            inputFileEl.value = '';
+        } catch (err) {
+            showNotification(err.message, 'error');
+        }
+    }
+
+    if(btnAttachMediaEl) btnAttachMediaEl.addEventListener('click', () => { if(inputMediaEl) inputMediaEl.click(); });
+    if(btnAttachFileEl) btnAttachFileEl.addEventListener('click', () => { if(inputFileEl) inputFileEl.click(); });
+
+    if(inputMediaEl) inputMediaEl.addEventListener('change', () => {
+        const file = inputMediaEl.files[0];
+        if (!file) return;
+        const tipo = file.type.startsWith('image') ? 'imagem' : (file.type.startsWith('video') ? 'video' : 'documento');
+        enviarArquivo(tipo, file);
+    });
+
+    if(inputFileEl) inputFileEl.addEventListener('change', () => {
+        const file = inputFileEl.files[0];
+        if (!file) return;
+        enviarArquivo('documento', file);
+    });
+
+    if(btnRecordAudioEl) {
+        let recorder = null;
+        let chunks = [];
+        btnRecordAudioEl.addEventListener('click', async () => {
+            if (!recorder) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    recorder = new MediaRecorder(stream);
+                    recorder.ondataavailable = e => chunks.push(e.data);
+                    recorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'audio/webm' });
+                        chunks = [];
+                        enviarArquivo('audio', new File([blob], 'audio.webm', { type: 'audio/webm' }));
+                        stream.getTracks().forEach(t => t.stop());
+                        recorder = null;
+                        btnRecordAudioEl.classList.remove('recording');
+                    };
+                    recorder.start();
+                    btnRecordAudioEl.classList.add('recording');
+                } catch (err) {
+                    console.error(err);
+                }
+            } else {
+                recorder.stop();
+            }
+        });
+    }
 
     if (notificacaoCloseBtnEl) {
         notificacaoCloseBtnEl.addEventListener('click', () => {

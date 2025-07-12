@@ -5,6 +5,23 @@ const logService = require('../services/logService');
 const subscriptionService = require('../services/subscriptionService');
 const envioController = require('./envioController');
 const { body, validationResult } = require('express-validator');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadDir),
+    filename: (req, file, cb) => {
+        const unique = Date.now() + '_' + file.originalname.replace(/\s+/g, '_');
+        cb(null, unique);
+    }
+});
+const upload = multer({ storage });
+exports.upload = upload;
 
 // LÊ todos os pedidos
 exports.listarPedidos = (req, res) => {
@@ -221,6 +238,56 @@ exports.enviarMensagemManual = async (req, res) => {
     } catch (error) {
         console.error("Erro no envio manual:", error);
         res.status(500).json({ error: "Falha ao enviar a mensagem." });
+    }
+};
+
+// ENVIA midia/arquivo manualmente
+exports.enviarMidia = async (req, res) => {
+    const db = req.db;
+    const clienteId = req.user.id;
+    const { id } = req.params;
+    const file = req.file;
+    const tipo = req.body.tipo || 'documento';
+    const legenda = req.body.legenda || '';
+    const broadcast = req.broadcast;
+
+    if (!file) {
+        return res.status(400).json({ error: 'Nenhum arquivo enviado.' });
+    }
+
+    try {
+        const pedido = await pedidoService.getPedidoById(db, id, clienteId);
+        if (!pedido) return res.status(404).json({ error: 'Pedido não encontrado.' });
+
+        if (!req.venomClient) {
+            return res.status(409).json({ error: 'A sua conta não está conectada ao WhatsApp.' });
+        }
+
+        const filePath = file.path;
+        const mediaUrl = `/uploads/${file.filename}`;
+        const client = req.venomClient;
+
+        switch (tipo) {
+            case 'imagem':
+                await whatsappService.sendImage(client, pedido.telefone, filePath, legenda);
+                break;
+            case 'audio':
+                await whatsappService.sendAudio(client, pedido.telefone, filePath);
+                break;
+            case 'video':
+                await whatsappService.sendVideo(client, pedido.telefone, filePath, legenda);
+                break;
+            default:
+                await whatsappService.sendFile(client, pedido.telefone, filePath, file.originalname, legenda);
+        }
+
+        await pedidoService.addMensagemHistorico(db, id, legenda, 'manual', 'bot', clienteId, mediaUrl, tipo);
+        await logService.addLog(db, clienteId, 'mensagem_manual', JSON.stringify({ pedidoId: id, tipo }));
+        broadcast(clienteId, { type: 'nova_mensagem', pedidoId: parseInt(id) });
+        res.status(200).json({ message: 'Arquivo enviado com sucesso!', mediaUrl });
+    } catch (error) {
+        console.error('Erro ao enviar midia:', error);
+        res.status(500).json({ error: 'Falha ao enviar midia.' });
     }
 };
 

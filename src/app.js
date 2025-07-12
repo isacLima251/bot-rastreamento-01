@@ -138,6 +138,7 @@ function createExpressApp(db, sessionManager) {
   app.delete('/api/pedidos/:id', planCheck, pedidosController.deletarPedido);
   app.get('/api/pedidos/:id/historico', planCheck, pedidosController.getHistoricoDoPedido);
   app.post('/api/pedidos/:id/enviar-mensagem', planCheck, pedidosController.enviarMensagemManual);
+  app.post('/api/pedidos/:id/enviar-midia', planCheck, pedidosController.upload.single('file'), pedidosController.enviarMidia);
   app.post('/api/pedidos/:id/atualizar-foto', planCheck, pedidosController.atualizarFotoDoPedido);
   app.put('/api/pedidos/:id/marcar-como-lido', planCheck, pedidosController.marcarComoLido);
 
