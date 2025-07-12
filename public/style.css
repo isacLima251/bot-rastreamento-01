@@ -1619,3 +1619,99 @@ input:checked ~ .toggle-label { color: var(--success-color); font-weight: 600; }
 .status-em-transito { background-color: #007bff; }
 .status-pendente { background-color: #ffc107; color: #333; }
 .status-falha { background-color: #dc3545; }
+
+/* ================================== */
+/* CSS CORRIGIDO PARA A JANELA DE CHAT */
+/* ================================== */
+
+/* Container principal que engloba o chat todo */
+#chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 95vh;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#chat-header {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+/* Área onde as mensagens são exibidas */
+#chat-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #e5ddd5;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilo base para todas as bolhas de mensagem */
+.message {
+    padding: 8px 12px;
+    border-radius: 18px;
+    margin-bottom: 10px;
+    max-width: 70%;
+    word-wrap: break-word;
+}
+
+/* PROBLEMA 1 - CORREÇÃO: Mensagens do cliente */
+.message.cliente {
+    background-color: #ffffff;
+    align-self: flex-start;
+    border: 1px solid #eee;
+}
+
+/* PROBLEMA 1 - CORREÇÃO: Mensagens do atendente */
+.message.atendente {
+    background-color: #dcf8c6;
+    align-self: flex-end;
+}
+
+
+/* Área de input da mensagem */
+#chat-input-container {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+    background-color: #f0f0f0;
+}
+
+#message-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    resize: none;
+}
+
+/* -------- (O resto do seu CSS que já demos na outra resposta pode continuar aqui) -------- */
+.chat-media {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 5px;
+}
+.chat-button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-left: 5px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.chat-button:hover {
+    background: #0056b3;
+}
+#record-audio-button.recording {
+    background-color: #dc3545;
+}

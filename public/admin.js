@@ -132,4 +132,49 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPlans();
     fetchStats();
     loadClients();
+
+    // Função utilitária para adicionar mensagens no chat
+    window.appendMessage = function({ remetente, mensagem, mediaUrl, mediaType }) {
+        const chatMessages = document.getElementById('chat-messages');
+        if (!chatMessages) return;
+
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        if (remetente) messageElement.classList.add(remetente);
+
+        if (mediaUrl) {
+            if (mediaType && mediaType.startsWith('image')) {
+                const img = document.createElement('img');
+                img.src = mediaUrl;
+                img.classList.add('chat-media');
+                messageElement.appendChild(img);
+            } else if (mediaType && mediaType.startsWith('audio')) {
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = mediaUrl;
+                messageElement.appendChild(audio);
+            } else if (mediaType && mediaType.startsWith('video')) {
+                const video = document.createElement('video');
+                video.controls = true;
+                video.src = mediaUrl;
+                video.classList.add('chat-media');
+                messageElement.appendChild(video);
+            } else {
+                const link = document.createElement('a');
+                link.href = mediaUrl;
+                link.textContent = 'Download';
+                link.target = '_blank';
+                messageElement.appendChild(link);
+            }
+        }
+
+        if (mensagem) {
+            const p = document.createElement('p');
+            p.textContent = mensagem;
+            messageElement.appendChild(p);
+        }
+
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
 });
