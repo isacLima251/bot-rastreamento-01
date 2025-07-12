@@ -659,13 +659,28 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                     const textarea = card.querySelector('.automation-message');
                     const toggle = card.querySelector('.automation-toggle');
                     const toggleLabel = card.querySelector('.toggle-label');
-                    if(toggle) toggle.checked = config.ativo;
-                    if(textarea) {
+                    const selectTipo = card.querySelector('.select-tipo-midia');
+                    const inputUrl = card.querySelector('.input-url-midia');
+                    const inputLegenda = card.querySelector('.input-legenda-midia');
+                    if (toggle) toggle.checked = config.ativo;
+                    if (textarea) {
                         textarea.value = config.mensagem;
                         textarea.disabled = !config.ativo;
                         highlightVariables(textarea);
                     }
-                    if(toggleLabel) toggleLabel.textContent = config.ativo ? 'Ativado' : 'Desativado';
+                    if (selectTipo) {
+                        selectTipo.value = config.tipo_midia || 'texto';
+                        selectTipo.disabled = !config.ativo;
+                    }
+                    if (inputUrl) {
+                        inputUrl.value = config.url_midia || '';
+                        inputUrl.disabled = !config.ativo;
+                    }
+                    if (inputLegenda) {
+                        inputLegenda.value = config.legenda_midia || '';
+                        inputLegenda.disabled = !config.ativo;
+                    }
+                    if (toggleLabel) toggleLabel.textContent = config.ativo ? 'Ativado' : 'Desativado';
                 }
             });
         } catch (error) {
@@ -683,9 +698,15 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             const automationId = card.dataset.automationId;
             const toggle = card.querySelector('.automation-toggle');
             const messageTextarea = card.querySelector('.automation-message');
+            const selectTipo = card.querySelector('.select-tipo-midia');
+            const inputUrl = card.querySelector('.input-url-midia');
+            const inputLegenda = card.querySelector('.input-legenda-midia');
             novasConfiguracoes[automationId] = {
                 ativo: toggle.checked,
-                mensagem: messageTextarea.value
+                mensagem: messageTextarea.value,
+                tipo_midia: selectTipo ? selectTipo.value : 'texto',
+                url_midia: inputUrl ? inputUrl.value.trim() : '',
+                legenda_midia: inputLegenda ? inputLegenda.value : ''
             };
         });
         try {
@@ -1139,9 +1160,15 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                 const card = e.target.closest('.automation-card');
                 const messageTextarea = card.querySelector('.automation-message');
                 const toggleLabel = card.querySelector('.toggle-label');
-                if(messageTextarea && toggleLabel) {
+                const selectTipo = card.querySelector('.select-tipo-midia');
+                const inputUrl = card.querySelector('.input-url-midia');
+                const inputLegenda = card.querySelector('.input-legenda-midia');
+                if (messageTextarea && toggleLabel) {
                     const isAtivo = e.target.checked;
                     messageTextarea.disabled = !isAtivo;
+                    if (selectTipo) selectTipo.disabled = !isAtivo;
+                    if (inputUrl) inputUrl.disabled = !isAtivo;
+                    if (inputLegenda) inputLegenda.disabled = !isAtivo;
                     toggleLabel.textContent = isAtivo ? 'Ativado' : 'Desativado';
                 }
             }
