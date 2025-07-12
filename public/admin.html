@@ -37,6 +37,23 @@
         </section>
     </div>
 
+    <div id="chat-container">
+        <div id="chat-header">
+            <h3 id="current-chat-contact">Selecione uma conversa</h3>
+        </div>
+
+        <div id="chat-messages">
+        </div>
+
+        <div id="chat-input-container">
+            <textarea id="message-input" placeholder="Digite sua mensagem..."></textarea>
+            <button id="attach-file-button" class="chat-button">📎</button>
+            <input type="file" id="media-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf">
+            <button id="record-audio-button" class="chat-button">🎤</button>
+            <button id="send-button" class="chat-button">Enviar</button>
+        </div>
+    </div>
+
     <div id="client-modal" class="modal-overlay">
         <div class="modal-content">
             <h3 id="modal-title">Novo Cliente</h3>
