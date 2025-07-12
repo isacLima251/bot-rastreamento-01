@@ -16,7 +16,10 @@ exports.getAutomations = (db, clienteId = null) => {
             const automationsMap = rows.reduce((acc, row) => {
                 acc[row.gatilho] = {
                     ativo: Boolean(row.ativo),
-                    mensagem: row.mensagem
+                    mensagem: row.mensagem,
+                    tipo_midia: row.tipo_midia || 'texto',
+                    url_midia: row.url_midia,
+                    legenda_midia: row.legenda_midia
                 };
                 return acc;
             }, {});
@@ -37,13 +40,21 @@ exports.getAutomations = (db, clienteId = null) => {
 // Salva todas as configurações de automação recebidas do frontend
 exports.saveAutomations = (db, configs, clienteId = null) => {
     return new Promise((resolve, reject) => {
-        const stmt = db.prepare("INSERT OR REPLACE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, ?, ?)");
+        const stmt = db.prepare("INSERT OR REPLACE INTO automacoes (gatilho, cliente_id, ativo, mensagem, tipo_midia, url_midia, legenda_midia) VALUES (?, ?, ?, ?, ?, ?, ?)");
         
         db.serialize(() => {
             db.run("BEGIN TRANSACTION");
             for (const gatilho in configs) {
                 const config = configs[gatilho];
-                stmt.run(gatilho, clienteId, config.ativo ? 1 : 0, config.mensagem);
+                stmt.run(
+                    gatilho,
+                    clienteId,
+                    config.ativo ? 1 : 0,
+                    config.mensagem,
+                    config.tipo_midia || 'texto',
+                    config.url_midia || null,
+                    config.legenda_midia || null
+                );
             }
             db.run("COMMIT", (err) => {
                 if(err) return reject(err);
@@ -65,21 +76,22 @@ exports.createDefaultAutomations = (db, clienteId, options = {}) => {
             gatilho,
             cliente_id: clienteId,
             ativo: 1,
-            mensagem
+            mensagem,
+            tipo_midia: 'texto'
         }));
         return Automacao.bulkCreate(records, { transaction: options.transaction, ignoreDuplicates: true });
     }
 
     return new Promise((resolve, reject) => {
         const stmt = db.prepare(
-            'INSERT OR IGNORE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, 1, ?)'
+            'INSERT OR IGNORE INTO automacoes (gatilho, cliente_id, ativo, mensagem, tipo_midia) VALUES (?, ?, 1, ?, ?)' 
         );
 
         db.serialize(() => {
             db.run('BEGIN TRANSACTION');
             for (const gatilho in DEFAULT_MESSAGES) {
                 const mensagem = DEFAULT_MESSAGES[gatilho];
-                stmt.run(gatilho, clienteId, mensagem);
+                stmt.run(gatilho, clienteId, mensagem, 'texto');
             }
             db.run('COMMIT', err => {
                 if (err) return reject(err);
