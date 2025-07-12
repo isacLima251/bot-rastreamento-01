@@ -120,7 +120,16 @@ body {
 .btn-salvar { background-color: var(--primary-color); }
 .btn-icon { background-color: transparent; border: none; color: var(--text-secondary); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .btn-icon:hover { background-color: var(--hover-bg); }
-.btn-icon.recording { color: red; }
+.btn-icon.recording {
+  color: red;
+  animation: pulse-record 1s infinite;
+}
+
+@keyframes pulse-record {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
 /* Destaque para o botão de excluir integração */
 .btn-delete-integration:hover {
     color: var(--error-color);
@@ -234,6 +243,8 @@ body {
 .automation-body { padding: 25px; display: flex; flex-direction: column; gap: 15px; height: 100%; }
 .toggle-container { display: flex; align-items: center; gap: 12px; }
 .toggle-label { font-weight: 500; color: var(--text-secondary); transition: color 0.4s ease; }
+.media-config { display: flex; flex-direction: column; gap: 8px; }
+.media-config input, .media-config select { padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; }
 .switch { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }

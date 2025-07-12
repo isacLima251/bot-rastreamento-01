@@ -8,6 +8,9 @@ const { body, validationResult } = require('express-validator');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('ffmpeg-static');
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 const uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -22,6 +25,17 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 exports.upload = upload;
+
+function convertToMp3(inputPath) {
+    const outputPath = inputPath.replace(/\.[^/.]+$/, '.mp3');
+    return new Promise((resolve, reject) => {
+        ffmpeg(inputPath)
+            .toFormat('mp3')
+            .on('error', reject)
+            .on('end', () => resolve(outputPath))
+            .save(outputPath);
+    });
+}
 
 // LÊ todos os pedidos
 exports.listarPedidos = (req, res) => {
@@ -263,8 +277,17 @@ exports.enviarMidia = async (req, res) => {
             return res.status(409).json({ error: 'A sua conta não está conectada ao WhatsApp.' });
         }
 
-        const filePath = file.path;
-        const mediaUrl = `/uploads/${file.filename}`;
+        let filePath = file.path;
+        let mediaUrl = `/uploads/${file.filename}`;
+        if (tipo === 'audio' && path.extname(filePath).toLowerCase() !== '.mp3') {
+            try {
+                filePath = await convertToMp3(filePath);
+                mediaUrl = `/uploads/${path.basename(filePath)}`;
+            } catch (err) {
+                console.error('Erro ao converter para mp3:', err);
+                return res.status(500).json({ error: 'Falha ao converter audio.' });
+            }
+        }
         const client = req.venomClient;
 
         switch (tipo) {
