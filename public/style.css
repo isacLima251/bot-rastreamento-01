@@ -82,7 +82,12 @@ body {
 /* =================================
    4. Janela de Chat
    ================================= */
-#chat-window { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+#chat-window {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
 .placeholder { margin: auto; text-align: center; color: var(--text-secondary); }
 .placeholder svg { stroke: #d1d5db; margin-bottom: 1rem; }
 .detalhes-header { background-color: var(--sidebar-bg); padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
@@ -93,8 +98,19 @@ body {
 .chat-feed { padding: 20px; display: flex; flex-direction: column; gap: 4px; flex-grow: 1; overflow-y: auto; }
 .chat-message { padding: 10px 15px; border-radius: 18px; max-width: 70%; line-height: 1.4; position: relative; word-wrap: break-word; }
 .chat-message p { margin: 0; padding-right: 50px; }
-.chat-message.enviado { background-color: var(--message-sent-bg); align-self: flex-end; border-radius: 18px 18px 4px 18px; }
-.chat-message.recebido { background-color: var(--message-received-bg); align-self: flex-start; border: 1px solid var(--border-color); border-radius: 18px 18px 18px 4px; }
+.chat-message.enviado {
+    background-color: var(--message-sent-bg);
+    align-self: flex-end;
+    border-radius: 18px 18px 4px 18px;
+    margin-left: auto;
+}
+.chat-message.recebido {
+    background-color: var(--message-received-bg);
+    align-self: flex-start;
+    border: 1px solid var(--border-color);
+    border-radius: 18px 18px 18px 4px;
+    margin-right: auto;
+}
 .chat-message .timestamp { position: absolute; bottom: 8px; right: 15px; font-size: 0.75rem; color: var(--text-secondary); }
 .chat-message.automatic { opacity: 0.9; }
 .auto-indicator { margin-left: 4px; }
