@@ -526,7 +526,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                 } else {
                     historico.forEach(msg => {
                         const msgDiv = document.createElement('div');
-                        msgDiv.className = `chat-message ${msg.origem === 'cliente' ? 'recebido' : 'enviado'}`;
+                        msgDiv.className = `chat-message ${msg.origem === 'entrada' ? 'recebido' : 'enviado'}`;
                         let dataEnvio = msg.data_envio;
                         if (dataEnvio instanceof Date) {
                             dataEnvio = dataEnvio.toISOString();
