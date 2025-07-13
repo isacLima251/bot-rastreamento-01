@@ -1,4 +1,3 @@
-// src/controllers/webhookRastreioController.js
 const pedidoService = require('../services/pedidoService');
 
 exports.receberWebhook = async (req, res) => {

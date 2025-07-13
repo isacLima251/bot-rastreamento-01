@@ -1,4 +1,3 @@
-// src/controllers/rastreamentoController.js
 const pedidoService = require('../services/pedidoService');
 const rastreamentoService = require('../services/rastreamentoService');
 const logService = require('../services/logService');

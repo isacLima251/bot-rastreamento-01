@@ -1,6 +1,6 @@
-// src/services/whatsappService.js
 // --- FUNÇÕES DE AJUDA ---
 const path = require('path');
+const logger = require('../logger');
 
 /**
  * Normaliza um número de telefone para o formato internacional brasileiro (55 + DDD + Número).
@@ -124,7 +124,7 @@ async function sendVideo(client, telefone, videoUrl, caption = '') {
  */
 async function getProfilePicUrl(client, telefone) {
     if (!client) {
-        console.warn("Cliente Venom não está pronto para buscar fotos.");
+        logger.warn("Cliente Venom não está pronto para buscar fotos.");
         return null;
     }
     const contatoId = `${normalizeTelefone(telefone)}@c.us`;
@@ -136,7 +136,7 @@ async function getProfilePicUrl(client, telefone) {
             return viaApi;
         }
     } catch (error) {
-        console.warn(`[API] Falhou para ${contatoId}. Motivo: ${error.message}. Ativando fallback.`);
+        logger.warn(`[API] Falhou para ${contatoId}. Motivo: ${error.message}. Ativando fallback.`);
     }
 
     // --- ESTRATÉGIA 2: FALLBACK VIA SCRAPING ROBUSTO COM PUPPETEER ---
@@ -146,7 +146,7 @@ async function getProfilePicUrl(client, telefone) {
         }
         return viaScrape;
     } catch (err) {
-        console.warn('Fallback Puppeteer falhou:', err);
+        logger.warn('Fallback Puppeteer falhou:', err);
         return null;
     }
 }

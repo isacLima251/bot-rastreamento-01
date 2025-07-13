@@ -1,4 +1,3 @@
-// src/controllers/envioController.js
 const pedidoService = require('../services/pedidoService');
 const whatsappService = require('../services/whatsappService');
 const automationService = require('../services/automationService');
@@ -32,9 +31,6 @@ async function enviarPassos(db, client, telefone, steps, pedido) {
     }
 }
 
-// ... (o resto do seu ficheiro envioController.js continua exatamente igual)
-// A lógica que já temos é inteligente o suficiente para usar os novos status
-// quando eles forem definidos no banco de dados.
 
 function personalizarMensagem(mensagem, pedido) {
     if (!mensagem) return null;

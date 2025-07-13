@@ -1,4 +1,3 @@
-// src/services/automationService.js
 const DEFAULT_MESSAGES = require('../constants/defaultMessages');
 const whatsappService = require('./whatsappService');
 
