@@ -1,8 +1,10 @@
+const logger = require('../logger');
+
 async function ensureFreePlan(tx) {
-  console.log('[ensureFreePlan] Inciando verificacao do plano gratuito.');
+  logger.info('[ensureFreePlan] Iniciando verificacao do plano gratuito.');
 
   try {
-    console.log('[ensureFreePlan] Procurando pelo plano com ID 1...');
+    logger.info('[ensureFreePlan] Procurando pelo plano com ID 1...');
     const plan = await new Promise((resolve, reject) => {
       tx.get('SELECT * FROM plans WHERE id = ?', [1], (err, row) => {
         if (err) return reject(err);
@@ -11,9 +13,9 @@ async function ensureFreePlan(tx) {
     });
 
     if (plan) {
-      console.log('[ensureFreePlan] Plano gratuito ja existe. Nada a fazer.');
+      logger.info('[ensureFreePlan] Plano gratuito ja existe. Nada a fazer.');
     } else {
-      console.log('[ensureFreePlan] Plano gratuito nao encontrado. Criando agora...');
+      logger.info('[ensureFreePlan] Plano gratuito nao encontrado. Criando agora...');
       await new Promise((resolve, reject) => {
         tx.run(
           'INSERT INTO plans (id, name, price, monthly_limit, checkout_url) VALUES (?, ?, ?, ?, ?)',
@@ -24,7 +26,7 @@ async function ensureFreePlan(tx) {
           }
         );
       });
-      console.log('[ensureFreePlan] Plano gratuito criado com sucesso.');
+      logger.info('[ensureFreePlan] Plano gratuito criado com sucesso.');
     }
   } catch (error) {
     console.error('[ensureFreePlan] ERRO CRITICO DENTRO DO HELPER:', error);

@@ -1,9 +1,10 @@
 const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY || '');
+const logger = require('../logger');
 
 async function sendWelcomeEmail(to, password) {
     if (!process.env.RESEND_API_KEY) {
-        console.warn('RESEND_API_KEY não configurada. O e-mail de boas-vindas não será enviado.');
+        logger.warn('RESEND_API_KEY não configurada. O e-mail de boas-vindas não será enviado.');
         return;
     }
     const loginUrl = (process.env.APP_URL || 'http://localhost:3000') + '/login.html';

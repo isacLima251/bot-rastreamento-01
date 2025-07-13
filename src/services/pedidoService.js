@@ -1,5 +1,6 @@
 // --- CORREÇÃO: Importando o whatsappService ---
 const whatsappService = require('./whatsappService');
+const logger = require('../logger');
 
 /**
  * NORMALIZADOR DE TELEFONE DEFINITIVO (trata o 9º dígito)
@@ -138,7 +139,7 @@ const updateCamposPedido = async (db, pedidoId, campos, clienteId = null) => {
 
         // Se não houver campos válidos, não há o que atualizar
         if (camposValidos.length === 0) {
-            console.log(`Nenhum campo válido para atualizar no pedido ${pedidoId}.`);
+            logger.info(`Nenhum campo válido para atualizar no pedido ${pedidoId}.`);
             return { changes: 0 };
         }
 
@@ -154,7 +155,7 @@ const updateCamposPedido = async (db, pedidoId, campos, clienteId = null) => {
             replacements.push(clienteId);
         }
 
-        console.log(`Executando query segura: ${query} com valores: ${JSON.stringify(replacements)}`);
+        logger.info(`Executando query segura: ${query} com valores: ${JSON.stringify(replacements)}`);
 
         return await new Promise((resolve, reject) => {
             db.run(query, replacements, function(err) {
@@ -298,7 +299,7 @@ const criarPedido = (db, dadosPedido, client, clienteId = null) => {
             try {
                 fotoUrl = await whatsappService.getProfilePicUrl(client, telefoneValidado);
             } catch (e) {
-                console.warn(`Não foi possível obter a foto para o novo contato ${telefoneValidado}.`);
+                logger.warn(`Não foi possível obter a foto para o novo contato ${telefoneValidado}.`);
                 fotoUrl = null;
             }
         }

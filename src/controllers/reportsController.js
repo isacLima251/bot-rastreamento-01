@@ -1,5 +1,3 @@
-// src/controllers/reportsController.js
-
 const subscriptionService = require('../services/subscriptionService');
 const pedidoService = require('../services/pedidoService');
 const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';

@@ -5,6 +5,7 @@ const subscriptionService = require('../services/subscriptionService');
 const integrationHistoryService = require('../services/integrationHistoryService');
 const pedidoService = require('../services/pedidoService');
 const { body, validationResult } = require('express-validator');
+const logger = require('../logger');
 
 // Dicionário de tradutores para cada plataforma
 const platformMappers = {
@@ -52,7 +53,7 @@ exports.receberPostback = async (req, res) => {
         }
 
         const dados = mapper(payload);
-        console.log(`[Webhook] Evento '${dados.eventType}' para usuário ${nossoUsuario.id}`);
+        logger.info(`[Webhook] Evento '${dados.eventType}' para usuário ${nossoUsuario.id}`);
 
         switch (dados.eventType) {
             case 'VENDA_APROVADA': {
@@ -61,7 +62,7 @@ exports.receberPostback = async (req, res) => {
                 }
                 const pedidoExistente = await pedidoService.findPedidoByTelefone(req.db, dados.clientPhone, nossoUsuario.id);
                 if (pedidoExistente) {
-                    console.log(`[Webhook] Contato com telefone ${dados.clientPhone} já existe. Ignorando.`);
+                    logger.info(`[Webhook] Contato com telefone ${dados.clientPhone} já existe. Ignorando.`);
                     break;
                 }
 
@@ -74,7 +75,7 @@ exports.receberPostback = async (req, res) => {
 
                 // AVISA O FRONTEND QUE UM NOVO CONTATO FOI CRIADO
                 req.broadcast(nossoUsuario.id, { type: 'novo_contato', pedido: pedidoCriado });
-                console.log(`[Webhook] Contato para ${dados.clientName} criado e notificação enviada.`);
+                logger.info(`[Webhook] Contato para ${dados.clientName} criado e notificação enviada.`);
                 break;
             }
 
@@ -84,13 +85,13 @@ exports.receberPostback = async (req, res) => {
                 }
                 const pedido = await pedidoService.findPedidoByEmail(req.db, dados.clientEmail, nossoUsuario.id);
                 if (!pedido || pedido.codigoRastreio) {
-                    console.log(`[Webhook] Pedido não encontrado ou já possui rastreio para o email ${dados.clientEmail}.`);
+                    logger.info(`[Webhook] Pedido não encontrado ou já possui rastreio para o email ${dados.clientEmail}.`);
                     break;
                 }
 
                 const sub = await subscriptionService.getUserSubscription(req.db, nossoUsuario.id);
                 if (sub.monthly_limit !== -1 && sub.usage >= sub.monthly_limit) {
-                    console.warn(`[Webhook] Limite do plano excedido para usuário ${nossoUsuario.id}.`);
+                    logger.warn(`[Webhook] Limite do plano excedido para usuário ${nossoUsuario.id}.`);
                     break;
                 }
 
@@ -101,7 +102,7 @@ exports.receberPostback = async (req, res) => {
                 
                 // AVISA O FRONTEND QUE UM PEDIDO FOI ATUALIZADO
                 req.broadcast(nossoUsuario.id, { type: 'pedido_atualizado', pedidoId: pedido.id });
-                console.log(`[Webhook] Rastreio ${dados.trackingCode} adicionado ao pedido ${pedido.id} e notificação enviada.`);
+                logger.info(`[Webhook] Rastreio ${dados.trackingCode} adicionado ao pedido ${pedido.id} e notificação enviada.`);
                 break;
             }
 

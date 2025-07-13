@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes, QueryTypes } = require('sequelize');
 const path = require('path');
+const logger = require('../logger');
 
 const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../../whatsship.db');
@@ -221,7 +222,7 @@ async function initDb() {
     }
   }
 
-  console.log(`\u2705 Conectado ao banco de dados ${DB_CLIENT}.`);
+  logger.info(`\u2705 Conectado ao banco de dados ${DB_CLIENT}.`);
   module.exports.sequelize = sequelize;
   module.exports.models = models;
   return createWrapper(sequelize);

@@ -1,4 +1,3 @@
-// src/controllers/pedidosController.js
 const pedidoService = require('../services/pedidoService');
 const whatsappService = require('../services/whatsappService');
 const logService = require('../services/logService');
