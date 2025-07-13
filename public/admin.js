@@ -180,75 +180,81 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     };
 
-    // ----- Automation Builder Functions -----
-    let stepCounter = 0;
-
-    window.addStep = function(type) {
-        stepCounter++;
-        const container = document.getElementById('steps-container');
-        const stepCard = document.createElement('div');
-        stepCard.className = 'automation-step';
-        stepCard.id = `step-${stepCounter}`;
-        stepCard.dataset.type = type;
-        stepCard.innerHTML = `
-            <div class="step-header">
-                <h5>Passo <span class="step-order-number"></span>: ${capitalize(type)}</h5>
-                <div class="step-controls">
-                    <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this, 'up')">▲</button>
-                    <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this, 'down')">▼</button>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="removeStep(this)">×</button>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>${type === 'texto' ? 'Mensagem de Texto' : 'Legenda (opcional)'}</label>
-                <textarea class="form-control step-text-content" rows="3"></textarea>
-            </div>
-            <div class="form-group step-file-content" style="display: ${type === 'texto' ? 'none' : 'block'};">
-                <label>Selecione o arquivo</label>
-                <input type="file" class="form-control-file step-file-input" onchange="displayFileName(this)">
-                <div class="file-name-display"></div>
-            </div>
-        `;
-        container.appendChild(stepCard);
-        updateStepNumbers();
-    };
-
-    window.removeStep = function(buttonElement) {
-        buttonElement.closest('.automation-step').remove();
-        updateStepNumbers();
-    };
-
-    window.moveStep = function(buttonElement, direction) {
-        const stepCard = buttonElement.closest('.automation-step');
-        const container = stepCard.parentNode;
-        if (direction === 'up') {
-            const previousSibling = stepCard.previousElementSibling;
-            if (previousSibling) container.insertBefore(stepCard, previousSibling);
-        } else {
-            const nextSibling = stepCard.nextElementSibling;
-            if (nextSibling) container.insertBefore(nextSibling, stepCard);
-        }
-        updateStepNumbers();
-    };
-
-    window.displayFileName = function(inputElement) {
-        const fileNameDisplay = inputElement.nextElementSibling;
-        if (inputElement.files.length > 0) {
-            fileNameDisplay.textContent = `Arquivo selecionado: ${inputElement.files[0].name}`;
-        } else {
-            fileNameDisplay.textContent = '';
-        }
-    };
-
-    function updateStepNumbers() {
-        const allSteps = document.querySelectorAll('#steps-container .automation-step');
-        allSteps.forEach((step, index) => {
-            step.querySelector('.step-order-number').textContent = index + 1;
-            step.dataset.order = index + 1;
-        });
-    }
-
-    function capitalize(s) {
-        return s.charAt(0).toUpperCase() + s.slice(1);
-    }
 });
+
+// ----- Automation Builder Functions (global) -----
+let stepCounter = 0;
+
+function addStep(type) {
+    stepCounter++;
+    const container = document.getElementById('steps-container');
+    const stepCard = document.createElement('div');
+    stepCard.className = 'automation-step';
+    stepCard.id = `step-${stepCounter}`;
+    stepCard.dataset.type = type;
+    stepCard.innerHTML = `
+        <div class="step-header">
+            <h5>Passo <span class="step-order-number"></span>: ${capitalize(type)}</h5>
+            <div class="step-controls">
+                <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this, 'up')">▲</button>
+                <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this, 'down')">▼</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeStep(this)">×</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>${type === 'texto' ? 'Mensagem de Texto' : 'Legenda (opcional)'}</label>
+            <textarea class="form-control step-text-content" rows="3"></textarea>
+        </div>
+        <div class="form-group step-file-content" style="display: ${type === 'texto' ? 'none' : 'block'};">
+            <label>Selecione o arquivo</label>
+            <input type="file" class="form-control-file step-file-input" onchange="displayFileName(this)">
+            <div class="file-name-display"></div>
+        </div>
+    `;
+    container.appendChild(stepCard);
+    updateStepNumbers();
+}
+
+function removeStep(buttonElement) {
+    buttonElement.closest('.automation-step').remove();
+    updateStepNumbers();
+}
+
+function moveStep(buttonElement, direction) {
+    const stepCard = buttonElement.closest('.automation-step');
+    const container = stepCard.parentNode;
+    if (direction === 'up') {
+        const previousSibling = stepCard.previousElementSibling;
+        if (previousSibling) container.insertBefore(stepCard, previousSibling);
+    } else {
+        const nextSibling = stepCard.nextElementSibling;
+        if (nextSibling) container.insertBefore(nextSibling, stepCard);
+    }
+    updateStepNumbers();
+}
+
+function displayFileName(inputElement) {
+    const fileNameDisplay = inputElement.nextElementSibling;
+    if (inputElement.files.length > 0) {
+        fileNameDisplay.textContent = `Arquivo selecionado: ${inputElement.files[0].name}`;
+    } else {
+        fileNameDisplay.textContent = '';
+    }
+}
+
+function updateStepNumbers() {
+    const allSteps = document.querySelectorAll('#steps-container .automation-step');
+    allSteps.forEach((step, index) => {
+        const orderSpan = step.querySelector('.step-order-number');
+        if (orderSpan) {
+            orderSpan.textContent = index + 1;
+        }
+        step.dataset.order = index + 1;
+    });
+}
+
+function capitalize(s) {
+    if (!s) return '';
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
