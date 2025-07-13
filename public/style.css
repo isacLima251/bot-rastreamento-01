@@ -43,8 +43,9 @@ body {
 .nav-btn svg { width: 24px; height: 24px; }
 .content-wrapper { flex: 1; overflow-y: auto; }
 .view-container { width: 100%; height: 100%; background-color: var(--main-bg); }
+#chat-view { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
 .app-layout { display: flex; height: 100%; }
-.main-content { flex: 1; background-color: var(--main-bg); display: flex; flex-direction: column; }
+.main-content { flex: 1; background-color: var(--main-bg); display: flex; flex-direction: column; min-height: 0; }
 
 /* =================================
    3. Sidebar e Lista de Contatos
