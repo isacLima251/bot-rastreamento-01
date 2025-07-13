@@ -100,7 +100,7 @@ exports.saveAutomations = (db, configs, clienteId = null) => {
 const { getModels } = require('../database/database');
 
 // Cria registros padrão de automações para um novo usuário
-exports.createDefaultAutomations = (db, clienteId, options = {}) => {
+exports.createDefaultAutomations = async (db, clienteId, options = {}) => {
     if (options.transaction) {
         const { Automacao, AutomacaoPasso } = getModels();
         const records = Object.entries(DEFAULT_MESSAGES).map(([gatilho, mensagem]) => ({
