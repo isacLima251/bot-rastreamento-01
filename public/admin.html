@@ -11,6 +11,7 @@
         <ul>
             <li><button class="nav-btn active" id="nav-dashboard">Dashboard</button></li>
             <li><button class="nav-btn" id="nav-clients">Clientes</button></li>
+            <li><button class="nav-btn" id="nav-automation">Automações</button></li>
             <li><button class="nav-btn" id="nav-config">Configurações</button></li>
         </ul>
     </nav>
@@ -30,6 +31,18 @@
                 </thead>
                 <tbody></tbody>
             </table>
+        </section>
+        <section id="view-automation" class="hidden">
+            <h1>Construtor de Automações</h1>
+            <div id="automation-builder">
+                <div id="steps-container"></div>
+                <div id="add-step-buttons" class="mt-3">
+                    <span>Adicionar novo passo:</span>
+                    <button type="button" class="btn btn-primary" onclick="addStep('texto')">Texto</button>
+                    <button type="button" class="btn btn-info" onclick="addStep('midia')">Mídia</button>
+                    <button type="button" class="btn btn-secondary" onclick="addStep('arquivo')">Arquivo</button>
+                </div>
+            </div>
         </section>
         <section id="view-config" class="hidden">
             <h1>Configurações</h1>
