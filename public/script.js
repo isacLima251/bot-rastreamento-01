@@ -233,7 +233,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         btnConfirmacaoCancelarEl.addEventListener('click', closeConfirmationModal, { once: true });
     };
 
-    function highlightVariables(textarea) {
+function highlightVariables(textarea) {
         if (!textarea) return;
         const text = textarea.value;
         const backdrop = textarea.previousElementSibling;
@@ -250,9 +250,90 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                 return `<span class="variable-highlight"${tooltipAttr}>{{${p1}}}</span>`;
             });
         
-        backdrop.innerHTML = highlightedText; 
-        backdrop.scrollTop = textarea.scrollTop;
+    backdrop.innerHTML = highlightedText;
+    backdrop.scrollTop = textarea.scrollTop;
+}
+
+    // ---------- Step Builder ----------
+    let stepCounter = 0;
+    window.addStep = function(cardEl, type, data = {}) {
+        stepCounter++;
+        const container = cardEl.querySelector('.steps-container');
+        if (!container) return;
+        const stepCard = document.createElement('div');
+        stepCard.className = 'automation-step';
+        stepCard.dataset.type = type;
+        stepCard.innerHTML = `
+            <div class="step-header">
+                <h5>Passo <span class="step-order-number"></span>: <span class="step-type-label">${capitalize(type)}</span></h5>
+                <div class="step-controls">
+                    <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this,'up')">▲</button>
+                    <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this,'down')">▼</button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeStep(this)">×</button>
+                </div>
+            </div>
+            <div class="form-group step-text-area" style="display:${type === 'texto' ? 'block' : 'none'};">
+                <textarea class="form-control step-text-content" rows="3" placeholder="Mensagem de texto"></textarea>
+            </div>
+            <div class="form-group step-media-fields" style="display:${type === 'texto' ? 'none' : 'block'};">
+                <input type="text" class="step-media-url form-control" placeholder="URL da mídia">
+                <input type="text" class="step-media-caption form-control" placeholder="Legenda (opcional)">
+            </div>
+            <select class="step-type" style="margin-top:10px;" onchange="updateStepType(this)">
+                <option value="texto" ${type==='texto'?'selected':''}>Texto</option>
+                <option value="imagem" ${type==='imagem'?'selected':''}>Imagem</option>
+                <option value="audio" ${type==='audio'?'selected':''}>Áudio</option>
+                <option value="arquivo" ${type==='arquivo'?'selected':''}>Arquivo</option>
+                <option value="video" ${type==='video'?'selected':''}>Vídeo</option>
+            </select>
+        `;
+        container.appendChild(stepCard);
+        if (data.conteudo) stepCard.querySelector('.step-text-content').value = data.conteudo;
+        if (data.mediaUrl) stepCard.querySelector('.step-media-url').value = data.mediaUrl;
+        if (data.conteudo && type !== 'texto') stepCard.querySelector('.step-media-caption').value = data.conteudo;
+        const txt = stepCard.querySelector('.step-text-content');
+        if (txt) highlightVariables(txt);
+        updateStepNumbers(cardEl);
+    };
+
+    window.removeStep = function(btn){
+        const card = btn.closest('.automation-card');
+        btn.closest('.automation-step').remove();
+        updateStepNumbers(card);
+    };
+
+    window.moveStep = function(btn,direction){
+        const step = btn.closest('.automation-step');
+        const card = btn.closest('.automation-card');
+        const container = card.querySelector('.steps-container');
+        if(direction==='up'){
+            const prev = step.previousElementSibling;
+            if(prev) container.insertBefore(step, prev);
+        } else {
+            const next = step.nextElementSibling;
+            if(next) container.insertBefore(next, step);
+        }
+        updateStepNumbers(card);
+    };
+
+    window.updateStepType = function(selectEl){
+        const step = selectEl.closest('.automation-step');
+        const type = selectEl.value;
+        step.dataset.type = type;
+        step.querySelector('.step-type-label').textContent = capitalize(type);
+        step.querySelector('.step-text-area').style.display = type === 'texto' ? 'block':'none';
+        step.querySelector('.step-media-fields').style.display = type === 'texto' ? 'none':'block';
+    };
+
+    function updateStepNumbers(card){
+        card.querySelectorAll('.automation-step').forEach((el,idx)=>{
+            el.dataset.order = idx+1;
+            const num = el.querySelector('.step-order-number');
+            if(num) num.textContent = idx+1;
+        });
     }
+
+    function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 
     function updateStatusUI(status, data = {}) {
         clearTimeout(qrCodeTimer);
@@ -656,32 +737,19 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                 const automationId = card.dataset.automationId;
                 const config = configuracoesAutomacao[automationId];
                 if (config) {
-                    const textarea = card.querySelector('.automation-message');
                     const toggle = card.querySelector('.automation-toggle');
                     const toggleLabel = card.querySelector('.toggle-label');
-                    const selectTipo = card.querySelector('.select-tipo-midia');
-                    const inputUrl = card.querySelector('.input-url-midia');
-                    const inputLegenda = card.querySelector('.input-legenda-midia');
-                    const step = config.steps && config.steps[0];
                     if (toggle) toggle.checked = config.ativo;
-                    if (textarea) {
-                        textarea.value = config.mensagem;
-                        textarea.disabled = !config.ativo;
-                        highlightVariables(textarea);
-                    }
-                    if (selectTipo) {
-                        selectTipo.value = step ? step.tipo : 'texto';
-                        selectTipo.disabled = !config.ativo;
-                    }
-                    if (inputUrl) {
-                        inputUrl.value = step && step.mediaUrl ? step.mediaUrl : '';
-                        inputUrl.disabled = !config.ativo;
-                    }
-                    if (inputLegenda) {
-                        inputLegenda.value = step ? step.conteudo : '';
-                        inputLegenda.disabled = !config.ativo;
-                    }
                     if (toggleLabel) toggleLabel.textContent = config.ativo ? 'Ativado' : 'Desativado';
+
+                    const container = card.querySelector('.steps-container');
+                    container.innerHTML = '';
+                    const steps = (config.steps && config.steps.length) ? config.steps : [{ tipo: 'texto', conteudo: config.mensagem }];
+                    steps.forEach(step => addStep(card, step.tipo, { conteudo: step.conteudo, mediaUrl: step.mediaUrl }));
+
+                    if (!config.ativo) {
+                        card.querySelectorAll('textarea, input, select').forEach(el => { if(!el.classList.contains('automation-toggle')) el.disabled = true; });
+                    }
                 }
             });
         } catch (error) {
@@ -698,21 +766,23 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         document.querySelectorAll('.automation-card').forEach(card => {
             const automationId = card.dataset.automationId;
             const toggle = card.querySelector('.automation-toggle');
-            const messageTextarea = card.querySelector('.automation-message');
-            const selectTipo = card.querySelector('.select-tipo-midia');
-            const inputUrl = card.querySelector('.input-url-midia');
-            const inputLegenda = card.querySelector('.input-legenda-midia');
-            const tipo = selectTipo ? selectTipo.value : 'texto';
-            const step = {
-                ordem: 1,
-                tipo,
-                conteudo: tipo === 'texto' ? messageTextarea.value : (inputLegenda ? inputLegenda.value : ''),
-                mediaUrl: tipo === 'texto' ? null : (inputUrl ? inputUrl.value.trim() : '')
-            };
+            const steps = [];
+            card.querySelectorAll('.automation-step').forEach((stepEl, idx) => {
+                const tipo = stepEl.querySelector('.step-type').value;
+                const msg = stepEl.querySelector('.step-text-content') ? stepEl.querySelector('.step-text-content').value : '';
+                const url = stepEl.querySelector('.step-media-url') ? stepEl.querySelector('.step-media-url').value.trim() : '';
+                const legenda = stepEl.querySelector('.step-media-caption') ? stepEl.querySelector('.step-media-caption').value : '';
+                steps.push({
+                    ordem: idx + 1,
+                    tipo,
+                    conteudo: tipo === 'texto' ? msg : legenda,
+                    mediaUrl: tipo === 'texto' ? null : url
+                });
+            });
             novasConfiguracoes[automationId] = {
                 ativo: toggle.checked,
-                mensagem: messageTextarea.value,
-                steps: [step]
+                mensagem: steps[0] && steps[0].tipo === 'texto' ? steps[0].conteudo : '',
+                steps
             };
         });
         try {
@@ -1164,32 +1234,17 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         automationsView.addEventListener('change', (e) => {
             if (e.target.classList.contains('automation-toggle')) {
                 const card = e.target.closest('.automation-card');
-                const messageTextarea = card.querySelector('.automation-message');
-                const toggleLabel = card.querySelector('.toggle-label');
-                const selectTipo = card.querySelector('.select-tipo-midia');
-                const inputUrl = card.querySelector('.input-url-midia');
-                const inputLegenda = card.querySelector('.input-legenda-midia');
-                if (messageTextarea && toggleLabel) {
-                    const isAtivo = e.target.checked;
-                    messageTextarea.disabled = !isAtivo;
-                    if (selectTipo) selectTipo.disabled = !isAtivo;
-                    if (inputUrl) inputUrl.disabled = !isAtivo;
-                    if (inputLegenda) inputLegenda.disabled = !isAtivo;
-                    toggleLabel.textContent = isAtivo ? 'Ativado' : 'Desativado';
-                }
+                const isAtivo = e.target.checked;
+                card.querySelectorAll('textarea, input, select').forEach(el => { if(!el.classList.contains('automation-toggle')) el.disabled = !isAtivo; });
+                const lbl = card.querySelector('.toggle-label');
+                if (lbl) lbl.textContent = isAtivo ? 'Ativado' : 'Desativado';
             }
         });
         automationsView.addEventListener('input', (e) => {
-            if (e.target.classList.contains('automation-message')) {
+            if (e.target.classList.contains('step-text-content')) {
                 highlightVariables(e.target);
             }
         });
-        automationsView.addEventListener('scroll', (e) => {
-            if (e.target.classList.contains('automation-message')) {
-                const backdrop = e.target.previousElementSibling;
-                if(backdrop) backdrop.scrollTop = e.target.scrollTop;
-            }
-        }, true);
     }
 
     if (btnCopyWebhookEl) {
