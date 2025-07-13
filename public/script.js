@@ -1,3 +1,115 @@
+// ----- Funções Globais para o Builder de Automações -----
+const variableTooltips = {
+    '{{link_rastreio}}': 'Insere o link completo e clicável para a página de rastreamento dos Correios.',
+    '{{status_rastreio}}': "Mostra o status resumido do rastreamento (Ex: 'A caminho', 'Entregue', 'Postado').",
+    '{{cidade_etapa_origem}}': 'Mostra a cidade de ONDE o pacote saiu na última movimentação registrada pelos Correios.',
+    '{{cidade_etapa_destino}}': 'Mostra a cidade para ONDE o pacote está indo na última movimentação registrada.',
+    '{{data_postagem_formatada}}': 'A data em que o pedido foi postado, no formato dd/mm/aaaa.',
+    '{{data_atualizacao_formatada}}': 'A data e a hora da última atualização do rastreio, no formato dd/mm/aaaa HH:mm.'
+};
+
+function highlightVariables(textarea) {
+    if (!textarea) return;
+    const text = textarea.value;
+    const backdrop = textarea.previousElementSibling;
+    if (!backdrop) return;
+    const highlightedText = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/{{(.*?)}}/g, (match, p1) => {
+            const key = `{{${p1}}}`;
+            const tooltip = variableTooltips[key];
+            const tooltipAttr = tooltip ? ` data-tooltip="${tooltip.replace(/"/g, '&quot;')}"` : '';
+            return `<span class="variable-highlight"${tooltipAttr}>{{${p1}}}</span>`;
+        });
+    backdrop.innerHTML = highlightedText;
+    backdrop.scrollTop = textarea.scrollTop;
+}
+
+let stepCounter = 0;
+
+function addStep(cardEl, type, data = {}) {
+    stepCounter++;
+    const container = cardEl.querySelector('.steps-container');
+    if (!container) return;
+    const stepCard = document.createElement('div');
+    stepCard.className = 'automation-step';
+    stepCard.dataset.type = type;
+    stepCard.innerHTML = `
+        <div class="step-header">
+            <h5>Passo <span class="step-order-number"></span>: <span class="step-type-label">${capitalize(type)}</span></h5>
+            <div class="step-controls">
+                <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this,'up')">▲</button>
+                <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this,'down')">▼</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeStep(this)">×</button>
+            </div>
+        </div>
+        <div class="form-group step-text-area" style="display:${type === 'texto' ? 'block' : 'none'};">
+            <textarea class="form-control step-text-content" rows="3" placeholder="Mensagem de texto"></textarea>
+        </div>
+        <div class="form-group step-media-fields" style="display:${type === 'texto' ? 'none' : 'block'};">
+            <input type="text" class="step-media-url form-control" placeholder="URL da mídia">
+            <input type="text" class="step-media-caption form-control" placeholder="Legenda (opcional)">
+        </div>
+        <select class="step-type" style="margin-top:10px;" onchange="updateStepType(this)">
+            <option value="texto" ${type==='texto'?'selected':''}>Texto</option>
+            <option value="imagem" ${type==='imagem'?'selected':''}>Imagem</option>
+            <option value="audio" ${type==='audio'?'selected':''}>Áudio</option>
+            <option value="arquivo" ${type==='arquivo'?'selected':''}>Arquivo</option>
+            <option value="video" ${type==='video'?'selected':''}>Vídeo</option>
+        </select>
+    `;
+    container.appendChild(stepCard);
+    if (data.conteudo) stepCard.querySelector('.step-text-content').value = data.conteudo;
+    if (data.mediaUrl) stepCard.querySelector('.step-media-url').value = data.mediaUrl;
+    if (data.conteudo && type !== 'texto') stepCard.querySelector('.step-media-caption').value = data.conteudo;
+    const txt = stepCard.querySelector('.step-text-content');
+    if (txt) highlightVariables(txt);
+    updateStepNumbers(cardEl);
+}
+
+function removeStep(btn) {
+    const card = btn.closest('.automation-card');
+    btn.closest('.automation-step').remove();
+    updateStepNumbers(card);
+}
+
+function moveStep(btn, direction) {
+    const step = btn.closest('.automation-step');
+    const card = btn.closest('.automation-card');
+    const container = card.querySelector('.steps-container');
+    if (direction === 'up') {
+        const prev = step.previousElementSibling;
+        if (prev) container.insertBefore(step, prev);
+    } else {
+        const next = step.nextElementSibling;
+        if (next) container.insertBefore(next, step);
+    }
+    updateStepNumbers(card);
+}
+
+function updateStepType(selectEl) {
+    const step = selectEl.closest('.automation-step');
+    const type = selectEl.value;
+    step.dataset.type = type;
+    step.querySelector('.step-type-label').textContent = capitalize(type);
+    step.querySelector('.step-text-area').style.display = type === 'texto' ? 'block' : 'none';
+    step.querySelector('.step-media-fields').style.display = type === 'texto' ? 'none' : 'block';
+}
+
+function updateStepNumbers(card) {
+    card.querySelectorAll('.automation-step').forEach((el, idx) => {
+        el.dataset.order = idx + 1;
+        const num = el.querySelector('.step-order-number');
+        if (num) num.textContent = idx + 1;
+    });
+}
+
+function capitalize(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 const token = localStorage.getItem('token');
 if (!token) { window.location.href = '/login.html'; return; }
@@ -102,14 +214,6 @@ const platformGrid = document.getElementById('platform-grid');
 const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
     if (loggedUserEl) loggedUserEl.textContent = userData.email || 'Usuário';
 
-    const variableTooltips = {
-        '{{link_rastreio}}': 'Insere o link completo e clicável para a página de rastreamento dos Correios.',
-        '{{status_rastreio}}': "Mostra o status resumido do rastreamento (Ex: 'A caminho', 'Entregue', 'Postado').",
-        '{{cidade_etapa_origem}}': 'Mostra a cidade de ONDE o pacote saiu na última movimentação registrada pelos Correios.',
-        '{{cidade_etapa_destino}}': 'Mostra a cidade para ONDE o pacote está indo na última movimentação registrada.',
-        '{{data_postagem_formatada}}': 'A data em que o pedido foi postado, no formato dd/mm/aaaa.',
-        '{{data_atualizacao_formatada}}': 'A data e a hora da última atualização do rastreio, no formato dd/mm/aaaa HH:mm.'
-    };
 
     // --- 2. Estado da Aplicação ---
     let todosOsPedidos = [];
@@ -233,107 +337,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         btnConfirmacaoCancelarEl.addEventListener('click', closeConfirmationModal, { once: true });
     };
 
-function highlightVariables(textarea) {
-        if (!textarea) return;
-        const text = textarea.value;
-        const backdrop = textarea.previousElementSibling;
-        if (!backdrop) return;
-        
-        const highlightedText = text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/{{(.*?)}}/g, (match, p1) => {
-                const key = `{{${p1}}}`;
-                const tooltip = variableTooltips[key];
-                const tooltipAttr = tooltip ? ` data-tooltip="${tooltip.replace(/"/g, '&quot;')}"` : '';
-                return `<span class="variable-highlight"${tooltipAttr}>{{${p1}}}</span>`;
-            });
-        
-    backdrop.innerHTML = highlightedText;
-    backdrop.scrollTop = textarea.scrollTop;
-}
-
     // ---------- Step Builder ----------
-    let stepCounter = 0;
-    window.addStep = function(cardEl, type, data = {}) {
-        stepCounter++;
-        const container = cardEl.querySelector('.steps-container');
-        if (!container) return;
-        const stepCard = document.createElement('div');
-        stepCard.className = 'automation-step';
-        stepCard.dataset.type = type;
-        stepCard.innerHTML = `
-            <div class="step-header">
-                <h5>Passo <span class="step-order-number"></span>: <span class="step-type-label">${capitalize(type)}</span></h5>
-                <div class="step-controls">
-                    <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this,'up')">▲</button>
-                    <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this,'down')">▼</button>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="removeStep(this)">×</button>
-                </div>
-            </div>
-            <div class="form-group step-text-area" style="display:${type === 'texto' ? 'block' : 'none'};">
-                <textarea class="form-control step-text-content" rows="3" placeholder="Mensagem de texto"></textarea>
-            </div>
-            <div class="form-group step-media-fields" style="display:${type === 'texto' ? 'none' : 'block'};">
-                <input type="text" class="step-media-url form-control" placeholder="URL da mídia">
-                <input type="text" class="step-media-caption form-control" placeholder="Legenda (opcional)">
-            </div>
-            <select class="step-type" style="margin-top:10px;" onchange="updateStepType(this)">
-                <option value="texto" ${type==='texto'?'selected':''}>Texto</option>
-                <option value="imagem" ${type==='imagem'?'selected':''}>Imagem</option>
-                <option value="audio" ${type==='audio'?'selected':''}>Áudio</option>
-                <option value="arquivo" ${type==='arquivo'?'selected':''}>Arquivo</option>
-                <option value="video" ${type==='video'?'selected':''}>Vídeo</option>
-            </select>
-        `;
-        container.appendChild(stepCard);
-        if (data.conteudo) stepCard.querySelector('.step-text-content').value = data.conteudo;
-        if (data.mediaUrl) stepCard.querySelector('.step-media-url').value = data.mediaUrl;
-        if (data.conteudo && type !== 'texto') stepCard.querySelector('.step-media-caption').value = data.conteudo;
-        const txt = stepCard.querySelector('.step-text-content');
-        if (txt) highlightVariables(txt);
-        updateStepNumbers(cardEl);
-    };
-
-    window.removeStep = function(btn){
-        const card = btn.closest('.automation-card');
-        btn.closest('.automation-step').remove();
-        updateStepNumbers(card);
-    };
-
-    window.moveStep = function(btn,direction){
-        const step = btn.closest('.automation-step');
-        const card = btn.closest('.automation-card');
-        const container = card.querySelector('.steps-container');
-        if(direction==='up'){
-            const prev = step.previousElementSibling;
-            if(prev) container.insertBefore(step, prev);
-        } else {
-            const next = step.nextElementSibling;
-            if(next) container.insertBefore(next, step);
-        }
-        updateStepNumbers(card);
-    };
-
-    window.updateStepType = function(selectEl){
-        const step = selectEl.closest('.automation-step');
-        const type = selectEl.value;
-        step.dataset.type = type;
-        step.querySelector('.step-type-label').textContent = capitalize(type);
-        step.querySelector('.step-text-area').style.display = type === 'texto' ? 'block':'none';
-        step.querySelector('.step-media-fields').style.display = type === 'texto' ? 'none':'block';
-    };
-
-    function updateStepNumbers(card){
-        card.querySelectorAll('.automation-step').forEach((el,idx)=>{
-            el.dataset.order = idx+1;
-            const num = el.querySelector('.step-order-number');
-            if(num) num.textContent = idx+1;
-        });
-    }
-
-    function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 
     function updateStatusUI(status, data = {}) {
         clearTimeout(qrCodeTimer);
