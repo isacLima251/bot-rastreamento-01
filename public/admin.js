@@ -81,19 +81,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.clients.forEach(c => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `<td>${c.email}</td><td>${c.is_active ? 'Sim' : 'Não'}</td><td>${c.requests}</td>`;
-                    const actionsTd = document.createElement('td');
-                    const toggleBtn = document.createElement('button');
-                    toggleBtn.textContent = c.is_active ? 'Desativar' : 'Ativar';
-                    toggleBtn.addEventListener('click', () => toggleActive(c.id, !c.is_active));
-                    const editBtn = document.createElement('button');
-                    editBtn.textContent = 'Editar';
-                    editBtn.addEventListener('click', () => openModal(c));
-                    actionsTd.appendChild(toggleBtn);
-                    actionsTd.appendChild(editBtn);
-                    tr.appendChild(actionsTd);
-                    tbody.appendChild(tr);
-                });
+                const actionsTd = document.createElement('td');
+                const toggleBtn = document.createElement('button');
+                toggleBtn.textContent = c.is_active ? 'Desativar' : 'Ativar';
+                toggleBtn.addEventListener('click', () => toggleActive(c.id, !c.is_active));
+                const editBtn = document.createElement('button');
+                editBtn.textContent = 'Editar';
+                editBtn.addEventListener('click', () => openModal(c));
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Excluir';
+                deleteBtn.addEventListener('click', () => deleteClient(c.id));
+                actionsTd.appendChild(toggleBtn);
+                actionsTd.appendChild(editBtn);
+                actionsTd.appendChild(deleteBtn);
+                tr.appendChild(actionsTd);
+                tbody.appendChild(tr);
             });
+        });
     }
 
     function toggleActive(id, active) {
@@ -108,6 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('client-password').value = '';
         if (client && client.plan_id) plansSelect.value = client.plan_id;
         document.getElementById('client-modal').classList.add('active');
+    }
+
+    function deleteClient(id) {
+        if (!confirm('Deseja realmente excluir este cliente?')) return;
+        authFetch(`/api/admin/clients/${id}`, { method: 'DELETE' })
+            .then(() => loadClients());
     }
 
     document.getElementById('btn-new-client').addEventListener('click', () => openModal(null));

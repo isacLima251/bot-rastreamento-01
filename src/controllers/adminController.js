@@ -63,6 +63,17 @@ exports.toggleActive = async (req, res) => {
     }
 };
 
+exports.deleteClient = async (req, res) => {
+    const id = parseInt(req.params.id);
+    try {
+        await userService.deleteUserCascade(req.db, id);
+        res.json({ message: 'Cliente excluído com sucesso' });
+    } catch (err) {
+        console.error('Erro ao excluir cliente:', err);
+        res.status(500).json({ error: 'Falha ao excluir cliente' });
+    }
+};
+
 // Estatísticas agregadas para o painel de admin
 exports.getStats = async (req, res) => {
     const db = req.db;
