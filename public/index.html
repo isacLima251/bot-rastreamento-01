@@ -178,17 +178,12 @@
                     <div class="automation-header"><h3>Mensagem de Boas-Vindas</h3><p>Enviada quando um novo contato é adicionado.</p></div>
                     <div class="automation-body">
                         <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
-                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
-                        <div class="media-config">
-                            <select class="select-tipo-midia">
-                                <option value="texto">Apenas texto</option>
-                                <option value="imagem">Imagem</option>
-                                <option value="audio">Áudio</option>
-                                <option value="documento">Arquivo</option>
-                                <option value="video">Vídeo</option>
-                            </select>
-                            <input type="text" class="input-url-midia" placeholder="URL da mídia">
-                            <input type="text" class="input-legenda-midia" placeholder="Legenda (opcional)">
+                        <div class="steps-container"></div>
+                        <div class="add-step-buttons">
+                            <span>Adicionar passo:</span>
+                            <button type="button" class="btn-primary" onclick="addStep(this.closest('.automation-card'),'texto')">Texto</button>
+                            <button type="button" class="btn-info" onclick="addStep(this.closest('.automation-card'),'imagem')">Mídia</button>
+                            <button type="button" class="btn-secondary" onclick="addStep(this.closest('.automation-card'),'arquivo')">Arquivo</button>
                         </div>
                     </div>
                 </div>
@@ -196,17 +191,12 @@
                     <div class="automation-header"><h3>Envio do Código de Rastreio</h3><p>Enviada quando um código de rastreio é adicionado.</p></div>
                     <div class="automation-body">
                         <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
-                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
-                        <div class="media-config">
-                            <select class="select-tipo-midia">
-                                <option value="texto">Apenas texto</option>
-                                <option value="imagem">Imagem</option>
-                                <option value="audio">Áudio</option>
-                                <option value="documento">Arquivo</option>
-                                <option value="video">Vídeo</option>
-                            </select>
-                            <input type="text" class="input-url-midia" placeholder="URL da mídia">
-                            <input type="text" class="input-legenda-midia" placeholder="Legenda (opcional)">
+                        <div class="steps-container"></div>
+                        <div class="add-step-buttons">
+                            <span>Adicionar passo:</span>
+                            <button type="button" class="btn-primary" onclick="addStep(this.closest('.automation-card'),'texto')">Texto</button>
+                            <button type="button" class="btn-info" onclick="addStep(this.closest('.automation-card'),'imagem')">Mídia</button>
+                            <button type="button" class="btn-secondary" onclick="addStep(this.closest('.automation-card'),'arquivo')">Arquivo</button>
                         </div>
                     </div>
                 </div>
@@ -214,17 +204,12 @@
                     <div class="automation-header"><h3>Pedido a Caminho</h3><p>Enviada quando o status do pedido muda para "A caminho".</p></div>
                     <div class="automation-body">
                         <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
-                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
-                        <div class="media-config">
-                            <select class="select-tipo-midia">
-                                <option value="texto">Apenas texto</option>
-                                <option value="imagem">Imagem</option>
-                                <option value="audio">Áudio</option>
-                                <option value="documento">Arquivo</option>
-                                <option value="video">Vídeo</option>
-                            </select>
-                            <input type="text" class="input-url-midia" placeholder="URL da mídia">
-                            <input type="text" class="input-legenda-midia" placeholder="Legenda (opcional)">
+                        <div class="steps-container"></div>
+                        <div class="add-step-buttons">
+                            <span>Adicionar passo:</span>
+                            <button type="button" class="btn-primary" onclick="addStep(this.closest('.automation-card'),'texto')">Texto</button>
+                            <button type="button" class="btn-info" onclick="addStep(this.closest('.automation-card'),'imagem')">Mídia</button>
+                            <button type="button" class="btn-secondary" onclick="addStep(this.closest('.automation-card'),'arquivo')">Arquivo</button>
                         </div>
                     </div>
                 </div>
@@ -232,17 +217,12 @@
                     <div class="automation-header"><h3>Alerta de Pedido em Atraso</h3><p>Enviada quando o sistema detecta um possível atraso na entrega.</p></div>
                     <div class="automation-body">
                         <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
-                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
-                        <div class="media-config">
-                            <select class="select-tipo-midia">
-                                <option value="texto">Apenas texto</option>
-                                <option value="imagem">Imagem</option>
-                                <option value="audio">Áudio</option>
-                                <option value="documento">Arquivo</option>
-                                <option value="video">Vídeo</option>
-                            </select>
-                            <input type="text" class="input-url-midia" placeholder="URL da mídia">
-                            <input type="text" class="input-legenda-midia" placeholder="Legenda (opcional)">
+                        <div class="steps-container"></div>
+                        <div class="add-step-buttons">
+                            <span>Adicionar passo:</span>
+                            <button type="button" class="btn-primary" onclick="addStep(this.closest('.automation-card'),'texto')">Texto</button>
+                            <button type="button" class="btn-info" onclick="addStep(this.closest('.automation-card'),'imagem')">Mídia</button>
+                            <button type="button" class="btn-secondary" onclick="addStep(this.closest('.automation-card'),'arquivo')">Arquivo</button>
                         </div>
                     </div>
                 </div>
@@ -250,17 +230,12 @@
                     <div class="automation-header"><h3>Alerta de Pedido em Espera</h3><p>Enviada quando o pedido fica em espera ou aguardando retirada.</p></div>
                     <div class="automation-body">
                         <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
-                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
-                        <div class="media-config">
-                            <select class="select-tipo-midia">
-                                <option value="texto">Apenas texto</option>
-                                <option value="imagem">Imagem</option>
-                                <option value="audio">Áudio</option>
-                                <option value="documento">Arquivo</option>
-                                <option value="video">Vídeo</option>
-                            </select>
-                            <input type="text" class="input-url-midia" placeholder="URL da mídia">
-                            <input type="text" class="input-legenda-midia" placeholder="Legenda (opcional)">
+                        <div class="steps-container"></div>
+                        <div class="add-step-buttons">
+                            <span>Adicionar passo:</span>
+                            <button type="button" class="btn-primary" onclick="addStep(this.closest('.automation-card'),'texto')">Texto</button>
+                            <button type="button" class="btn-info" onclick="addStep(this.closest('.automation-card'),'imagem')">Mídia</button>
+                            <button type="button" class="btn-secondary" onclick="addStep(this.closest('.automation-card'),'arquivo')">Arquivo</button>
                         </div>
                     </div>
                 </div>
@@ -268,17 +243,12 @@
                     <div class="automation-header"><h3>Alerta de Pedido Devolvido</h3><p>Enviada quando o rastreio indica que o objeto foi devolvido.</p></div>
                     <div class="automation-body">
                         <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
-                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
-                        <div class="media-config">
-                            <select class="select-tipo-midia">
-                                <option value="texto">Apenas texto</option>
-                                <option value="imagem">Imagem</option>
-                                <option value="audio">Áudio</option>
-                                <option value="documento">Arquivo</option>
-                                <option value="video">Vídeo</option>
-                            </select>
-                            <input type="text" class="input-url-midia" placeholder="URL da mídia">
-                            <input type="text" class="input-legenda-midia" placeholder="Legenda (opcional)">
+                        <div class="steps-container"></div>
+                        <div class="add-step-buttons">
+                            <span>Adicionar passo:</span>
+                            <button type="button" class="btn-primary" onclick="addStep(this.closest('.automation-card'),'texto')">Texto</button>
+                            <button type="button" class="btn-info" onclick="addStep(this.closest('.automation-card'),'imagem')">Mídia</button>
+                            <button type="button" class="btn-secondary" onclick="addStep(this.closest('.automation-card'),'arquivo')">Arquivo</button>
                         </div>
                     </div>
                 </div>
@@ -286,17 +256,12 @@
                     <div class="automation-header"><h3>Notificação de Pedido Cancelado</h3><p>Enviada quando um pedido é cancelado.</p></div>
                     <div class="automation-body">
                         <div class="toggle-container"><label class="switch"><input type="checkbox" class="automation-toggle"><span class="slider round"></span></label><span class="toggle-label">Desativado/Ativado</span></div>
-                        <div class="editor-wrapper"><textarea class="automation-message" placeholder="Escreva a sua mensagem aqui..."></textarea></div>
-                        <div class="media-config">
-                            <select class="select-tipo-midia">
-                                <option value="texto">Apenas texto</option>
-                                <option value="imagem">Imagem</option>
-                                <option value="audio">Áudio</option>
-                                <option value="documento">Arquivo</option>
-                                <option value="video">Vídeo</option>
-                            </select>
-                            <input type="text" class="input-url-midia" placeholder="URL da mídia">
-                            <input type="text" class="input-legenda-midia" placeholder="Legenda (opcional)">
+                        <div class="steps-container"></div>
+                        <div class="add-step-buttons">
+                            <span>Adicionar passo:</span>
+                            <button type="button" class="btn-primary" onclick="addStep(this.closest('.automation-card'),'texto')">Texto</button>
+                            <button type="button" class="btn-info" onclick="addStep(this.closest('.automation-card'),'imagem')">Mídia</button>
+                            <button type="button" class="btn-secondary" onclick="addStep(this.closest('.automation-card'),'arquivo')">Arquivo</button>
                         </div>
                     </div>
                 </div>
