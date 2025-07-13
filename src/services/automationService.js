@@ -1,13 +1,14 @@
 // src/services/automationService.js
 const DEFAULT_MESSAGES = require('../constants/defaultMessages');
+const whatsappService = require('./whatsappService');
 
-// Busca todas as automações e formata num objeto para fácil acesso
+// Busca todas as automações e seus passos em formato acessível
 exports.getAutomations = (db, clienteId = null) => {
     return new Promise((resolve, reject) => {
-        let sql = "SELECT * FROM automacoes";
+        let sql = 'SELECT * FROM automacoes';
         const params = [];
         if (clienteId !== null) {
-            sql += " WHERE cliente_id = ?";
+            sql += ' WHERE cliente_id = ?';
             params.push(clienteId);
         }
         db.all(sql, params, (err, rows) => {
@@ -17,22 +18,40 @@ exports.getAutomations = (db, clienteId = null) => {
                 acc[row.gatilho] = {
                     ativo: Boolean(row.ativo),
                     mensagem: row.mensagem,
-                    tipo_midia: row.tipo_midia || 'texto',
-                    url_midia: row.url_midia,
-                    legenda_midia: row.legenda_midia
+                    steps: []
                 };
                 return acc;
             }, {});
-            for (const gatilho in DEFAULT_MESSAGES) {
-                if (!automationsMap[gatilho]) {
-                    automationsMap[gatilho] = {
-                        ativo: true,
-                        mensagem: DEFAULT_MESSAGES[gatilho]
-                    };
-                }
-            }
 
-            resolve(automationsMap);
+            const stepSql = clienteId !== null
+                ? 'SELECT * FROM automacao_passos WHERE cliente_id = ? ORDER BY gatilho, ordem'
+                : 'SELECT * FROM automacao_passos ORDER BY gatilho, ordem';
+            const stepParams = clienteId !== null ? [clienteId] : [];
+            db.all(stepSql, stepParams, (err2, stepRows) => {
+                if (err2) return reject(err2);
+                stepRows.forEach(p => {
+                    if (automationsMap[p.gatilho]) {
+                        automationsMap[p.gatilho].steps.push({
+                            ordem: p.ordem,
+                            tipo: p.tipo,
+                            conteudo: p.conteudo,
+                            mediaUrl: p.mediaUrl
+                        });
+                    }
+                });
+
+                for (const gatilho in DEFAULT_MESSAGES) {
+                    if (!automationsMap[gatilho]) {
+                        automationsMap[gatilho] = {
+                            ativo: true,
+                            mensagem: DEFAULT_MESSAGES[gatilho],
+                            steps: []
+                        };
+                    }
+                }
+
+                resolve(automationsMap);
+            });
         });
     });
 };
@@ -40,29 +59,41 @@ exports.getAutomations = (db, clienteId = null) => {
 // Salva todas as configurações de automação recebidas do frontend
 exports.saveAutomations = (db, configs, clienteId = null) => {
     return new Promise((resolve, reject) => {
-        const stmt = db.prepare("INSERT OR REPLACE INTO automacoes (gatilho, cliente_id, ativo, mensagem, tipo_midia, url_midia, legenda_midia) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        
+        const stmt = db.prepare('INSERT OR REPLACE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, ?, ?)');
+        const stepStmt = db.prepare('INSERT INTO automacao_passos (gatilho, cliente_id, ordem, tipo, conteudo, mediaUrl, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)');
+
         db.serialize(() => {
-            db.run("BEGIN TRANSACTION");
+            db.run('BEGIN TRANSACTION');
             for (const gatilho in configs) {
                 const config = configs[gatilho];
                 stmt.run(
                     gatilho,
                     clienteId,
                     config.ativo ? 1 : 0,
-                    config.mensagem,
-                    config.tipo_midia || 'texto',
-                    config.url_midia || null,
-                    config.legenda_midia || null
+                    config.mensagem || null
                 );
+                db.run('DELETE FROM automacao_passos WHERE gatilho = ? AND cliente_id = ?', [gatilho, clienteId]);
+                if (Array.isArray(config.steps)) {
+                    config.steps.forEach(step => {
+                        stepStmt.run(
+                            gatilho,
+                            clienteId,
+                            step.ordem,
+                            step.tipo,
+                            step.conteudo || null,
+                            step.mediaUrl || null
+                        );
+                    });
+                }
             }
-            db.run("COMMIT", (err) => {
-                if(err) return reject(err);
-                resolve({ message: "Configurações salvas com sucesso." });
+            db.run('COMMIT', (err) => {
+                if (err) return reject(err);
+                resolve({ message: 'Configurações salvas com sucesso.' });
             });
         });
 
         stmt.finalize();
+        stepStmt.finalize();
     });
 };
 
@@ -71,27 +102,38 @@ const { getModels } = require('../database/database');
 // Cria registros padrão de automações para um novo usuário
 exports.createDefaultAutomations = (db, clienteId, options = {}) => {
     if (options.transaction) {
-        const { Automacao } = getModels();
+        const { Automacao, AutomacaoPasso } = getModels();
         const records = Object.entries(DEFAULT_MESSAGES).map(([gatilho, mensagem]) => ({
             gatilho,
             cliente_id: clienteId,
             ativo: 1,
-            mensagem,
-            tipo_midia: 'texto'
+            mensagem
         }));
-        return Automacao.bulkCreate(records, { transaction: options.transaction, ignoreDuplicates: true });
+        await Automacao.bulkCreate(records, { transaction: options.transaction, ignoreDuplicates: true });
+        const steps = Object.entries(DEFAULT_MESSAGES).map(([gatilho, mensagem]) => ({
+            gatilho,
+            cliente_id: clienteId,
+            ordem: 1,
+            tipo: 'texto',
+            conteudo: mensagem
+        }));
+        return AutomacaoPasso.bulkCreate(steps, { transaction: options.transaction });
     }
 
     return new Promise((resolve, reject) => {
         const stmt = db.prepare(
-            'INSERT OR IGNORE INTO automacoes (gatilho, cliente_id, ativo, mensagem, tipo_midia) VALUES (?, ?, 1, ?, ?)' 
+            'INSERT OR IGNORE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, 1, ?)'
+        );
+        const stepStmt = db.prepare(
+            'INSERT INTO automacao_passos (gatilho, cliente_id, ordem, tipo, conteudo, mediaUrl, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
         );
 
         db.serialize(() => {
             db.run('BEGIN TRANSACTION');
             for (const gatilho in DEFAULT_MESSAGES) {
                 const mensagem = DEFAULT_MESSAGES[gatilho];
-                stmt.run(gatilho, clienteId, mensagem, 'texto');
+                stmt.run(gatilho, clienteId, mensagem);
+                stepStmt.run(gatilho, clienteId, 1, 'texto', mensagem, null);
             }
             db.run('COMMIT', err => {
                 if (err) return reject(err);
@@ -100,5 +142,35 @@ exports.createDefaultAutomations = (db, clienteId, options = {}) => {
         });
 
         stmt.finalize();
+        stepStmt.finalize();
+    });
+};
+
+// Executa os passos de uma automação na ordem definida
+exports.executeAutomation = (db, gatilho, clienteId, client, telefone) => {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT * FROM automacao_passos WHERE gatilho = ? AND cliente_id = ? ORDER BY ordem';
+        db.all(sql, [gatilho, clienteId], async (err, rows) => {
+            if (err) return reject(err);
+            try {
+                for (const passo of rows) {
+                    if (passo.tipo === 'texto') {
+                        await whatsappService.enviarMensagem(client, telefone, passo.conteudo);
+                    } else if (passo.tipo === 'imagem') {
+                        await whatsappService.sendImage(client, telefone, passo.mediaUrl, passo.conteudo || '');
+                    } else if (passo.tipo === 'audio') {
+                        await whatsappService.sendAudio(client, telefone, passo.mediaUrl);
+                    } else if (passo.tipo === 'arquivo') {
+                        await whatsappService.sendFile(client, telefone, passo.mediaUrl, passo.mediaUrl.split('/').pop(), passo.conteudo || '');
+                    } else if (passo.tipo === 'video') {
+                        await whatsappService.sendVideo(client, telefone, passo.mediaUrl, passo.conteudo || '');
+                    }
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+                resolve();
+            } catch (e) {
+                reject(e);
+            }
+        });
     });
 };

@@ -135,6 +135,16 @@ function defineModels(sequelize) {
     legenda_midia: DataTypes.STRING
   }, { tableName: 'automacoes', timestamps: false });
 
+  const AutomacaoPasso = sequelize.define('AutomacaoPasso', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    gatilho: { type: DataTypes.STRING, allowNull: false },
+    cliente_id: { type: DataTypes.INTEGER, allowNull: false },
+    ordem: { type: DataTypes.INTEGER, allowNull: false },
+    tipo: { type: DataTypes.STRING, allowNull: false },
+    conteudo: DataTypes.TEXT,
+    mediaUrl: DataTypes.STRING
+  }, { tableName: 'automacao_passos', timestamps: true });
+
   const Integration = sequelize.define('Integration', {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     user_id: { type: DataTypes.INTEGER, allowNull: false },
@@ -166,7 +176,10 @@ function defineModels(sequelize) {
   Pedido.hasMany(Historico, { foreignKey: 'pedido_id' });
   Historico.belongsTo(Pedido, { foreignKey: 'pedido_id' });
 
-  return { User, Plan, Subscription, Pedido, Historico, Log, Automacao, Integration, IntegrationSetting, UserSetting };
+  Automacao.hasMany(AutomacaoPasso, { foreignKey: 'gatilho', sourceKey: 'gatilho' });
+  AutomacaoPasso.belongsTo(Automacao, { foreignKey: 'gatilho', targetKey: 'gatilho' });
+
+  return { User, Plan, Subscription, Pedido, Historico, Log, Automacao, AutomacaoPasso, Integration, IntegrationSetting, UserSetting };
 }
 
 let sequelize;

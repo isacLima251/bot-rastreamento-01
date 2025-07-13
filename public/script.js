@@ -662,6 +662,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                     const selectTipo = card.querySelector('.select-tipo-midia');
                     const inputUrl = card.querySelector('.input-url-midia');
                     const inputLegenda = card.querySelector('.input-legenda-midia');
+                    const step = config.steps && config.steps[0];
                     if (toggle) toggle.checked = config.ativo;
                     if (textarea) {
                         textarea.value = config.mensagem;
@@ -669,15 +670,15 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                         highlightVariables(textarea);
                     }
                     if (selectTipo) {
-                        selectTipo.value = config.tipo_midia || 'texto';
+                        selectTipo.value = step ? step.tipo : 'texto';
                         selectTipo.disabled = !config.ativo;
                     }
                     if (inputUrl) {
-                        inputUrl.value = config.url_midia || '';
+                        inputUrl.value = step && step.mediaUrl ? step.mediaUrl : '';
                         inputUrl.disabled = !config.ativo;
                     }
                     if (inputLegenda) {
-                        inputLegenda.value = config.legenda_midia || '';
+                        inputLegenda.value = step ? step.conteudo : '';
                         inputLegenda.disabled = !config.ativo;
                     }
                     if (toggleLabel) toggleLabel.textContent = config.ativo ? 'Ativado' : 'Desativado';
@@ -701,12 +702,17 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             const selectTipo = card.querySelector('.select-tipo-midia');
             const inputUrl = card.querySelector('.input-url-midia');
             const inputLegenda = card.querySelector('.input-legenda-midia');
+            const tipo = selectTipo ? selectTipo.value : 'texto';
+            const step = {
+                ordem: 1,
+                tipo,
+                conteudo: tipo === 'texto' ? messageTextarea.value : (inputLegenda ? inputLegenda.value : ''),
+                mediaUrl: tipo === 'texto' ? null : (inputUrl ? inputUrl.value.trim() : '')
+            };
             novasConfiguracoes[automationId] = {
                 ativo: toggle.checked,
                 mensagem: messageTextarea.value,
-                tipo_midia: selectTipo ? selectTipo.value : 'texto',
-                url_midia: inputUrl ? inputUrl.value.trim() : '',
-                legenda_midia: inputLegenda ? inputLegenda.value : ''
+                steps: [step]
             };
         });
         try {

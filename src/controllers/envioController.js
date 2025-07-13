@@ -6,6 +6,32 @@ const logService = require('../services/logService');
 const DEFAULT_MESSAGES = require('../constants/defaultMessages');
 const path = require('path');
 
+async function enviarPassos(db, client, telefone, steps, pedido) {
+    for (const passo of steps.sort((a,b) => a.ordem - b.ordem)) {
+        const texto = personalizarMensagem(passo.conteudo, pedido);
+        switch (passo.tipo) {
+            case 'imagem':
+                await whatsappService.sendImage(client, telefone, passo.mediaUrl, texto || '');
+                break;
+            case 'audio':
+                await whatsappService.sendAudio(client, telefone, passo.mediaUrl);
+                break;
+            case 'arquivo':
+                await whatsappService.sendFile(client, telefone, passo.mediaUrl, path.basename(passo.mediaUrl), texto || '');
+                break;
+            case 'video':
+                await whatsappService.sendVideo(client, telefone, passo.mediaUrl, texto || '');
+                break;
+            case 'texto':
+            default:
+                if (texto) await whatsappService.enviarMensagem(client, telefone, texto);
+                break;
+        }
+        await pedidoService.addMensagemHistorico(db, pedido.id, texto, 'automacao', 'bot', pedido.cliente_id, passo.mediaUrl || null, passo.tipo);
+        await new Promise(r => setTimeout(r, 1000));
+    }
+}
+
 // ... (o resto do seu ficheiro envioController.js continua exatamente igual)
 // A lógica que já temos é inteligente o suficiente para usar os novos status
 // quando eles forem definidos no banco de dados.
@@ -90,49 +116,15 @@ async function enviarMensagensComRegras(db, broadcast, sessions) {
                 if (!client) continue;
 
                 const config = automacoes[novoStatusDaMensagem] || {};
-                const tipoMidia = config.tipo_midia || 'texto';
-                const urlMidia = config.url_midia;
-                const legendaMidia = personalizarMensagem(config.legenda_midia, pedido);
-
-                switch (tipoMidia) {
-                    case 'imagem':
-                        if (urlMidia) {
-                            await whatsappService.sendImage(client, telefone, urlMidia, legendaMidia || mensagemParaEnviar);
-                        } else {
-                            await whatsappService.enviarMensagem(client, telefone, mensagemParaEnviar);
-                        }
-                        break;
-                    case 'audio':
-                        if (urlMidia) {
-                            await whatsappService.sendAudio(client, telefone, urlMidia);
-                        } else {
-                            await whatsappService.enviarMensagem(client, telefone, mensagemParaEnviar);
-                        }
-                        break;
-                    case 'documento':
-                        if (urlMidia) {
-                            await whatsappService.sendFile(client, telefone, urlMidia, path.basename(urlMidia), legendaMidia || '');
-                        } else {
-                            await whatsappService.enviarMensagem(client, telefone, mensagemParaEnviar);
-                        }
-                        break;
-                    case 'video':
-                        if (urlMidia) {
-                            await whatsappService.sendVideo(client, telefone, urlMidia, legendaMidia || '');
-                        } else {
-                            await whatsappService.enviarMensagem(client, telefone, mensagemParaEnviar);
-                        }
-                        break;
-                    case 'texto':
-                    default:
-                        await whatsappService.enviarMensagem(client, telefone, mensagemParaEnviar);
-                        break;
+                if (Array.isArray(config.steps) && config.steps.length > 0) {
+                    await enviarPassos(db, client, telefone, config.steps, pedido);
+                } else {
+                    await whatsappService.enviarMensagem(client, telefone, mensagemParaEnviar);
+                    await pedidoService.addMensagemHistorico(db, id, mensagemParaEnviar, novoStatusDaMensagem, 'bot', pedido.cliente_id, null, 'texto');
                 }
-
-                await pedidoService.addMensagemHistorico(db, id, mensagemParaEnviar, novoStatusDaMensagem, 'bot', pedido.cliente_id, urlMidia || null, tipoMidia);
                 await pedidoService.updateCamposPedido(db, id, { mensagemUltimoStatus: novoStatusDaMensagem }, userId);
 
-                await logService.addLog(db, pedido.cliente_id || 1, 'mensagem_automatica', JSON.stringify({ pedidoId: id, tipo: novoStatusDaMensagem, tipoMidia }));
+                await logService.addLog(db, pedido.cliente_id || 1, 'mensagem_automatica', JSON.stringify({ pedidoId: id, tipo: novoStatusDaMensagem }));
                 if (broadcast) broadcast(userId, { type: 'nova_mensagem', pedidoId: id });
             }
         }
@@ -149,49 +141,16 @@ async function enviarMensagemBoasVindas(db, pedido, broadcast, client) {
     if (config && config.ativo) {
         const mensagemBase = config.mensagem || DEFAULT_MESSAGES.boas_vindas;
         const msg = personalizarMensagem(mensagemBase, pedido);
-        const tipoMidia = config.tipo_midia || 'texto';
-        const urlMidia = config.url_midia;
-        const legendaMidia = personalizarMensagem(config.legenda_midia, pedido);
-
         if (client) {
-            switch (tipoMidia) {
-                case 'imagem':
-                    if (urlMidia) {
-                        await whatsappService.sendImage(client, pedido.telefone, urlMidia, legendaMidia || msg);
-                    } else {
-                        await whatsappService.enviarMensagem(client, pedido.telefone, msg);
-                    }
-                    break;
-                case 'audio':
-                    if (urlMidia) {
-                        await whatsappService.sendAudio(client, pedido.telefone, urlMidia);
-                    } else {
-                        await whatsappService.enviarMensagem(client, pedido.telefone, msg);
-                    }
-                    break;
-                case 'documento':
-                    if (urlMidia) {
-                        await whatsappService.sendFile(client, pedido.telefone, urlMidia, path.basename(urlMidia), legendaMidia || '');
-                    } else {
-                        await whatsappService.enviarMensagem(client, pedido.telefone, msg);
-                    }
-                    break;
-                case 'video':
-                    if (urlMidia) {
-                        await whatsappService.sendVideo(client, pedido.telefone, urlMidia, legendaMidia || '');
-                    } else {
-                        await whatsappService.enviarMensagem(client, pedido.telefone, msg);
-                    }
-                    break;
-                case 'texto':
-                default:
-                    await whatsappService.enviarMensagem(client, pedido.telefone, msg);
-                    break;
+            if (Array.isArray(config.steps) && config.steps.length > 0) {
+                await enviarPassos(db, client, pedido.telefone, config.steps, pedido);
+            } else {
+                await whatsappService.enviarMensagem(client, pedido.telefone, msg);
+                await pedidoService.addMensagemHistorico(db, pedido.id, msg, 'boas_vindas', 'bot', pedido.cliente_id, null, 'texto');
             }
         }
-        await pedidoService.addMensagemHistorico(db, pedido.id, msg, 'boas_vindas', 'bot', pedido.cliente_id, urlMidia || null, tipoMidia);
         await pedidoService.updateCamposPedido(db, pedido.id, { mensagemUltimoStatus: 'boas_vindas' }, pedido.cliente_id);
-        await logService.addLog(db, pedido.cliente_id || 1, 'mensagem_automatica', JSON.stringify({ pedidoId: pedido.id, tipo: 'boas_vindas', tipoMidia }));
+        await logService.addLog(db, pedido.cliente_id || 1, 'mensagem_automatica', JSON.stringify({ pedidoId: pedido.id, tipo: 'boas_vindas' }));
         if (broadcast) broadcast(pedido.cliente_id, { type: 'nova_mensagem', pedidoId: pedido.id });
     }
 }
