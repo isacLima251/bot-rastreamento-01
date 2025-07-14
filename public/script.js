@@ -43,9 +43,9 @@ function addStep(cardElOrType, maybeType, data = {}) {
         <div class="step-header">
             <h5>Passo <span class="step-order-number"></span>: <span class="step-type-label">${capitalize(type)}</span></h5>
             <div class="step-controls">
-                <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this,'up')">▲</button>
-                <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this,'down')">▼</button>
-                <button type="button" class="btn btn-danger btn-sm" onclick="removeStep(this)">×</button>
+                <button type="button" class="btn btn-light btn-sm btn-move-up">▲</button>
+                <button type="button" class="btn btn-light btn-sm btn-move-down">▼</button>
+                <button type="button" class="btn btn-danger btn-sm btn-remove">×</button>
             </div>
         </div>
         <div class="form-group step-text-area" style="display:${type === 'texto' ? 'block' : 'none'};">
@@ -55,7 +55,7 @@ function addStep(cardElOrType, maybeType, data = {}) {
             <input type="text" class="step-media-url form-control" placeholder="URL da mídia">
             <input type="text" class="step-media-caption form-control" placeholder="Legenda (opcional)">
         </div>
-        <select class="step-type" style="margin-top:10px;" onchange="updateStepType(this)">
+        <select class="step-type" style="margin-top:10px;">
             <option value="texto" ${type==='texto'?'selected':''}>Texto</option>
             <option value="imagem" ${type==='imagem'?'selected':''}>Imagem</option>
             <option value="audio" ${type==='audio'?'selected':''}>Áudio</option>
@@ -64,6 +64,16 @@ function addStep(cardElOrType, maybeType, data = {}) {
         </select>
     `;
     container.appendChild(stepCard);
+
+    const btnUp = stepCard.querySelector('.btn-move-up');
+    if (btnUp) btnUp.addEventListener('click', () => moveStep(btnUp, 'up'));
+    const btnDown = stepCard.querySelector('.btn-move-down');
+    if (btnDown) btnDown.addEventListener('click', () => moveStep(btnDown, 'down'));
+    const btnRemove = stepCard.querySelector('.btn-remove');
+    if (btnRemove) btnRemove.addEventListener('click', () => removeStep(btnRemove));
+    const selectType = stepCard.querySelector('.step-type');
+    if (selectType) selectType.addEventListener('change', () => updateStepType(selectType));
+
     if (data.conteudo) stepCard.querySelector('.step-text-content').value = data.conteudo;
     if (data.mediaUrl) stepCard.querySelector('.step-media-url').value = data.mediaUrl;
     if (data.conteudo && type !== 'texto') stepCard.querySelector('.step-media-caption').value = data.conteudo;
@@ -250,6 +260,15 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             });
         });
     }
+
+    document.querySelectorAll('.automation-card').forEach(card => {
+        card.querySelectorAll('.btn-add-step').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.dataset.stepType;
+                addStep(card, type);
+            });
+        });
+    });
      const variablesToCopy = document.querySelectorAll('.variable-highlight');
     if (variablesToCopy.length > 0) {
         variablesToCopy.forEach(variable => {
@@ -1908,8 +1927,3 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
     showView('chat-view');
 });
 
-// Expor funções do construtor globalmente para inline handlers
-window.addStep = addStep;
-window.removeStep = removeStep;
-window.moveStep = moveStep;
-window.updateStepType = updateStepType;
