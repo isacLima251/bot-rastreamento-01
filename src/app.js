@@ -13,6 +13,7 @@ const paymentController = require('./controllers/paymentController');
 const webhookRastreioController = require('./controllers/webhookRastreioController');
 const authController = require('./controllers/authController');
 const adminController = require('./controllers/adminController');
+const uploadController = require('./controllers/uploadController');
 const settingsController = require('./controllers/settingsController');
 const subscriptionService = require('./services/subscriptionService');
 const userService = require('./services/userService');
@@ -142,6 +143,8 @@ function createExpressApp(db, sessionManager) {
   app.post('/api/pedidos/:id/enviar-midia', planCheck, pedidosController.upload.single('file'), pedidosController.enviarMidia);
   app.post('/api/pedidos/:id/atualizar-foto', planCheck, pedidosController.atualizarFotoDoPedido);
   app.put('/api/pedidos/:id/marcar-como-lido', planCheck, pedidosController.marcarComoLido);
+
+  app.post('/api/upload', planCheck, uploadController.upload.single('file'), uploadController.uploadFile);
 
   app.post('/api/webhook-site-rastreio', webhookRastreioController.receberWebhook);
   app.get('/api/automations', planCheck, automationsController.listarAutomacoes);

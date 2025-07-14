@@ -52,7 +52,8 @@ function addStep(cardElOrType, maybeType, data = {}) {
             <textarea class="form-control step-text-content" rows="3" placeholder="Mensagem de texto"></textarea>
         </div>
         <div class="form-group step-media-fields" style="display:${type === 'texto' ? 'none' : 'block'};">
-            <input type="text" class="step-media-url form-control" placeholder="URL da mídia">
+            <input type="file" class="form-control-file step-file-input">
+            <div class="file-name-display"></div>
             <input type="text" class="step-media-caption form-control" placeholder="Legenda (opcional)">
         </div>
         <select class="step-type" style="margin-top:10px;">
@@ -75,8 +76,14 @@ function addStep(cardElOrType, maybeType, data = {}) {
     if (selectType) selectType.addEventListener('change', () => updateStepType(selectType));
 
     if (data.conteudo) stepCard.querySelector('.step-text-content').value = data.conteudo;
-    if (data.mediaUrl) stepCard.querySelector('.step-media-url').value = data.mediaUrl;
+    if (data.mediaUrl) {
+        stepCard.dataset.currentUrl = data.mediaUrl;
+        const display = stepCard.querySelector('.file-name-display');
+        if (display) display.textContent = `Arquivo: ${data.mediaUrl.split('/').pop()}`;
+    }
     if (data.conteudo && type !== 'texto') stepCard.querySelector('.step-media-caption').value = data.conteudo;
+    const fileInput = stepCard.querySelector('.step-file-input');
+    if (fileInput) fileInput.addEventListener('change', () => displayFileName(fileInput));
     const txt = stepCard.querySelector('.step-text-content');
     if (txt) highlightVariables(txt);
     updateStepNumbers(cardEl);
@@ -117,6 +124,15 @@ function updateStepNumbers(card) {
         const num = el.querySelector('.step-order-number');
         if (num) num.textContent = idx + 1;
     });
+}
+
+function displayFileName(inputElement) {
+    const fileNameDisplay = inputElement.nextElementSibling;
+    if (inputElement.files.length > 0) {
+        fileNameDisplay.textContent = `Arquivo selecionado: ${inputElement.files[0].name}`;
+    } else {
+        fileNameDisplay.textContent = '';
+    }
 }
 
 function capitalize(s) {
@@ -789,14 +805,27 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         btnSalvarAutomacoesEl.disabled = true;
         btnSalvarAutomacoesEl.textContent = 'A guardar...';
         const novasConfiguracoes = {};
-        document.querySelectorAll('.automation-card').forEach(card => {
+        for (const card of document.querySelectorAll('.automation-card')) {
             const automationId = card.dataset.automationId;
             const toggle = card.querySelector('.automation-toggle');
             const steps = [];
-            card.querySelectorAll('.automation-step').forEach((stepEl, idx) => {
+            const stepEls = card.querySelectorAll('.automation-step');
+            for (let idx = 0; idx < stepEls.length; idx++) {
+                const stepEl = stepEls[idx];
                 const tipo = stepEl.querySelector('.step-type').value;
                 const msg = stepEl.querySelector('.step-text-content') ? stepEl.querySelector('.step-text-content').value : '';
-                const url = stepEl.querySelector('.step-media-url') ? stepEl.querySelector('.step-media-url').value.trim() : '';
+                let url = stepEl.dataset.currentUrl || '';
+                const fileInput = stepEl.querySelector('.step-file-input');
+                if (fileInput && fileInput.files.length > 0) {
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    formData.append('tipo', tipo);
+                    const uploadResp = await authFetch('/api/upload', { method: 'POST', body: formData });
+                    const uploadData = await uploadResp.json();
+                    if (!uploadResp.ok) throw new Error(uploadData.error || 'Falha ao enviar arquivo.');
+                    url = uploadData.url;
+                    stepEl.dataset.currentUrl = url;
+                }
                 const legenda = stepEl.querySelector('.step-media-caption') ? stepEl.querySelector('.step-media-caption').value : '';
                 steps.push({
                     ordem: idx + 1,
@@ -804,13 +833,13 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                     conteudo: tipo === 'texto' ? msg : legenda,
                     mediaUrl: tipo === 'texto' ? null : url
                 });
-            });
+            }
             novasConfiguracoes[automationId] = {
                 ativo: toggle.checked,
                 mensagem: steps[0] && steps[0].tipo === 'texto' ? steps[0].conteudo : '',
                 steps
             };
-        });
+        }
         try {
             const response = await authFetch('/api/automations', {
                 method: 'POST',
