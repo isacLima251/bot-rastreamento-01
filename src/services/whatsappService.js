@@ -2,6 +2,14 @@
 const path = require('path');
 const logger = require('../logger');
 
+function resolveMediaPath(url) {
+    if (!url) return url;
+    if (url.startsWith('/uploads/') || url.startsWith('uploads/')) {
+        return path.join(__dirname, '..', '..', 'public', url.replace(/^\//, ''));
+    }
+    return url;
+}
+
 /**
  * Normaliza um número de telefone para o formato internacional brasileiro (55 + DDD + Número).
  */
@@ -97,28 +105,32 @@ async function sendImage(client, telefone, imageUrl, caption = '') {
     if (!client) throw new Error('Cliente WhatsApp não iniciado.');
     const numeroNormalizado = normalizeTelefone(telefone);
     const numeroFormatado = `${numeroNormalizado}@c.us`;
-    await client.sendImage(numeroFormatado, imageUrl, path.basename(imageUrl), caption);
+    const filePath = resolveMediaPath(imageUrl);
+    await client.sendImage(numeroFormatado, filePath, path.basename(filePath), caption);
 }
 
 async function sendAudio(client, telefone, audioUrl) {
     if (!client) throw new Error('Cliente WhatsApp não iniciado.');
     const numeroNormalizado = normalizeTelefone(telefone);
     const numeroFormatado = `${numeroNormalizado}@c.us`;
-    await client.sendVoice(numeroFormatado, audioUrl);
+    const filePath = resolveMediaPath(audioUrl);
+    await client.sendVoice(numeroFormatado, filePath);
 }
 
 async function sendFile(client, telefone, fileUrl, fileName, caption = '') {
     if (!client) throw new Error('Cliente WhatsApp não iniciado.');
     const numeroNormalizado = normalizeTelefone(telefone);
     const numeroFormatado = `${numeroNormalizado}@c.us`;
-    await client.sendFile(numeroFormatado, fileUrl, fileName, caption);
+    const filePath = resolveMediaPath(fileUrl);
+    await client.sendFile(numeroFormatado, filePath, fileName, caption);
 }
 
 async function sendVideo(client, telefone, videoUrl, caption = '') {
     if (!client) throw new Error('Cliente WhatsApp não iniciado.');
     const numeroNormalizado = normalizeTelefone(telefone);
     const numeroFormatado = `${numeroNormalizado}@c.us`;
-    await client.sendVideo(numeroFormatado, videoUrl, caption);
+    const filePath = resolveMediaPath(videoUrl);
+    await client.sendVideo(numeroFormatado, filePath, caption);
 }
 
 /**
