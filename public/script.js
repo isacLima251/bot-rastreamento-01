@@ -29,8 +29,11 @@ function highlightVariables(textarea) {
 
 let stepCounter = 0;
 
-function addStep(cardEl, type, data = {}) {
+function addStep(cardElOrType, maybeType, data = {}) {
     stepCounter++;
+    let cardEl = cardElOrType instanceof Element ? cardElOrType : document.getElementById('steps-container');
+    const type = cardElOrType instanceof Element ? maybeType : cardElOrType;
+    if (!cardEl) return;
     const container = cardEl.querySelector('.steps-container');
     if (!container) return;
     const stepCard = document.createElement('div');
