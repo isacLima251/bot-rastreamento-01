@@ -145,6 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchStats();
     loadClients();
 
+    document.querySelectorAll('.btn-add-step').forEach(btn => {
+        btn.addEventListener('click', () => addStep(btn.dataset.stepType));
+    });
+
     // Função utilitária para adicionar mensagens no chat
     window.appendMessage = function({ remetente, mensagem, mediaUrl, mediaType }) {
         const chatMessages = document.getElementById('chat-messages');
@@ -206,9 +210,9 @@ function addStep(type) {
         <div class="step-header">
             <h5>Passo <span class="step-order-number"></span>: ${capitalize(type)}</h5>
             <div class="step-controls">
-                <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this, 'up')">▲</button>
-                <button type="button" class="btn btn-light btn-sm" onclick="moveStep(this, 'down')">▼</button>
-                <button type="button" class="btn btn-danger btn-sm" onclick="removeStep(this)">×</button>
+                <button type="button" class="btn btn-light btn-sm btn-move-up">▲</button>
+                <button type="button" class="btn btn-light btn-sm btn-move-down">▼</button>
+                <button type="button" class="btn btn-danger btn-sm btn-remove">×</button>
             </div>
         </div>
         <div class="form-group">
@@ -217,11 +221,21 @@ function addStep(type) {
         </div>
         <div class="form-group step-file-content" style="display: ${type === 'texto' ? 'none' : 'block'};">
             <label>Selecione o arquivo</label>
-            <input type="file" class="form-control-file step-file-input" onchange="displayFileName(this)">
+            <input type="file" class="form-control-file step-file-input">
             <div class="file-name-display"></div>
         </div>
     `;
     container.appendChild(stepCard);
+
+    const btnUp = stepCard.querySelector('.btn-move-up');
+    if (btnUp) btnUp.addEventListener('click', () => moveStep(btnUp, 'up'));
+    const btnDown = stepCard.querySelector('.btn-move-down');
+    if (btnDown) btnDown.addEventListener('click', () => moveStep(btnDown, 'down'));
+    const btnRemove = stepCard.querySelector('.btn-remove');
+    if (btnRemove) btnRemove.addEventListener('click', () => removeStep(btnRemove));
+    const fileInput = stepCard.querySelector('.step-file-input');
+    if (fileInput) fileInput.addEventListener('change', () => displayFileName(fileInput));
+
     updateStepNumbers();
 }
 
