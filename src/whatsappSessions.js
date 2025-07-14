@@ -74,7 +74,13 @@ function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
 
     venom
       .create(
-        { session: `whatsship-bot-${userId}`, useChrome: false, headless: 'new', browserArgs: ['--no-sandbox', '--disable-setuid-sandbox'] },
+        {
+          session: `whatsship-bot-${userId}`,
+          useChrome: false,
+          headless: 'new',
+          browserArgs: ['--no-sandbox', '--disable-setuid-sandbox'],
+          puppeteerOptions: { protocolTimeout: 60000 },
+        },
         (base64Qr) => broadcastStatus(userId, 'QR_CODE', { qrCode: base64Qr })
       )
       .then(async (client) => {
