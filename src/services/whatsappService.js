@@ -33,7 +33,7 @@ function normalizeTelefone(telefoneRaw) {
  */
 async function scrapeProfilePicViaPuppeteer(client, telefone) {
   const tel = normalizeTelefone(telefone);
-  const page = await client.pupBrowser.newPage();
+  const page = await client.browser.newPage();
   try {
     // Abre o chat do contato (já autenticado)
     await page.goto(`https://web.whatsapp.com/send?phone=${tel}`, { waitUntil: 'networkidle2' });
