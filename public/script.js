@@ -1904,3 +1904,9 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
     }
     showView('chat-view');
 });
+
+// Expor funções do construtor globalmente para inline handlers
+window.addStep = addStep;
+window.removeStep = removeStep;
+window.moveStep = moveStep;
+window.updateStepType = updateStepType;
