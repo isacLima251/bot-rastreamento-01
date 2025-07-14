@@ -1763,7 +1763,8 @@ input:checked ~ .toggle-label { color: var(--success-color); font-weight: 600; }
     margin-top: 20px;
 }
 
-#add-step-buttons {
+#add-step-buttons,
+.add-step-buttons {
     margin-top: 20px;
     padding-top: 20px;
     border-top: 1px dashed #ced4da;
@@ -1772,9 +1773,20 @@ input:checked ~ .toggle-label { color: var(--success-color); font-weight: 600; }
     gap: 10px;
 }
 
-#add-step-buttons span {
+#add-step-buttons span,
+.add-step-buttons span {
     font-weight: 500;
     color: #495057;
+}
+
+.add-step-buttons button {
+    margin-left: 5px;
+}
+
+.steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 .automation-step {
