@@ -25,17 +25,17 @@ function normalizeTelefone(telefoneRaw) {
  */
 async function scrapeProfilePicViaPuppeteer(client, telefone) {
   const tel = normalizeTelefone(telefone);
-  const page = client.page;
-  
-  // Abre o chat do contato (já autenticado)
-  await page.goto(`https://web.whatsapp.com/send?phone=${tel}`, { waitUntil: 'networkidle2' });
-  // Aguarda o header aparecer
-  await page.waitForSelector('header', { visible: true, timeout: 10000 });
+  const page = await client.pupBrowser.newPage();
+  try {
+    // Abre o chat do contato (já autenticado)
+    await page.goto(`https://web.whatsapp.com/send?phone=${tel}`, { waitUntil: 'networkidle2' });
+    // Aguarda o header aparecer
+    await page.waitForSelector('header', { visible: true, timeout: 10000 });
 
-  // Executa a lógica de busca dentro do contexto do navegador
-  const fotoUrl = await page.evaluate(() => {
-    const header = document.querySelector('header');
-    if (!header) return null;
+    // Executa a lógica de busca dentro do contexto do navegador
+    const fotoUrl = await page.evaluate(() => {
+      const header = document.querySelector('header');
+      if (!header) return null;
 
     // 1) Tenta pegar a tag <img>, comum em versões mais novas do WA Web
     const img = header.querySelector('img');
@@ -58,21 +58,25 @@ async function scrapeProfilePicViaPuppeteer(client, telefone) {
     return null;
   });
 
-  // O Puppeteer pode retornar um 'blob:', que precisamos converter
-  if (fotoUrl && fotoUrl.startsWith('blob:')) {
-    const dataUri = await page.evaluate(async (url) => {
-        const response = await window.fetch(url);
-        const blob = await response.blob();
-        return new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-        });
-    }, fotoUrl);
-    return dataUri;
-  }
+    // O Puppeteer pode retornar um 'blob:', que precisamos converter
+    if (fotoUrl && fotoUrl.startsWith('blob:')) {
+      const dataUri = await page.evaluate(async (url) => {
+          const response = await window.fetch(url);
+          const blob = await response.blob();
+          return new Promise(resolve => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+          });
+      }, fotoUrl);
+      return dataUri;
+    }
 
-  return fotoUrl;
+    return fotoUrl;
+  } finally {
+    await page.close();
+  }
+  
 }
 
 
