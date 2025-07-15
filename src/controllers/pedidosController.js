@@ -319,11 +319,7 @@ exports.atualizarFotoDoPedido = async (req, res) => {
     const db = req.db;
     const clienteId = req.user.id;
     const { id } = req.params;
-    const client = req.venomClient;
-
-    if (!client) {
-        return res.status(500).json({ error: "Cliente WhatsApp não está conectado." });
-    }
+    const client = req.venomClient; // mantido para compatibilidade, mas não é mais necessário
 
     try {
         const pedido = await pedidoService.getPedidoById(db, id, clienteId);
@@ -331,15 +327,11 @@ exports.atualizarFotoDoPedido = async (req, res) => {
             return res.status(404).json({ error: "Pedido não encontrado." });
         }
 
-        const fotoUrl = await whatsappService.getProfilePicUrl(client, pedido.telefone);
-        
-        if (fotoUrl) {
-            await pedidoService.updateCamposPedido(db, id, { fotoPerfilUrl: fotoUrl }, clienteId);
-            req.broadcast(clienteId, { type: 'pedido_atualizado', pedidoId: id });
-            res.status(200).json({ message: "Foto de perfil atualizada com sucesso!", data: { fotoUrl } });
-        } else {
-             res.status(200).json({ message: "Nenhuma foto de perfil foi encontrada para este contato.", data: { fotoUrl: null } });
-        }
+        const fotoUrl = await whatsappService.getProfilePicUrl();
+
+        await pedidoService.updateCamposPedido(db, id, { fotoPerfilUrl: fotoUrl }, clienteId);
+        req.broadcast(clienteId, { type: 'pedido_atualizado', pedidoId: id });
+        res.status(200).json({ message: "Foto de perfil atualizada com sucesso!", data: { fotoUrl } });
 
     } catch (error) {
         console.error("Erro ao tentar atualizar a foto do pedido:", error);

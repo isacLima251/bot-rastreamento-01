@@ -294,15 +294,7 @@ const criarPedido = (db, dadosPedido, client, clienteId = null) => {
             return reject(new Error("Nome e um número de celular válido são obrigatórios."));
         }
 
-        let fotoUrl = null;
-        if (client) {
-            try {
-                fotoUrl = await whatsappService.getProfilePicUrl(client, telefoneValidado);
-            } catch (e) {
-                logger.warn(`Não foi possível obter a foto para o novo contato ${telefoneValidado}.`);
-                fotoUrl = null;
-            }
-        }
+        const fotoUrl = await whatsappService.getProfilePicUrl();
 
         const sql = 'INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, codigoRastreio, notas, fotoPerfilUrl, dataCriacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
         const params = [clienteId, nome, email || null, telefoneValidado, produto || null, codigoRastreio || null, notas || null, fotoUrl, new Date().toISOString()];
