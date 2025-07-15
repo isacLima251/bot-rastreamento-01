@@ -39,7 +39,10 @@ git clone https://github.com/isacLima251/bot-rastreamento.git
 cd bot-rastreamento
 
 # Instalar dependências
-npm install
+# O Venom Bot usa o Puppeteer e tenta baixar o Chrome durante a instalação.
+# Caso sua rede bloqueie o download (ou você já possua o navegador),
+# defina PUPPETEER_SKIP_DOWNLOAD=1 para pular essa etapa.
+PUPPETEER_SKIP_DOWNLOAD=1 npm install
 
 # Executar a suíte de testes (opcional)
 npm test
