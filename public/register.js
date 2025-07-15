@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Redireciona para o login após um breve momento
             setTimeout(() => {
-                window.location.href = '/login.html';
+                window.location.href = '/login';
             }, 1500);
 
         } catch (err) {

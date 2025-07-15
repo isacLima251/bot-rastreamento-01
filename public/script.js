@@ -141,7 +141,7 @@ function capitalize(s) {
 
 document.addEventListener('DOMContentLoaded', () => {
 const token = localStorage.getItem('token');
-if (!token) { window.location.href = '/login.html'; return; }
+if (!token) { window.location.href = '/login'; return; }
 function parseJwt(t){try{return JSON.parse(atob(t.split('.')[1]));}catch(e){return {};}}
 const userData = parseJwt(token);
 if (userData.precisa_trocar_senha) {
@@ -155,7 +155,7 @@ const authFetch = async (url, options = {}) => {
     const resp = await fetch(url, options);
     if (resp.status === 401) {
         localStorage.removeItem('token');
-        window.location.href = '/login.html';
+        window.location.href = '/login';
     }
     if (resp.status === 403) {
         try {
@@ -1505,7 +1505,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                     if (!resp.ok) throw new Error(data.error || 'Falha ao excluir conta.');
                     localStorage.removeItem('token');
                     alert('Conta excluída com sucesso.');
-                    window.location.href = '/login.html';
+                    window.location.href = '/login';
                 } catch (err) {
                     showNotification(err.message, 'error');
                 }
@@ -1700,7 +1700,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
     if (logoutBtnEl) {
         logoutBtnEl.addEventListener('click', () => {
             localStorage.removeItem('token');
-            window.location.href = '/login.html';
+            window.location.href = '/login';
         });
     }
 
