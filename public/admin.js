@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
-    if (!token) { window.location.href = '/login.html'; return; }
+    if (!token) { window.location.href = '/login'; return; }
 
     const authFetch = (url, options = {}) => {
         options.headers = options.headers || {};
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return fetch(url, options).then(resp => {
             if (resp.status === 401) {
                 localStorage.removeItem('token');
-                window.location.href = '/login.html';
+                window.location.href = '/login';
             }
             return resp;
         });

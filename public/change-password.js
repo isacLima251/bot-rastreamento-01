@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = '/login.html';
+        window.location.href = '/login';
         return;
     }
 
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             localStorage.removeItem('token');
             alert('Senha atualizada com sucesso! Por favor, faça o login novamente.');
-            window.location.href = '/login.html';
+            window.location.href = '/login';
         } catch (err) {
             displayError(err.message || 'Falha ao atualizar a senha.');
         } finally {

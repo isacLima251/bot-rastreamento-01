@@ -7,7 +7,7 @@ async function sendWelcomeEmail(to, password) {
         logger.warn('RESEND_API_KEY não configurada. O e-mail de boas-vindas não será enviado.');
         return;
     }
-    const loginUrl = (process.env.APP_URL || 'http://localhost:3000') + '/login.html';
+    const loginUrl = (process.env.APP_URL || 'http://localhost:3000') + '/login';
 
     const html = `
 <!DOCTYPE html>
