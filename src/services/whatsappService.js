@@ -70,7 +70,10 @@ async function sendVideo(client, telefone, videoUrl, caption = '') {
     const numeroNormalizado = normalizeTelefone(telefone);
     const numeroFormatado = `${numeroNormalizado}@c.us`;
     const filePath = resolveMediaPath(videoUrl);
-    await client.sendVideo(numeroFormatado, filePath, caption);
+    const fileName = path.basename(filePath);
+    // Venom-bot não possui um método dedicado para envio de vídeo.
+    // Utilizamos sendFile, que trata o MIME e envia o arquivo como vídeo.
+    await client.sendFile(numeroFormatado, filePath, fileName, caption);
 }
 
 /**
