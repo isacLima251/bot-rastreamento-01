@@ -140,31 +140,33 @@ async function sendVideo(client, telefone, videoUrl, caption = '') {
  */
 async function getProfilePicUrl(client, telefone) {
     if (!client) {
-        logger.warn("Cliente Venom não está pronto para buscar fotos.");
+        logger.debug("Cliente Venom não está pronto para buscar fotos.");
         return null;
     }
     const contatoId = `${normalizeTelefone(telefone)}@c.us`;
 
+    let viaApi = null;
     // --- ESTRATÉGIA 1: TENTATIVA VIA API OFICIAL DO VENOM ---
     try {
-        const viaApi = await client.getProfilePicFromServer(contatoId);
-        if (viaApi) {
-            return viaApi;
-        }
+        viaApi = await client.getProfilePicFromServer(contatoId);
     } catch (error) {
-        logger.warn(`[API] Falhou para ${contatoId}. Motivo: ${error.message}. Ativando fallback.`);
+        logger.debug(`[API] Falhou para ${contatoId}. Motivo: ${error.message}.`);
+    }
+    if (viaApi) {
+        return viaApi;
     }
 
     // --- ESTRATÉGIA 2: FALLBACK VIA SCRAPING ROBUSTO COM PUPPETEER ---
     try {
         const viaScrape = await scrapeProfilePicViaPuppeteer(client, telefone);
         if (viaScrape) {
+            return viaScrape;
         }
-        return viaScrape;
     } catch (err) {
-        logger.warn('Fallback Puppeteer falhou:', err);
-        return null;
+        logger.debug('Fallback Puppeteer falhou:', err);
     }
+
+    return null;
 }
 
 module.exports = {
