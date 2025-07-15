@@ -48,7 +48,7 @@ function createExpressApp(db, sessionManager) {
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'landing.html'));
   });
-  app.use(express.static('public'));
+  app.use(express.static('public', { extensions: ['html'] }));
 
   app.use((req, res, next) => {
     req.db = db;
@@ -83,6 +83,10 @@ function createExpressApp(db, sessionManager) {
 
   app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'admin.html'));
+  });
+
+  app.get('/painel', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
   });
 
   app.get('/api/teste-conexao', (req, res) => {

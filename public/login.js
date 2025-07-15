@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Se o utilizador já está logado, vai para o painel principal
     if (localStorage.getItem('token')) {
-        window.location.href = '/index.html';
+        window.location.href = '/painel';
         return;
     }
 
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (info.precisa_trocar_senha) {
                 window.location.href = '/change-password.html';
             } else {
-                window.location.href = '/index.html';
+                window.location.href = '/painel';
             }
         } catch (err) {
             displayError(err.message);
