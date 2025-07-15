@@ -1,6 +1,5 @@
 // --- FUNÇÕES DE AJUDA ---
 const path = require('path');
-const logger = require('../logger');
 
 function resolveMediaPath(url) {
     if (!url) return url;
@@ -25,67 +24,8 @@ function normalizeTelefone(telefoneRaw) {
     return digitos;
 }
 
-// --- NOVA FUNÇÃO DE SCRAPING ROBUSTA ---
-/**
- * Tenta "scrapar" a foto direto do header do chat no WhatsApp Web.
- * @param {string} telefone - número sem máscara.
- * @returns {Promise<string|null>} URL da foto, ou null.
- */
-async function scrapeProfilePicViaPuppeteer(client, telefone) {
-  const tel = normalizeTelefone(telefone);
-  const page = await client.browser.newPage();
-  try {
-    // Abre o chat do contato (já autenticado)
-    await page.goto(`https://web.whatsapp.com/send?phone=${tel}`, { waitUntil: 'networkidle2' });
-    // Aguarda o header aparecer
-    await page.waitForSelector('header', { visible: true, timeout: 10000 });
-
-    // Executa a lógica de busca dentro do contexto do navegador
-    const fotoUrl = await page.evaluate(() => {
-      const header = document.querySelector('header');
-      if (!header) return null;
-
-    // 1) Tenta pegar a tag <img>, comum em versões mais novas do WA Web
-    const img = header.querySelector('img');
-    if (img && img.src) {
-      return img.src;
-    }
-
-    // 2) Se não encontrar, busca qualquer elemento com 'background-image'
-    const all = Array.from(header.querySelectorAll('div, span'));
-    const avatar = all.find(el => {
-      const bg = getComputedStyle(el).backgroundImage;
-      return bg && bg !== 'none' && bg.startsWith('url');
-    });
-    if (avatar) {
-      const bg = getComputedStyle(avatar).backgroundImage;
-      // Extrai a URL de dentro de 'url("...")'
-      return bg.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-    }
-
-    return null;
-  });
-
-    // O Puppeteer pode retornar um 'blob:', que precisamos converter
-    if (fotoUrl && fotoUrl.startsWith('blob:')) {
-      const dataUri = await page.evaluate(async (url) => {
-          const response = await window.fetch(url);
-          const blob = await response.blob();
-          return new Promise(resolve => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result);
-              reader.readAsDataURL(blob);
-          });
-      }, fotoUrl);
-      return dataUri;
-    }
-
-    return fotoUrl;
-  } finally {
-    await page.close();
-  }
-  
-}
+// Avatar padrão usado para todos os contatos
+const DEFAULT_AVATAR_URL = 'https://i.imgur.com/z28n3Nz.png';
 
 
 // --- FUNÇÕES PRINCIPAIS DO SERVIÇO ---
@@ -134,39 +74,11 @@ async function sendVideo(client, telefone, videoUrl, caption = '') {
 }
 
 /**
- * Busca a URL da foto de perfil, primeiro pela API e depois com fallback via Puppeteer.
- * @param {string} telefone O número do contato.
- * @returns {Promise<string|null>} A URL da foto ou nulo se não existir.
+ * Retorna a URL do avatar padrão.
+ * A busca pela foto real do contato foi removida.
  */
-async function getProfilePicUrl(client, telefone) {
-    if (!client) {
-        logger.debug("Cliente Venom não está pronto para buscar fotos.");
-        return null;
-    }
-    const contatoId = `${normalizeTelefone(telefone)}@c.us`;
-
-    let viaApi = null;
-    // --- ESTRATÉGIA 1: TENTATIVA VIA API OFICIAL DO VENOM ---
-    try {
-        viaApi = await client.getProfilePicFromServer(contatoId);
-    } catch (error) {
-        logger.debug(`[API] Falhou para ${contatoId}. Motivo: ${error.message}.`);
-    }
-    if (viaApi) {
-        return viaApi;
-    }
-
-    // --- ESTRATÉGIA 2: FALLBACK VIA SCRAPING ROBUSTO COM PUPPETEER ---
-    try {
-        const viaScrape = await scrapeProfilePicViaPuppeteer(client, telefone);
-        if (viaScrape) {
-            return viaScrape;
-        }
-    } catch (err) {
-        logger.debug('Fallback Puppeteer falhou:', err);
-    }
-
-    return null;
+async function getProfilePicUrl() {
+    return DEFAULT_AVATAR_URL;
 }
 
 module.exports = {
@@ -176,5 +88,6 @@ module.exports = {
     sendAudio,
     sendFile,
     sendVideo,
-    getProfilePicUrl
+    getProfilePicUrl,
+    DEFAULT_AVATAR_URL
 };
