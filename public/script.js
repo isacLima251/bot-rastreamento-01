@@ -849,11 +849,13 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             if (!response.ok) throw new Error('Falha ao salvar as configurações.');
             const resultado = await response.json();
             showNotification(resultado.message, 'success');
+            btnSalvarAutomacoesEl.textContent = 'Salvo!';
+            setTimeout(() => { btnSalvarAutomacoesEl.textContent = originalText; }, 1500);
         } catch (error) {
             showNotification(error.message, 'error');
+            btnSalvarAutomacoesEl.textContent = originalText;
         } finally {
             btnSalvarAutomacoesEl.disabled = false;
-            btnSalvarAutomacoesEl.textContent = originalText;
         }
     }
 
