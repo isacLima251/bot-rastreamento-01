@@ -129,6 +129,22 @@ const findPedidoByEmail = (db, email, clienteId = null) => {
         });
     });
 };
+
+/**
+ * Busca um pedido pelo código de rastreio.
+ */
+const findPedidoByCodigo = (db, codigo, clienteId) => {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT * FROM pedidos WHERE codigoRastreio = ? AND cliente_id = ?';
+        db.get(sql, [codigo, clienteId], (err, row) => {
+            if (err) {
+                console.error(`Erro ao buscar pedido por código ${codigo}`, err);
+                return reject(err);
+            }
+            resolve(row);
+        });
+    });
+};
 /**
  * Atualiza um ou mais campos de um pedido específico.
  */
@@ -314,6 +330,7 @@ module.exports = {
     getPedidoById,
     findPedidoByTelefone,
     findPedidoByEmail,
+    findPedidoByCodigo,
     updateCamposPedido,
     addMensagemHistorico,
     getHistoricoPorPedidoId,
