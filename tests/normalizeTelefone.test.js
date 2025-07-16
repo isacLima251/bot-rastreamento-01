@@ -1,4 +1,5 @@
-const { normalizeTelefone } = require('../src/services/pedidoService');
+const { normalizeTelefone } = require('../src/utils/normalizeTelefone');
+const pedidoService = require('../src/services/pedidoService');
 
 describe('normalizeTelefone', () => {
   test('normalizes various formats', () => {
@@ -10,5 +11,9 @@ describe('normalizeTelefone', () => {
 
   test('returns null for invalid numbers', () => {
     expect(normalizeTelefone('12345')).toBeNull();
+  });
+
+  test('pedidoService exports the shared implementation', () => {
+    expect(pedidoService.normalizeTelefone).toBe(normalizeTelefone);
   });
 });

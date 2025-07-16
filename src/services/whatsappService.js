@@ -1,6 +1,7 @@
 // --- FUNÇÕES DE AJUDA ---
 const path = require('path');
 
+const { normalizeTelefone } = require("../utils/normalizeTelefone");
 function resolveMediaPath(url) {
     if (!url) return url;
     if (url.startsWith('/uploads/') || url.startsWith('uploads/')) {
@@ -8,22 +9,6 @@ function resolveMediaPath(url) {
     }
     return url;
 }
-
-/**
- * Normaliza um número de telefone para o formato internacional brasileiro (55 + DDD + Número).
- */
-function normalizeTelefone(telefoneRaw) {
-    if (!telefoneRaw) return '';
-    const digitos = String(telefoneRaw).replace(/\D/g, '');
-    if (digitos.startsWith('55') && (digitos.length === 12 || digitos.length === 13)) {
-        return digitos;
-    }
-    if (digitos.length === 10 || digitos.length === 11) {
-        return `55${digitos}`;
-    }
-    return digitos;
-}
-
 // Avatar padrão usado para todos os contatos
 const DEFAULT_AVATAR_URL = 'https://i.imgur.com/z28n3Nz.png';
 
