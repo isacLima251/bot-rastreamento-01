@@ -748,7 +748,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             if (!response.ok) throw new Error('Falha ao buscar chave de API.');
             const data = await response.json();
             const baseUrl = `${window.location.protocol}//${window.location.host}`;
-            const webhookUrl = `${baseUrl}/api/postback?key=${data.apiKey}`;
+            const webhookUrl = `${baseUrl}/api/postback/${data.unique_path}`;
             webhookUrlDisplayEl.textContent = webhookUrl;
             if (inputPostbackSecretEl) inputPostbackSecretEl.value = data.settings && data.settings.postback_secret ? data.settings.postback_secret : '';
         } catch (error) {
