@@ -56,27 +56,29 @@ function createExpressApp(db, sessionManager) {
   });
 
   app.post('/api/register', authController.register);
-  app.post('/api/register-test-rollback', async (req, res) => {
-    const { email, password } = req.body;
-    try {
-      const existing = await userService.findUserByEmail(db, email);
-      if (existing) return res.status(409).json({ error: 'Usuário já existe.' });
-
-      await planService.ensureFreePlan(db);
-      const user = await userService.createUser(db, email, password, 0, 1, 0);
-
+  if (process.env.NODE_ENV === 'test') {
+    app.post('/api/register-test-rollback', async (req, res) => {
+      const { email, password } = req.body;
       try {
-        await subscriptionService.createSubscription(db, user.id, 999);
-      } catch (err) {
-        await userService.deleteUserCascade(db, user.id);
-        return res.status(500).json({ error: 'Erro simulado na assinatura' });
-      }
+        const existing = await userService.findUserByEmail(db, email);
+        if (existing) return res.status(409).json({ error: 'Usuário já existe.' });
 
-      res.status(201).json({ id: user.id });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
+        await planService.ensureFreePlan(db);
+        const user = await userService.createUser(db, email, password, 0, 1, 0);
+
+        try {
+          await subscriptionService.createSubscription(db, user.id, 999);
+        } catch (err) {
+          await userService.deleteUserCascade(db, user.id);
+          return res.status(500).json({ error: 'Erro simulado na assinatura' });
+        }
+
+        res.status(201).json({ id: user.id });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    });
+  }
   app.post('/api/login', authController.login);
 
   app.post('/api/postback/:unique_path', integrationsController.receberPostback);
