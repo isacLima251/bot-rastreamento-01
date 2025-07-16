@@ -7,16 +7,16 @@ exports.receberWebhook = async (req, res) => {
 
     const codigoRastreio = evento.code;
     const statusAtual = evento.status;
+    const clienteId = evento.cliente_id;
     const cidade = evento.location;
     const dataEvento = evento.datetime;
 
-    if (!codigoRastreio || !statusAtual) {
-        return res.status(400).json({ error: 'Evento inválido. Código de rastreio ou status faltando.' });
+    if (!codigoRastreio || !statusAtual || !clienteId) {
+        return res.status(400).json({ error: 'Evento inválido. Código de rastreio, cliente ou status faltando.' });
     }
 
     try {
-        const pedidos = await pedidoService.getAllPedidos(db);
-        const pedido = pedidos.find(p => p.codigoRastreio === codigoRastreio);
+        const pedido = await pedidoService.findPedidoByCodigo(db, codigoRastreio, clienteId);
 
         if (pedido) {
             await pedidoService.updateCamposPedido(db, pedido.id, {
