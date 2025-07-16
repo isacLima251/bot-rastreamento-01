@@ -14,7 +14,7 @@ function updateSetting(db, userId, value) {
     return new Promise((resolve, reject) => {
         db.run('UPDATE user_settings SET create_contact_on_message = ? WHERE user_id = ?', [val, userId], function(err){
             if (err) return reject(err);
-            if (this.changes === 0) {
+            if (!this.changes) {
                 db.run('INSERT INTO user_settings (user_id, create_contact_on_message) VALUES (?, ?)', [userId, val], function(err2){
                     if (err2) return reject(err2);
                     resolve();

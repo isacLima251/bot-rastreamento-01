@@ -169,7 +169,7 @@ function defineModels(sequelize) {
 
   const UserSetting = sequelize.define('UserSetting', {
     user_id: { type: DataTypes.INTEGER, primaryKey: true },
-    create_contact_on_message: { type: DataTypes.INTEGER, defaultValue: 0 }
+    create_contact_on_message: { type: DataTypes.INTEGER, defaultValue: 1 }
   }, { tableName: 'user_settings', timestamps: false });
 
   // relationships
