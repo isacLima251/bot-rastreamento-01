@@ -1,46 +1,7 @@
 // --- CORREÇÃO: Importando o whatsappService ---
 const whatsappService = require('./whatsappService');
 const logger = require('../logger');
-
-/**
- * NORMALIZADOR DE TELEFONE DEFINITIVO (trata o 9º dígito)
- * Converte qualquer número de celular brasileiro para o formato padrão 55DDD9XXXXXXXX.
- * @param {string} telefoneRaw O número em qualquer formato.
- * @returns {string|null} O número 100% normalizado ou nulo se for inválido.
- */
-function normalizeTelefone(telefoneRaw) {
-    if (!telefoneRaw) return null;
-    // 1. Remove tudo que não for dígito
-    let digitos = String(telefoneRaw).replace(/\D/g, '');
-
-    // 2. Se tiver '55' no início, remove para analisar o número local
-    if (digitos.startsWith('55')) {
-        digitos = digitos.substring(2);
-    }
-
-    // 3. Um número local válido no Brasil tem 10 (DDD+8) ou 11 (DDD+9) dígitos
-    if (digitos.length < 10 || digitos.length > 11) {
-        return null; // Formato inválido
-    }
-
-    const ddd = digitos.substring(0, 2);
-    let numeroBase = digitos.substring(2);
-
-    // 4. A MÁGICA: Se o número base tem 8 dígitos e é um celular, adiciona o '9'
-    if (numeroBase.length === 8 && ['6','7','8','9'].includes(numeroBase[0])) {
-        numeroBase = '9' + numeroBase;
-    }
-
-    // 5. Se o número final não tem 9 dígitos, não é um celular válido
-    if (numeroBase.length !== 9) {
-        return null;
-    }
-
-    // 6. Retorna o número no formato canônico e garantido
-    return `55${ddd}${numeroBase}`;
-}
-
-
+const { normalizeTelefone } = require("../utils/normalizeTelefone");
 /**
  * Busca todos os pedidos do banco de dados.
  */

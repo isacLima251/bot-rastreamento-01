@@ -11,6 +11,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const ffmpegPath = require('ffmpeg-static');
 ffmpeg.setFfmpegPath(ffmpegPath);
 
+const { normalizeTelefone } = require('../utils/normalizeTelefone');
 const uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -79,26 +80,6 @@ exports.listarPedidos = (req, res) => {
     });
 };
 
-// Normalizador de telefone
-function normalizeTelefone(telefoneRaw) {
-    if (!telefoneRaw) return null;
-    let digitos = String(telefoneRaw).replace(/\D/g, '');
-    if (digitos.startsWith('55')) {
-        digitos = digitos.substring(2);
-    }
-    if (digitos.length < 10 || digitos.length > 11) {
-        return null;
-    }
-    const ddd = digitos.substring(0, 2);
-    let numero = digitos.substring(2);
-    if (numero.length === 8 && ['6', '7', '8', '9'].includes(numero[0])) {
-        numero = '9' + numero;
-    }
-    if (numero.length !== 9) {
-        return null;
-    }
-    return `55${ddd}${numero}`;
-}
 
 // CRIA um novo pedido
 exports.criarPedido = [
