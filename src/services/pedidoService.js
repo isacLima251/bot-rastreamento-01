@@ -296,8 +296,8 @@ const criarPedido = (db, dadosPedido, client, clienteId = null) => {
 
         const fotoUrl = await whatsappService.getProfilePicUrl();
 
-        const sql = 'INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, codigoRastreio, notas, fotoPerfilUrl, dataCriacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        const params = [clienteId, nome, email || null, telefoneValidado, produto || null, codigoRastreio || null, notas || null, fotoUrl, new Date().toISOString()];
+        const sql = 'INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, codigoRastreio, notas, fotoPerfilUrl, dataCriacao, lastCheckedAt, statusChangeAt, checkCount, alertSent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        const params = [clienteId, nome, email || null, telefoneValidado, produto || null, codigoRastreio || null, notas || null, fotoUrl, new Date().toISOString(), null, null, 0, 0];
 
         db.run(sql, params, function (err) {
             if (err) return reject(err);

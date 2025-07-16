@@ -99,7 +99,11 @@ function defineModels(sequelize) {
     dataCriacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     mensagensNaoLidas: { type: DataTypes.INTEGER, defaultValue: 0 },
     ultimaMensagem: DataTypes.STRING,
-    dataUltimaMensagem: DataTypes.DATE
+    dataUltimaMensagem: DataTypes.DATE,
+    lastCheckedAt: DataTypes.DATE,
+    statusChangeAt: DataTypes.DATE,
+    checkCount: { type: DataTypes.INTEGER, defaultValue: 0 },
+    alertSent: { type: DataTypes.INTEGER, defaultValue: 0 }
   }, {
     tableName: 'pedidos',
     timestamps: false,

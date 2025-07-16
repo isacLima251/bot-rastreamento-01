@@ -22,17 +22,24 @@ function incrementUsage(db, subscriptionId) {
     });
 }
 
+const pedidoService = require('./pedidoService');
+
 function resetUsageIfNeeded(db, subscriptionId) {
     return new Promise((resolve, reject) => {
-        db.get('SELECT usage, renewal_date FROM subscriptions WHERE id = ?', [subscriptionId], (err, sub) => {
+        db.get('SELECT usage, renewal_date, user_id FROM subscriptions WHERE id = ?', [subscriptionId], (err, sub) => {
             if (err) return reject(err);
             if (!sub) return resolve();
             const now = moment();
             if (!sub.renewal_date || moment(sub.renewal_date).isBefore(now)) {
                 const next = now.clone().add(1, 'month').startOf('day');
-                db.run('UPDATE subscriptions SET usage = 0, renewal_date = ? WHERE id = ?', [next.format('YYYY-MM-DD'), subscriptionId], (e) => {
-                    if (e) return reject(e);
-                    resolve();
+                db.serialize(() => {
+                    db.run('BEGIN TRANSACTION');
+                    db.run('UPDATE subscriptions SET usage = 0, renewal_date = ? WHERE id = ?', [next.format('YYYY-MM-DD'), subscriptionId]);
+                    db.run('UPDATE pedidos SET checkCount = 0 WHERE cliente_id = ?', [sub.user_id]);
+                    db.run('COMMIT', (e) => {
+                        if (e) return reject(e);
+                        resolve();
+                    });
                 });
             } else {
                 resolve();
