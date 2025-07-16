@@ -212,10 +212,10 @@ async function initDb() {
   const count = parseInt(rows[0].count, 10);
   if (count === 0) {
     const defaultPlans = [
-      ['Gr\u00e1tis', 0, 10, null],
-      ['Start', 39.99, 50, 'https://payment.ticto.app/O6073F635'],
-      ['Basic', 59.99, 100, 'https://payment.ticto.app/O8EC5C302'],
-      ['Pro', 99.99, 250, 'https://payment.ticto.app/OEE2CBEAA'],
+      ['Gr\u00e1tis', 0, 5, null],
+      ['Start', 49.99, 31, 'https://payment.ticto.app/O6073F635'],
+      ['Basic', 99.99, 75, 'https://payment.ticto.app/O8EC5C302'],
+      ['Pro', 159.99, 130, 'https://payment.ticto.app/OEE2CBEAA'],
     ];
     for (const p of defaultPlans) {
       await sequelize.query('INSERT INTO plans (name, price, monthly_limit, checkout_url) VALUES (?, ?, ?, ?)', { replacements: p });

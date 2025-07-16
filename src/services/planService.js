@@ -19,7 +19,7 @@ async function ensureFreePlan(tx) {
       await new Promise((resolve, reject) => {
         tx.run(
           'INSERT INTO plans (id, name, price, monthly_limit, checkout_url) VALUES (?, ?, ?, ?, ?)',
-          [1, 'Gr\u00e1tis', 0, 10, null],
+          [1, 'Gr\u00e1tis', 0, 5, null],
           err => {
             if (err) return reject(err);
             resolve();

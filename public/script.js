@@ -1105,9 +1105,9 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                 if (p.name === 'Basic') card.classList.add('popular');
 
                 const features = {
-                    'Start': ['50 pedidos/mês', 'Integrações Básicas', 'Relatórios Simples'],
-                    'Basic': ['100 pedidos/mês', 'Relatórios Padrão', 'Suporte via Email'],
-                    'Pro': ['250 pedidos/mês', 'Relatórios Avançados', 'Suporte Prioritário']
+                    'Start': ['31 pedidos/mês', 'Integrações Básicas', 'Relatórios Simples'],
+                    'Basic': ['75 pedidos/mês', 'Relatórios Padrão', 'Suporte via Email'],
+                    'Pro': ['130 pedidos/mês', 'Relatórios Avançados', 'Suporte Prioritário']
                 }[p.name] || [];
 
                 const featuresHtml = features.map(f => `
