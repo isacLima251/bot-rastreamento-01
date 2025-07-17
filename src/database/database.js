@@ -204,7 +204,12 @@ async function initDb() {
       }
     );
   } else {
-    sequelize = new Sequelize({ dialect: 'sqlite', storage: DB_PATH, logging: false });
+    sequelize = new Sequelize({
+      dialect: 'sqlite',
+      storage: DB_PATH,
+      logging: false,
+      pool: { max: 1 }
+    });
   }
 
   await sequelize.authenticate();
