@@ -8,12 +8,14 @@ const { createWebSocketServer } = require('./src/websocket');
 const { createWhatsAppManager } = require('./src/whatsappSessions');
 const { createExpressApp } = require('./src/app');
 
+let db;
+
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 async function start() {
   try {
-    const db = await initDb();
+    db = await initDb();
     const sessionManager = createWhatsAppManager(null, { broadcastStatus: () => {}, broadcastToUser: () => {} });
     const app = createExpressApp(db, sessionManager);
     sessionManager.setApp(app);
@@ -49,3 +51,18 @@ async function start() {
 }
 
 start();
+
+async function gracefulShutdown() {
+  if (db && typeof db.close === 'function') {
+    try {
+      await db.close();
+      logger.info('📴 Conexão com o banco encerrada.');
+    } catch (err) {
+      logger.error('Erro ao fechar banco de dados', err);
+    }
+  }
+  process.exit(0);
+}
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
