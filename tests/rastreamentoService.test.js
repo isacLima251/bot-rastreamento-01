@@ -46,6 +46,37 @@ describe('shouldCheck logic', () => {
     expect(shouldCheck(pedido, now)).toBe(false);
   });
 
+  test('checks postado first day when never checked', () => {
+    const now = new Date('2024-05-01T12:00:00Z');
+    const pedido = {
+      statusInterno: 'postado',
+      statusChangeAt: '2024-05-01T08:00:00Z',
+      lastCheckedAt: null,
+      checkCount: 0
+    };
+    expect(shouldCheck(pedido, now)).toBe(true);
+  });
+
+  test('checks postado again after 8 hours', () => {
+    const now = new Date('2024-05-02T18:00:00Z');
+    const pedido = {
+      statusInterno: 'postado',
+      statusChangeAt: '2024-05-01T08:00:00Z',
+      lastCheckedAt: '2024-05-02T09:00:00Z'
+    };
+    expect(shouldCheck(pedido, now)).toBe(true);
+  });
+
+  test('waits 8 hours between checks for postado', () => {
+    const now = new Date('2024-05-02T14:00:00Z');
+    const pedido = {
+      statusInterno: 'postado',
+      statusChangeAt: '2024-05-01T08:00:00Z',
+      lastCheckedAt: '2024-05-02T10:00:00Z'
+    };
+    expect(shouldCheck(pedido, now)).toBe(false);
+  });
+
   test('checks saiu para entrega after 30 minutes', () => {
     const now = new Date('2024-05-01T12:00:00Z');
     const pedido = { statusInterno: 'saiu para entrega', lastCheckedAt: '2024-05-01T11:20:00Z' };
@@ -67,6 +98,24 @@ describe('shouldCheck logic', () => {
   test('ignores pedidos concluídos', () => {
     const now = new Date();
     const pedido = { statusInterno: 'entregue' };
+    expect(shouldCheck(pedido, now)).toBe(false);
+  });
+
+  test('triggers scheduled check window if not checked', () => {
+    const now = new Date('2024-05-03T10:32:00Z');
+    const pedido = { lastCheckedAt: '2024-05-03T09:00:00Z' };
+    expect(shouldCheck(pedido, now)).toBe(true);
+  });
+
+  test('does not trigger window check twice', () => {
+    const now = new Date('2024-05-03T10:32:00Z');
+    const pedido = { lastCheckedAt: '2024-05-03T10:31:00Z' };
+    expect(shouldCheck(pedido, now)).toBe(false);
+  });
+
+  test('ignores scheduled window after it passes', () => {
+    const now = new Date('2024-05-03T10:40:00Z');
+    const pedido = { lastCheckedAt: '2024-05-03T09:00:00Z' };
     expect(shouldCheck(pedido, now)).toBe(false);
   });
 });
