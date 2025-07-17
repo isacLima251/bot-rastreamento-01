@@ -23,6 +23,6 @@ const { initDb } = require('./src/database/database');
     await run('ROLLBACK').catch(() => {});
     console.error('Erro ao limpar banco de dados:', err);
   } finally {
-    db.close();
+    await db.close();
   }
 })();

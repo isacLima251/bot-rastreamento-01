@@ -37,6 +37,6 @@ const userService = require('./src/services/userService');
     console.error('Erro ao processar:', err);
   } finally {
     rl.close();
-    db.close();
+    await db.close();
   }
 })();
