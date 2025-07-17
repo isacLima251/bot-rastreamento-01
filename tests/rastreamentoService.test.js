@@ -25,6 +25,22 @@ describe('rastrearCodigo', () => {
     expect(result.ultimaAtualizacao).toBe(`${evento.date} ${evento.time}`);
   });
 
+  test('maps origem e destino da descricao', async () => {
+    const evento = {
+      status: 'Em trânsito',
+      location: 'Centro',
+      date: '2024-01-01',
+      time: '10:00',
+      description: 'Objeto em trânsito de São Paulo/SP para Rio de Janeiro/RJ'
+    };
+    jest.spyOn(axios, 'post').mockResolvedValue({ data: { events: [evento] } });
+
+    const result = await rastrearCodigo('AB123', 'KEY');
+
+    expect(result.origemUltimaMovimentacao).toBe('São Paulo/SP');
+    expect(result.destinoUltimaMovimentacao).toBe('Rio de Janeiro/RJ');
+  });
+
   test('returns erro_api on failure', async () => {
     jest.spyOn(axios, 'post').mockRejectedValue(new Error('fail'));
 
