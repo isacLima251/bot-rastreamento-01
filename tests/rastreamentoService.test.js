@@ -1,5 +1,8 @@
 const axios = require('axios');
 const { rastrearCodigo } = require('../src/services/rastreamentoService');
+const { shouldCheck, verificarRastreios } = require('../src/controllers/rastreamentoController');
+const pedidoService = require('../src/services/pedidoService');
+const rastreamentoService = require('../src/services/rastreamentoService');
 
 afterEach(() => {
   jest.restoreAllMocks();
@@ -28,5 +31,54 @@ describe('rastrearCodigo', () => {
     const result = await rastrearCodigo('AB123', 'KEY');
 
     expect(result).toEqual({ statusInterno: 'erro_api', ultimaLocalizacao: '-', ultimaAtualizacao: '-', eventos: [] });
+  });
+});
+
+describe('shouldCheck logic', () => {
+  test('ignores first day recheck after postado', () => {
+    const now = new Date('2024-05-01T12:00:00Z');
+    const pedido = {
+      statusInterno: 'postado',
+      statusChangeAt: '2024-05-01T08:00:00Z',
+      lastCheckedAt: '2024-05-01T09:00:00Z',
+      checkCount: 1
+    };
+    expect(shouldCheck(pedido, now)).toBe(false);
+  });
+
+  test('checks saiu para entrega after 30 minutes', () => {
+    const now = new Date('2024-05-01T12:00:00Z');
+    const pedido = { statusInterno: 'saiu para entrega', lastCheckedAt: '2024-05-01T11:20:00Z' };
+    expect(shouldCheck(pedido, now)).toBe(true);
+  });
+
+  test('waits 30 minutes for saiu para entrega', () => {
+    const now = new Date('2024-05-01T12:00:00Z');
+    const pedido = { statusInterno: 'saiu para entrega', lastCheckedAt: '2024-05-01T11:45:00Z' };
+    expect(shouldCheck(pedido, now)).toBe(false);
+  });
+
+  test('reduces checks to once per day after limit', () => {
+    const now = new Date('2024-05-02T12:00:00Z');
+    const pedido = { checkCount: 100, lastCheckedAt: '2024-05-02T01:00:00Z' };
+    expect(shouldCheck(pedido, now)).toBe(false);
+  });
+
+  test('ignores pedidos concluídos', () => {
+    const now = new Date();
+    const pedido = { statusInterno: 'entregue' };
+    expect(shouldCheck(pedido, now)).toBe(false);
+  });
+});
+
+describe('verificarRastreios horario', () => {
+  test('nao verifica durante a madrugada', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2024-05-01T03:00:00Z'));
+    const getAll = jest.spyOn(pedidoService, 'getAllPedidos').mockResolvedValue([]);
+
+    await verificarRastreios({}, null, 1);
+
+    expect(getAll).not.toHaveBeenCalled();
+    jest.useRealTimers();
   });
 });
