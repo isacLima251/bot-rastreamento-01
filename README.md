@@ -109,6 +109,20 @@ node criar-admin.js
 
 Ele irá perguntar o e-mail e, se o usuário não existir, será criado como administrador. Caso já exista, você poderá promovê-lo.
 
+### 3. Migrar do SQLite para PostgreSQL
+
+Caso tenha iniciado o projeto com o banco SQLite e deseje mover os dados para um
+banco PostgreSQL configurado no `.env`, utilize o script abaixo. Certifique-se
+de que as tabelas já existam no banco de destino (execute `npm run migrate` ou
+inicie o servidor uma vez) e que as variáveis `POSTGRES_*` estejam corretas.
+
+```bash
+node scripts/migrateSqliteToPostgres.js
+```
+
+O script exporta cada tabela do SQLite para CSV e importa os registros usando o
+`psql`. Nenhuma informação original é apagada.
+
 ---
 
 ## 📚 Estrutura do Projeto
