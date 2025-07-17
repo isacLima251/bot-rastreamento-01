@@ -38,8 +38,10 @@ function shouldCheck(pedido, nowSP) {
 
     for (const t of times) {
         const target = new Date(nowSP);
-        target.setHours(t.h, t.m, 0, 0);
-        if (nowSP >= target && nowSP - target < 5 * 60 * 1000) {
+        target.setUTCHours(t.h, t.m, 0, 0);
+
+        const diff = nowSP.getTime() - target.getTime();
+        if (diff >= 0 && diff < 5 * 60 * 1000) {
             if (!lastChecked || lastChecked < target) return true;
         }
     }
