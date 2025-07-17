@@ -1,0 +1,43 @@
+# Ignore node modules and development dependencies
+node_modules/
+
+# Ignore Venom and Chromium runtime data
+.venom/
+.local-chromium/
+
+tokens/
+token/
+
+# Environment files
+.env
+
+# Database files
+*.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary directories
+tmp/
+temp/
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Uploaded media
+uploads/
+media/
+
+# System files
+*.lock
+.DS_Store
+Thumbs.db
+
+# Tests and git metadata
+tests/
+.git
