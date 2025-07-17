@@ -77,6 +77,18 @@ Para rodar os testes automatizados dentro do container, execute:
 docker compose exec app npm test
 ```
 
+## 🐘 Migração para PostgreSQL
+
+1. Defina `DB_CLIENT=postgres` no `.env` e ajuste `POSTGRES_USER`,
+   `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_HOST` e `POSTGRES_PORT` com os
+   dados do seu servidor.
+2. Inicialize o PostgreSQL (o `docker-compose` incluso pode ser usado).
+3. Execute `npm run migrate` (ou `npx sequelize-cli db:migrate`) para criar as
+   tabelas no banco novo.
+4. Para importar os registros já existentes no SQLite, utilize uma ferramenta
+   como [`pgloader`](https://pgloader.io/) ou um script de migração que leia o
+   arquivo definido em `DB_PATH` e insira os dados no PostgreSQL.
+
 ---
 
 ## 🔹 Como Usar
