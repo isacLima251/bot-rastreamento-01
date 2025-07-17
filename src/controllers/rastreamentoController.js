@@ -104,5 +104,5 @@ async function verificarRastreios(db, client, clienteId, broadcast) {
     }
 }
 
-module.exports = { verificarRastreios };
+module.exports = { verificarRastreios, shouldCheck };
 
