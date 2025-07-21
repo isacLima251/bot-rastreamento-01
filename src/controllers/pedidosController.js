@@ -302,6 +302,24 @@ exports.enviarMidia = async (req, res) => {
         await pedidoService.addMensagemHistorico(db, id, legenda, 'manual', 'bot', clienteId, mediaUrl, tipo);
         await logService.addLog(db, clienteId, 'mensagem_manual', JSON.stringify({ pedidoId: id, tipo }));
         broadcast(clienteId, { type: 'nova_mensagem', pedidoId: parseInt(id) });
+
+        // Remove arquivos temporários após o envio
+        const filesToDelete = [file.path];
+        if (filePath !== file.path) {
+            filesToDelete.push(filePath);
+        }
+
+        await Promise.all(
+            filesToDelete.map(async (p) => {
+                try {
+                    await fs.promises.unlink(p);
+                    console.log('Arquivo removido durante limpeza:', p);
+                } catch (err) {
+                    console.error('Erro ao remover arquivo temporário:', err);
+                }
+            })
+        );
+
         res.status(200).json({ message: 'Arquivo enviado com sucesso!', mediaUrl });
     } catch (error) {
         console.error('Erro ao enviar midia:', error);
