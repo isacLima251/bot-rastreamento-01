@@ -33,6 +33,10 @@ Este é um projeto Node.js que automatiza o rastreamento de pedidos e o envio de
 
 ## 🔧 Instalação
 
+> **Importante:** se o servidor não possuir acesso direto à internet, é **obrigatório**
+> definir a variável de ambiente `PUPPETEER_SKIP_DOWNLOAD=1` antes de rodar
+> `npm install`. Assim o Puppeteer não tentará baixar o Chrome.
+
 ```bash
 # Clonar o repositório
 git clone https://github.com/isacLima251/bot-rastreamento.git
