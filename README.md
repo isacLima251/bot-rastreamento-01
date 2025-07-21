@@ -44,9 +44,6 @@ cd bot-rastreamento
 # defina PUPPETEER_SKIP_DOWNLOAD=1 para pular essa etapa.
 PUPPETEER_SKIP_DOWNLOAD=1 npm install
 
-# Executar a suíte de testes (opcional)
-npm test
-
 # Copiar o arquivo de exemplo de variáveis de ambiente
 cp .env.example .env
 ```
@@ -71,11 +68,6 @@ docker compose up --build
 
 A aplicacao sera exposta na porta 3000 e o banco PostgreSQL persistira no volume `db_data`.
 
-Para rodar os testes automatizados dentro do container, execute:
-
-```bash
-docker compose exec app npm test
-```
 
 ## 🐘 Migração para PostgreSQL
 
