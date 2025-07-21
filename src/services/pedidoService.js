@@ -2,6 +2,8 @@
 const whatsappService = require('./whatsappService');
 const logger = require('../logger');
 const { normalizeTelefone } = require("../utils/normalizeTelefone");
+const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
+const q = c => DB_CLIENT === 'postgres' ? `"${c}"` : c;
 /**
  * Busca todos os pedidos do banco de dados.
  */
@@ -96,7 +98,7 @@ const findPedidoByEmail = (db, email, clienteId = null) => {
  */
 const findPedidoByCodigo = (db, codigo, clienteId) => {
     return new Promise((resolve, reject) => {
-        const sql = 'SELECT * FROM pedidos WHERE codigoRastreio = ? AND cliente_id = ?';
+        const sql = `SELECT * FROM pedidos WHERE ${q('codigoRastreio')} = ? AND cliente_id = ?`;
         db.get(sql, [codigo, clienteId], (err, row) => {
             if (err) {
                 console.error(`Erro ao buscar pedido por código ${codigo}`, err);
@@ -121,7 +123,7 @@ const updateCamposPedido = async (db, pedidoId, campos, clienteId = null) => {
         }
 
         // Monta dinamicamente a cláusula SET apenas com os campos permitidos
-        const setClause = camposValidos.map(key => `${key} = ?`).join(', ');
+        const setClause = camposValidos.map(key => `${q(key)} = ?`).join(', ');
         let query = `UPDATE pedidos SET ${setClause} WHERE id = ?`;
 
         // Os valores devem seguir exatamente a ordem da cláusula SET
@@ -166,7 +168,7 @@ const addMensagemHistorico = (db, pedidoId, mensagem, tipoMensagem, origem, clie
 
             // --- NOVO: Atualiza a tabela de pedidos com a última mensagem ---
             const dataAgora = new Date().toISOString();
-            let sqlUpdate = `UPDATE pedidos SET ultimaMensagem = ?, dataUltimaMensagem = ? WHERE id = ?`;
+            let sqlUpdate = `UPDATE pedidos SET ${q('ultimaMensagem')} = ?, ${q('dataUltimaMensagem')} = ? WHERE id = ?`;
             const valuesUpdate = [mensagem, dataAgora, pedidoId];
             if (clienteId !== null && clienteId !== undefined) {
                 sqlUpdate += ' AND cliente_id = ?';
@@ -202,13 +204,13 @@ const getHistoricoPorPedidoId = (db, pedidoId, clienteId) => {
 };
 
 const getPedidosComCodigoAtivo = (db, clienteId, inicioCiclo, fimCiclo) => {
-    const sql = `SELECT id, nome, produto, codigoRastreio, dataCriacao, statusInterno
+    const sql = `SELECT id, nome, produto, ${q('codigoRastreio')}, ${q('dataCriacao')}, ${q('statusInterno')}
                  FROM pedidos
                  WHERE cliente_id = ?
-                   AND codigoRastreio IS NOT NULL
-                   AND codigoRastreio != ''
-                   AND (statusInterno IS NULL OR statusInterno != 'entregue')
-                   AND dataCriacao >= ? AND dataCriacao < ?`;
+                   AND ${q('codigoRastreio')} IS NOT NULL
+                   AND ${q('codigoRastreio')} != ''
+                   AND (${q('statusInterno')} IS NULL OR ${q('statusInterno')} != 'entregue')
+                   AND ${q('dataCriacao')} >= ? AND ${q('dataCriacao')} < ?`;
     return new Promise((resolve, reject) => {
         db.all(sql, [clienteId, inicioCiclo, fimCiclo], (err, rows) => {
             if (err) return reject(err);
@@ -222,7 +224,7 @@ const getPedidosComCodigoAtivo = (db, clienteId, inicioCiclo, fimCiclo) => {
  */
 const incrementarNaoLidas = (db, pedidoId, clienteId = null) => {
     return new Promise((resolve, reject) => {
-        let sql = 'UPDATE pedidos SET mensagensNaoLidas = mensagensNaoLidas + 1 WHERE id = ?';
+        let sql = `UPDATE pedidos SET ${q('mensagensNaoLidas')} = ${q('mensagensNaoLidas')} + 1 WHERE id = ?`;
         const params = [pedidoId];
         if (clienteId !== null && clienteId !== undefined) {
             sql += ' AND cliente_id = ?';
@@ -243,7 +245,7 @@ const incrementarNaoLidas = (db, pedidoId, clienteId = null) => {
  */
 const marcarComoLido = (db, pedidoId, clienteId = null) => {
     return new Promise((resolve, reject) => {
-        let sql = 'UPDATE pedidos SET mensagensNaoLidas = 0 WHERE id = ?';
+        let sql = `UPDATE pedidos SET ${q('mensagensNaoLidas')} = 0 WHERE id = ?`;
         const params = [pedidoId];
         if (clienteId !== null && clienteId !== undefined) {
             sql += ' AND cliente_id = ?';
@@ -273,7 +275,7 @@ const criarPedido = (db, dadosPedido, client, clienteId = null) => {
 
         const fotoUrl = await whatsappService.getProfilePicUrl();
 
-        const sql = 'INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, codigoRastreio, notas, fotoPerfilUrl, dataCriacao, lastCheckedAt, statusChangeAt, checkCount, alertSent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        const sql = `INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, ${q('codigoRastreio')}, notas, ${q('fotoPerfilUrl')}, ${q('dataCriacao')}, ${q('lastCheckedAt')}, ${q('statusChangeAt')}, ${q('checkCount')}, ${q('alertSent')}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
         const params = [clienteId, nome, email || null, telefoneValidado, produto || null, codigoRastreio || null, notas || null, fotoUrl, new Date().toISOString(), null, null, 0, 0];
 
         db.run(sql, params, function (err) {

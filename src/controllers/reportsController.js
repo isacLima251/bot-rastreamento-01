@@ -1,6 +1,7 @@
 const subscriptionService = require('../services/subscriptionService');
 const pedidoService = require('../services/pedidoService');
 const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
+const q = c => DB_CLIENT === 'postgres' ? `"${c}"` : c;
 
 // Função auxiliar para executar consultas SQL e retornar uma Promise
 const runQuery = (dbInstance, sql, params = []) => {
@@ -33,11 +34,11 @@ exports.getReportSummary = async (req, res) => {
             statusDistributionRows,
             newContactsLast7DaysRows
         ] = await Promise.all([
-            runQuery(db, "SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND codigoRastreio IS NOT NULL AND statusInterno NOT IN ('entregue', 'pedido_cancelado')", [clienteId]),
+            runQuery(db, `SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('codigoRastreio')} IS NOT NULL AND ${q('statusInterno')} NOT IN ('entregue', 'pedido_cancelado')`, [clienteId]),
             runQuery(db, avgDeliveryQuery, [clienteId]),
-            runQuery(db, "SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND statusInterno = 'pedido_atrasado'", [clienteId]),
-            runQuery(db, "SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND statusInterno = 'pedido_cancelado'", [clienteId]),
-            runQuery(db, 'SELECT statusInterno, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND statusInterno IS NOT NULL GROUP BY statusInterno', [clienteId]),
+            runQuery(db, `SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('statusInterno')} = 'pedido_atrasado'`, [clienteId]),
+            runQuery(db, `SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('statusInterno')} = 'pedido_cancelado'`, [clienteId]),
+            runQuery(db, `SELECT ${q('statusInterno')} as statusInterno, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('statusInterno')} IS NOT NULL GROUP BY ${q('statusInterno')}` , [clienteId]),
             runQuery(db, newContactsQuery, [clienteId])
         ]);
 
@@ -65,14 +66,14 @@ exports.getTrackingReport = async (req, res) => {
         const db = req.db;
         const clienteId = req.user.id;
 
-        const sql = `SELECT nome, email, telefone, produto, codigoRastreio,
-                             COALESCE(dataPostagem, dataCriacao) as dataEnvio,
-                             statusInterno
+        const sql = `SELECT nome, email, telefone, produto, ${q('codigoRastreio')},
+                             COALESCE(${q('dataPostagem')}, ${q('dataCriacao')}) as dataEnvio,
+                             ${q('statusInterno')}
                       FROM pedidos
                       WHERE cliente_id = ?
-                        AND codigoRastreio IS NOT NULL
-                        AND codigoRastreio != ''
-                      ORDER BY dataCriacao DESC`;
+                        AND ${q('codigoRastreio')} IS NOT NULL
+                        AND ${q('codigoRastreio')} != ''
+                      ORDER BY ${q('dataCriacao')} DESC`;
 
         const rows = await runQuery(db, sql, [clienteId]);
         res.json({ data: rows });
@@ -87,14 +88,14 @@ exports.getClientesComRastreio = async (req, res) => {
         const db = req.db;
         const clienteId = req.user.id;
 
-        const sql = `SELECT nome, produto, codigoRastreio,
-                            statusInterno AS status,
-                            dataCriacao AS createdAt
+        const sql = `SELECT nome, produto, ${q('codigoRastreio')},
+                            ${q('statusInterno')} AS status,
+                            ${q('dataCriacao')} AS createdAt
                      FROM pedidos
                      WHERE cliente_id = ?
-                       AND codigoRastreio IS NOT NULL
-                       AND codigoRastreio != ''
-                     ORDER BY dataCriacao DESC`;
+                       AND ${q('codigoRastreio')} IS NOT NULL
+                       AND ${q('codigoRastreio')} != ''
+                     ORDER BY ${q('dataCriacao')} DESC`;
 
         const rows = await runQuery(db, sql, [clienteId]);
         res.json(rows);
