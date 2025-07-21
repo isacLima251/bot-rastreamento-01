@@ -80,6 +80,11 @@ function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
           headless: 'new',
           browserArgs: ['--no-sandbox', '--disable-setuid-sandbox'],
           puppeteerOptions: { protocolTimeout: 60000 },
+          logQR: false,
+          updatesLog: false,
+          disableSpins: true,
+          disableWelcome: true,
+          debug: false,
         },
         (base64Qr) => broadcastStatus(userId, 'QR_CODE', { qrCode: base64Qr })
       )
