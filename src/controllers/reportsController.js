@@ -104,9 +104,11 @@ exports.getClientesComRastreio = async (req, res) => {
         const db = req.db;
         const clienteId = req.user.id;
 
+        const createdAtAlias = DB_CLIENT === 'postgres' ? '"createdAt"' : 'createdAt';
+
         const sql = `SELECT nome, produto, ${q('codigoRastreio')},
                             ${q('statusInterno')} AS status,
-                            ${q('dataCriacao')} AS createdAt
+                            ${q('dataCriacao')} AS ${createdAtAlias}
                      FROM pedidos
                      WHERE cliente_id = ?
                        AND ${q('codigoRastreio')} IS NOT NULL
