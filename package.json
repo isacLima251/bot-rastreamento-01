@@ -4,7 +4,6 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "jest",
     "create-admin": "node criar-admin.js",
     "clean-users": "node limpar-usuarios.js",
     "migrate": "sequelize-cli db:migrate"
