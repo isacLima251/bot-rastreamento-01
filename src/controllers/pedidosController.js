@@ -12,6 +12,9 @@ const ffmpeg = require('fluent-ffmpeg');
 const ffmpegPath = require('ffmpeg-static');
 ffmpeg.setFfmpegPath(ffmpegPath);
 
+const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
+const q = c => DB_CLIENT === 'postgres' ? `"${c}"` : c;
+
 const { normalizeTelefone } = require('../utils/normalizeTelefone');
 const uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -57,9 +60,9 @@ exports.listarPedidos = (req, res) => {
 
     if (filtroStatus) {
         if (filtroStatus === 'caminho') {
-            conditions.push("statusInterno IS NOT NULL AND statusInterno != 'entregue'");
+            conditions.push(`${q('statusInterno')} IS NOT NULL AND ${q('statusInterno')} != 'entregue'`);
         } else if (filtroStatus === 'entregue') {
-            conditions.push("statusInterno = ?");
+            conditions.push(`${q('statusInterno')} = ?`);
             params.push('entregue');
         }
     }
@@ -69,7 +72,7 @@ exports.listarPedidos = (req, res) => {
         sql += " WHERE " + conditions.join(" AND ");
     }
     const whereClause = conditions.length > 0 ? " WHERE " + conditions.join(" AND ") : "";
-    const sqlPaginated = `${sql} ORDER BY dataUltimaMensagem DESC, id DESC LIMIT ? OFFSET ?`;
+    const sqlPaginated = `${sql} ORDER BY ${q('dataUltimaMensagem')} DESC, id DESC LIMIT ? OFFSET ?`;
     const sqlCount = `SELECT COUNT(*) as total FROM pedidos${whereClause}`;
 
     try {
