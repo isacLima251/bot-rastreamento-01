@@ -27,6 +27,15 @@ function highlightVariables(textarea) {
     backdrop.scrollTop = textarea.scrollTop;
 }
 
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 let stepCounter = 0;
 
 function addStep(cardElOrType, maybeType, data = {}) {
@@ -529,15 +538,16 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                 if (pedido.statusInterno === 'entregue') item.dataset.status = 'entregue';
                 else item.dataset.status = 'caminho';
             }
+            const safeName = escapeHtml(pedido.nome || '');
             const primeiraLetra = pedido.nome ? pedido.nome.charAt(0).toUpperCase() : '?';
             const cor = corAvatar(pedido.nome || '');
             const fotoHtml = pedido.fotoPerfilUrl
-                ? `<img src="${pedido.fotoPerfilUrl}" alt="Foto de ${pedido.nome}" onerror="this.parentElement.innerHTML = '<div class=\\'avatar-fallback\\' style=\\'background-color:${cor};\\'>${primeiraLetra}</div>';">`
+                ? `<img src="${pedido.fotoPerfilUrl}" alt="Foto de ${safeName}" onerror="this.parentElement.innerHTML = '<div class=\\'avatar-fallback\\' style=\\'background-color:${cor};\\'>${primeiraLetra}</div>';">`
                 : `<div class="avatar-fallback" style="background-color:${cor};">${primeiraLetra}</div>`;
             const contadorHtml = pedido.mensagensNaoLidas > 0 ? `<div class="unread-counter">${pedido.mensagensNaoLidas}</div>` : '';
             const timestampHtml = `<span class="contact-timestamp">${formatarDataContato(pedido.dataUltimaMensagem)}</span>`;
-            const previewMensagem = pedido.ultimaMensagem ? pedido.ultimaMensagem.substring(0, 35) + (pedido.ultimaMensagem.length > 35 ? '...' : '') : 'Novo Pedido';
-            item.innerHTML = `${timestampHtml}<div class="avatar-container">${fotoHtml}</div><div class="info"><h4>${pedido.nome}</h4><p>${previewMensagem}</p></div>${contadorHtml}`;
+            const previewMensagem = pedido.ultimaMensagem ? escapeHtml(pedido.ultimaMensagem.substring(0, 35) + (pedido.ultimaMensagem.length > 35 ? '...' : '')) : 'Novo Pedido';
+            item.innerHTML = `${timestampHtml}<div class="avatar-container">${fotoHtml}</div><div class="info"><h4>${safeName}</h4><p>${previewMensagem}</p></div>${contadorHtml}`;
             listaContactosEl.appendChild(item);
         });
     };
@@ -554,12 +564,13 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             const item = document.createElement('div');
             item.className = 'contact-row contact-item-clickable';
             item.dataset.id = pedido.id;
+            const safeName = escapeHtml(pedido.nome || '');
             const primeiraLetra = pedido.nome ? pedido.nome.charAt(0).toUpperCase() : '?';
             const cor = corAvatar(pedido.nome || '');
             const fotoHtml = pedido.fotoPerfilUrl
-                ? `<img src="${pedido.fotoPerfilUrl}" alt="Foto de ${pedido.nome}" onerror="this.parentElement.innerHTML = '<div class=\\'avatar-fallback\\' style=\\'background-color:${cor};\\'>${primeiraLetra}</div>';">`
+                ? `<img src="${pedido.fotoPerfilUrl}" alt="Foto de ${safeName}" onerror="this.parentElement.innerHTML = '<div class=\\'avatar-fallback\\' style=\\'background-color:${cor};\\'>${primeiraLetra}</div>';">`
                 : `<div class="avatar-fallback" style="background-color:${cor};">${primeiraLetra}</div>`;
-            item.innerHTML = `<div class="avatar-container">${fotoHtml}</div><div class="info"><h4>${pedido.nome || 'Nome não disponível'}</h4><p>${pedido.telefone}</p></div><div class="contact-tag">cliente</div><div class="arrow-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>`;
+            item.innerHTML = `<div class="avatar-container">${fotoHtml}</div><div class="info"><h4>${safeName || 'Nome não disponível'}</h4><p>${escapeHtml(pedido.telefone)}</p></div><div class="contact-tag">cliente</div><div class="arrow-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>`;
             listaContactosCompletaEl.appendChild(item);
         });
     };
@@ -582,13 +593,14 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         renderizarListaDeContactos();
 
         // 1. PREENCHER A COLUNA 2: JANELA DE CHAT
+        const safeName = escapeHtml(pedido.nome || '');
         const chatHeaderHtml = `
             <div class="chat-header-main">
                 <div class="contact-info-main">
                     <div class="avatar-container small">
-                        <img src="${pedido.fotoPerfilUrl || 'https://i.imgur.com/z28n3Nz.png'}" alt="Foto de ${pedido.nome}" onerror="this.src='https://i.imgur.com/z28n3Nz.png';">
+                        <img src="${pedido.fotoPerfilUrl || 'https://i.imgur.com/z28n3Nz.png'}" alt="Foto de ${safeName}" onerror="this.src='https://i.imgur.com/z28n3Nz.png';">
                     </div>
-                    <h3>${pedido.nome}</h3>
+                    <h3>${safeName}</h3>
                 </div>
             </div>
         `;
@@ -614,15 +626,15 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             <div class="details-body">
                 <div class="detail-item">
                     <label>Telefone</label>
-                    <span>${pedido.telefone}</span>
+                    <span>${escapeHtml(pedido.telefone)}</span>
                 </div>
                 <div class="detail-item">
                     <label>Produto</label>
-                    <span>${pedido.produto || 'Não informado'}</span>
+                    <span>${escapeHtml(pedido.produto || 'Não informado')}</span>
                 </div>
                 <div class="detail-item">
                     <label>Código de Rastreio</label>
-                    <span>${pedido.codigoRastreio || 'Nenhum'}</span>
+                    <span>${escapeHtml(pedido.codigoRastreio || 'Nenhum')}</span>
                 </div>
                 <div class="detail-item-divider"></div>
                 <div class="detail-item-notes">
@@ -631,7 +643,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                         <h4>Notas</h4>
                     </div>
                     <div id="notes-content" class="editable-notes" tabindex="0">
-                        ${pedido.notas ? pedido.notas.replace(/\n/g, '<br>') : '<span class="placeholder-text">Clique para adicionar uma nota...</span>'}
+                        ${pedido.notas ? escapeHtml(pedido.notas).replace(/\n/g, '<br>') : '<span class="placeholder-text">Clique para adicionar uma nota...</span>'}
                     </div>
                 </div>
             </div>
@@ -662,21 +674,22 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                         const statusIcon = msg.origem === 'bot' ? `<span class="message-status"><svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="m11.354 4.646l-4.5 4.5l-1.5-1.5a.5.5 0 0 0-.708.708l2 2a.5.5 0 0 0 .708 0l5-5a.5.5 0 0 0-.708-.708M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0"/></svg></span>` : '';
 
                         let bodyHtml = '';
+                        const escapedMsg = msg.mensagem ? escapeHtml(msg.mensagem).replace(/\n/g, '<br>') : '';
                         if (msg.media_url) {
                             if (msg.message_type && msg.message_type.startsWith('image')) {
                                 bodyHtml = `<img src="${msg.media_url}" alt="Imagem" style="max-width: 200px;">`;
-                                if (msg.mensagem) bodyHtml += `<p>${msg.mensagem.replace(/\n/g, '<br>')}</p>`;
+                                if (msg.mensagem) bodyHtml += `<p>${escapedMsg}</p>`;
                             } else if (msg.message_type && msg.message_type.startsWith('audio')) {
                                 bodyHtml = `<audio controls src="${msg.media_url}"></audio>`;
                             } else if (msg.message_type && msg.message_type.startsWith('video')) {
                                 bodyHtml = `<video controls src="${msg.media_url}" style="max-width: 200px;"></video>`;
-                                if (msg.mensagem) bodyHtml += `<p>${msg.mensagem.replace(/\n/g, '<br>')}</p>`;
+                                if (msg.mensagem) bodyHtml += `<p>${escapedMsg}</p>`;
                             } else {
-                                const linkText = msg.mensagem ? msg.mensagem.replace(/\n/g, '<br>') : 'Download';
+                                const linkText = msg.mensagem ? escapedMsg : 'Download';
                                 bodyHtml = `<a href="${msg.media_url}" target="_blank">${linkText}</a>`;
                             }
                         } else {
-                            bodyHtml = `<p>${msg.mensagem.replace(/\n/g, '<br>')}</p>`;
+                            bodyHtml = `<p>${escapedMsg}</p>`;
                         }
 
                         msgDiv.innerHTML = `${bodyHtml}<div class="message-meta"><span class="timestamp">${horaFormatada}</span>${statusIcon}</div>`;
@@ -968,10 +981,10 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${new Date(pedido.createdAt).toLocaleDateString('pt-BR')}</td>
-                <td>${pedido.nome || '-'}</td>
-                <td>${pedido.produto || 'Não informado'}</td>
-                <td>${pedido.codigoRastreio || 'N/A'}</td>
-                <td><span class="status-badge ${statusClass}">${pedido.status}</span></td>
+                <td>${escapeHtml(pedido.nome || '-')}</td>
+                <td>${escapeHtml(pedido.produto || 'Não informado')}</td>
+                <td>${escapeHtml(pedido.codigoRastreio || 'N/A')}</td>
+                <td><span class="status-badge ${statusClass}">${escapeHtml(pedido.status)}</span></td>
             `;
             tabelaCorpo.appendChild(row);
         });
@@ -1009,10 +1022,10 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
 
                     row.innerHTML = `
                         <td>${new Date(pedido.createdAt).toLocaleDateString('pt-BR')}</td>
-                        <td>${pedido.nome || '-'}</td>
-                        <td>${pedido.produto || 'Não informado'}</td>
-                        <td>${pedido.codigoRastreio || 'N/A'}</td>
-                        <td><span class="status-badge ${statusClass}">${status}</span></td>
+                        <td>${escapeHtml(pedido.nome || '-')}</td>
+                        <td>${escapeHtml(pedido.produto || 'Não informado')}</td>
+                        <td>${escapeHtml(pedido.codigoRastreio || 'N/A')}</td>
+                        <td><span class="status-badge ${statusClass}">${escapeHtml(status)}</span></td>
                     `;
                     tabelaCorpo.appendChild(row);
                 });
@@ -1251,7 +1264,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                 data.forEach(item => {
                     const tr = document.createElement('tr');
                     const dt = new Date(item.created_at);
-                    tr.innerHTML = `<td>${dt.toLocaleString('pt-BR')}</td><td>${item.client_name || '-'}</td><td>${item.product_name || '-'}</td><td><span class="status-badge ${item.status === 'sucesso' ? 'success' : 'error'}">${item.status === 'sucesso' ? 'Recebido' : 'Falhou'}</span></td>`;
+                    tr.innerHTML = `<td>${dt.toLocaleString('pt-BR')}</td><td>${escapeHtml(item.client_name || '-')}</td><td>${escapeHtml(item.product_name || '-')}</td><td><span class="status-badge ${item.status === 'sucesso' ? 'success' : 'error'}">${item.status === 'sucesso' ? 'Recebido' : 'Falhou'}</span></td>`;
                     integrationHistoryBodyEl.appendChild(tr);
                 });
             }
@@ -1551,7 +1564,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         if (e.target.closest('#notes-content') && !notesContent.querySelector('textarea')) {
             const pedidoAtual = todosOsPedidos.find(p => p.id === pedidoId);
             const currentNotes = pedidoAtual ? pedidoAtual.notas || '' : '';
-            notesContent.innerHTML = `<textarea id="notes-textarea" class="notes-editor">${currentNotes}</textarea>`;
+            notesContent.innerHTML = `<textarea id="notes-textarea" class="notes-editor">${escapeHtml(currentNotes)}</textarea>`;
             const textarea = document.getElementById('notes-textarea');
             textarea.focus();
             textarea.setSelectionRange(textarea.value.length, textarea.value.length);
@@ -1565,10 +1578,10 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                         body: JSON.stringify({ notas: newNotes })
                     });
                     if (pedidoAtual) pedidoAtual.notas = newNotes;
-                    notesContent.innerHTML = newNotes.replace(/\n/g, '<br>') || '<span class="placeholder-text">Clique para adicionar uma nota...</span>';
+                    notesContent.innerHTML = escapeHtml(newNotes).replace(/\n/g, '<br>') || '<span class="placeholder-text">Clique para adicionar uma nota...</span>';
                 } catch (err) {
                     showNotification('Falha ao salvar a nota.', 'error');
-                    notesContent.innerHTML = currentNotes.replace(/\n/g, '<br>') || '<span class="placeholder-text">Clique para adicionar uma nota...</span>';
+                    notesContent.innerHTML = escapeHtml(currentNotes).replace(/\n/g, '<br>') || '<span class="placeholder-text">Clique para adicionar uma nota...</span>';
                 }
             });
         }
@@ -1801,8 +1814,8 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
 
                 card.innerHTML = `
                     <div class="integration-item-header">
-                        <img src="${logoUrl}" alt="${integration.platform}" class="platform-logo-small" onerror="this.style.display='none'">
-                        <h4>${integration.name}</h4>
+                        <img src="${logoUrl}" alt="${escapeHtml(integration.platform)}" class="platform-logo-small" onerror="this.style.display='none'">
+                        <h4>${escapeHtml(integration.name)}</h4>
                     </div>
                     <div class="integration-item-body">
                         <span class="status-badge ${integration.status === 'active' ? 'success' : 'default'}">${integration.status === 'active' ? 'Ativado' : 'Desativado'}</span>
@@ -1869,7 +1882,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             const platformTile = document.createElement('div');
             platformTile.className = 'platform-tile';
             platformTile.dataset.platformId = platform.id;
-            platformTile.innerHTML = `<img src="${platform.logo}" alt="${platform.name}"><span>${platform.name}</span>`;
+            platformTile.innerHTML = `<img src="${platform.logo}" alt="${escapeHtml(platform.name)}"><span>${escapeHtml(platform.name)}</span>`;
             platformTile.addEventListener('click', () => {
                 closePlatformModal();
                 showIntegrationSetup(platform);
