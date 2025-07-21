@@ -1024,7 +1024,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             console.error("Erro detalhado ao carregar relatório:", error);
             const tabelaCorpo = document.getElementById('corpo-tabela-relatorio');
             if (tabelaCorpo) {
-                tabelaCorp.innerHTML = `<tr><td colspan="5">Não foi possível carregar o relatório. Erro: ${error.message}</td></tr>`;
+                tabelaCorpo.innerHTML = `<tr><td colspan="5">Não foi possível carregar o relatório. Erro: ${error.message}</td></tr>`;
             }
         });
     }
