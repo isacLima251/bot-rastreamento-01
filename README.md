@@ -128,8 +128,8 @@ inicie o servidor uma vez) e que as variáveis `POSTGRES_*` estejam corretas.
 node scripts/migrateSqliteToPostgres.js
 ```
 
-O script exporta cada tabela do SQLite para CSV e importa os registros usando o
-`psql`. Nenhuma informação original é apagada.
+O script conecta-se aos bancos SQLite e PostgreSQL utilizando as bibliotecas `sqlite3` e `pg`,
+transferindo cada registro sem remover os dados originais.
 
 ---
 
