@@ -63,6 +63,12 @@ Edite o `.env` com suas chaves e URLs de callback. As principais variáveis são
 
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` e `POSTGRES_HOST` podem ser definidos para usar PostgreSQL em container.
 - `DB_CLIENT` deve ser `postgres` para conectar ao banco no docker-compose.
+
+Após configurar o `.env`, execute as migrações para criar as tabelas:
+
+```bash
+npm run migrate
+```
 ### Usando Docker
 
 ```bash
