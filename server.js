@@ -1,4 +1,8 @@
 require('dotenv').config();
+
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
 const http = require('http');
 const { initDb } = require('./src/database/database');
 const logger = require('./src/logger');
@@ -11,7 +15,7 @@ const { createExpressApp } = require('./src/app');
 let db;
 
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 async function start() {
   try {
