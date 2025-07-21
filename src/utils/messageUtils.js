@@ -25,7 +25,7 @@ async function processIncomingMessage(client, message) {
       const prefix = message.type === 'ptt' ? 'audio' : 'media';
       const fileName = `${prefix}_${Date.now()}.${ext}`;
       const filePath = path.join(uploadDir, fileName);
-      fs.writeFileSync(filePath, buffer);
+      await fs.promises.writeFile(filePath, buffer);
       mediaUrl = `/uploads/${fileName}`;
       messageContent = message.caption || (message.type === 'ptt' ? '[ÁUDIO]' : '');
       messageType = message.type === 'ptt' ? 'audio' : message.type;
