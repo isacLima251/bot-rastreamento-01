@@ -45,7 +45,6 @@ function createWrapper(sequelize) {
         finalize(cb) { if (cb) cb(); }
       };
     },
-    serialize(cb) { if (cb) cb(); },
     close() {
       return sequelize.close();
     }

@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const integrationConfigService = require('./integrationConfigService');
 const automationService = require('./automationService');
 const { ensureFreePlan } = require('./planService');
-const { getModels } = require('../database/database');
+const { getModels, getSequelize } = require('../database/database');
 const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
 
 function generateApiKey() {
@@ -199,29 +199,24 @@ function setUserActive(db, id, active) {
     return updateUser(db, id, { is_active: active });
 }
 
-function deleteUserCascade(db, userId) {
-    return new Promise((resolve, reject) => {
-        db.serialize(() => {
-            db.run('BEGIN TRANSACTION');
-            db.run('DELETE FROM historico_mensagens WHERE cliente_id = ?', [userId]);
-            db.run('DELETE FROM pedidos WHERE cliente_id = ?', [userId]);
-            db.run('DELETE FROM logs WHERE cliente_id = ?', [userId]);
-            db.run('DELETE FROM automacoes WHERE cliente_id = ?', [userId]);
-            db.run('DELETE FROM subscriptions WHERE user_id = ?', [userId]);
-            db.run('DELETE FROM integration_settings WHERE user_id = ?', [userId]);
-            db.run('DELETE FROM user_settings WHERE user_id = ?', [userId]);
-            db.run('DELETE FROM users WHERE id = ?', [userId], function(err){
-                if (err) {
-                    db.run('ROLLBACK');
-                    return reject(err);
-                }
-                db.run('COMMIT', err2 => {
-                    if (err2) return reject(err2);
-                    resolve();
-                });
-            });
-        });
-    });
+async function deleteUserCascade(db, userId) {
+    const sequelize = getSequelize();
+    const { Historico, Pedido, Log, Automacao, Subscription, IntegrationSetting, UserSetting, User } = getModels();
+    const t = await sequelize.transaction();
+    try {
+        await Historico.destroy({ where: { cliente_id: userId }, transaction: t });
+        await Pedido.destroy({ where: { cliente_id: userId }, transaction: t });
+        await Log.destroy({ where: { cliente_id: userId }, transaction: t });
+        await Automacao.destroy({ where: { cliente_id: userId }, transaction: t });
+        await Subscription.destroy({ where: { user_id: userId }, transaction: t });
+        await IntegrationSetting.destroy({ where: { user_id: userId }, transaction: t });
+        await UserSetting.destroy({ where: { user_id: userId }, transaction: t });
+        await User.destroy({ where: { id: userId }, transaction: t });
+        await t.commit();
+    } catch (err) {
+        await t.rollback();
+        throw err;
+    }
 }
 
 module.exports = {

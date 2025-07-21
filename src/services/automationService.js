@@ -1,6 +1,7 @@
 const DEFAULT_MESSAGES = require('../constants/defaultMessages');
 const whatsappService = require('./whatsappService');
 const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
+const { getSequelize, getModels } = require('../database/database');
 
 // Busca todas as automações e seus passos em formato acessível
 exports.getAutomations = (db, clienteId = null) => {
@@ -57,50 +58,40 @@ exports.getAutomations = (db, clienteId = null) => {
 };
 
 // Salva todas as configurações de automação recebidas do frontend
-exports.saveAutomations = (db, configs, clienteId = null) => {
-    return new Promise((resolve, reject) => {
-        const stmtSql = DB_CLIENT === 'postgres'
-            ? 'INSERT INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, ?, ?) ON CONFLICT (gatilho, cliente_id) DO UPDATE SET ativo = EXCLUDED.ativo, mensagem = EXCLUDED.mensagem'
-            : 'INSERT OR REPLACE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, ?, ?)';
-        const stmt = db.prepare(stmtSql);
-        const stepStmt = db.prepare('INSERT INTO automacao_passos (gatilho, cliente_id, ordem, tipo, conteudo, mediaUrl, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)');
-
-        db.serialize(() => {
-            db.run('BEGIN TRANSACTION');
-            for (const gatilho in configs) {
-                const config = configs[gatilho];
-                stmt.run(
-                    gatilho,
-                    clienteId,
-                    config.ativo ? 1 : 0,
-                    config.mensagem || null
-                );
-                db.run('DELETE FROM automacao_passos WHERE gatilho = ? AND cliente_id = ?', [gatilho, clienteId]);
-                if (Array.isArray(config.steps)) {
-                    config.steps.forEach(step => {
-                        stepStmt.run(
-                            gatilho,
-                            clienteId,
-                            step.ordem,
-                            step.tipo,
-                            step.conteudo || null,
-                            step.mediaUrl || null
-                        );
-                    });
+exports.saveAutomations = async (db, configs, clienteId = null) => {
+    const sequelize = getSequelize();
+    const { Automacao, AutomacaoPasso } = getModels();
+    const t = await sequelize.transaction();
+    try {
+        for (const gatilho in configs) {
+            const config = configs[gatilho];
+            await Automacao.upsert({
+                gatilho,
+                cliente_id: clienteId,
+                ativo: config.ativo ? 1 : 0,
+                mensagem: config.mensagem || null
+            }, { transaction: t });
+            await AutomacaoPasso.destroy({ where: { gatilho, cliente_id: clienteId }, transaction: t });
+            if (Array.isArray(config.steps)) {
+                for (const step of config.steps) {
+                    await AutomacaoPasso.create({
+                        gatilho,
+                        cliente_id: clienteId,
+                        ordem: step.ordem,
+                        tipo: step.tipo,
+                        conteudo: step.conteudo || null,
+                        mediaUrl: step.mediaUrl || null
+                    }, { transaction: t });
                 }
             }
-            db.run('COMMIT', (err) => {
-                if (err) return reject(err);
-                resolve({ message: 'Configurações salvas com sucesso.' });
-            });
-        });
-
-        stmt.finalize();
-        stepStmt.finalize();
-    });
+        }
+        await t.commit();
+        return { message: 'Configurações salvas com sucesso.' };
+    } catch (err) {
+        await t.rollback();
+        throw err;
+    }
 };
-
-const { getModels } = require('../database/database');
 
 // Cria registros padrão de automações para um novo usuário
 exports.createDefaultAutomations = async (db, clienteId, options = {}) => {
@@ -123,31 +114,30 @@ exports.createDefaultAutomations = async (db, clienteId, options = {}) => {
         return AutomacaoPasso.bulkCreate(steps, { transaction: options.transaction });
     }
 
-    return new Promise((resolve, reject) => {
-        const defaultSql = DB_CLIENT === 'postgres'
-            ? 'INSERT INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, 1, ?) ON CONFLICT DO NOTHING'
-            : 'INSERT OR IGNORE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, 1, ?)';
-        const stmt = db.prepare(defaultSql);
-        const stepStmt = db.prepare(
-            'INSERT INTO automacao_passos (gatilho, cliente_id, ordem, tipo, conteudo, mediaUrl, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
-        );
-
-        db.serialize(() => {
-            db.run('BEGIN TRANSACTION');
-            for (const gatilho in DEFAULT_MESSAGES) {
-                const mensagem = DEFAULT_MESSAGES[gatilho];
-                stmt.run(gatilho, clienteId, mensagem);
-                stepStmt.run(gatilho, clienteId, 1, 'texto', mensagem, null);
-            }
-            db.run('COMMIT', err => {
-                if (err) return reject(err);
-                resolve();
-            });
-        });
-
-        stmt.finalize();
-        stepStmt.finalize();
-    });
+    const sequelize = getSequelize();
+    const { Automacao, AutomacaoPasso } = getModels();
+    const records = Object.entries(DEFAULT_MESSAGES).map(([gatilho, mensagem]) => ({
+        gatilho,
+        cliente_id: clienteId,
+        ativo: 1,
+        mensagem
+    }));
+    const steps = Object.entries(DEFAULT_MESSAGES).map(([gatilho, mensagem]) => ({
+        gatilho,
+        cliente_id: clienteId,
+        ordem: 1,
+        tipo: 'texto',
+        conteudo: mensagem
+    }));
+    const t = await sequelize.transaction();
+    try {
+        await Automacao.bulkCreate(records, { transaction: t, ignoreDuplicates: true });
+        await AutomacaoPasso.bulkCreate(steps, { transaction: t });
+        await t.commit();
+    } catch (err) {
+        await t.rollback();
+        throw err;
+    }
 };
 
 // Executa os passos de uma automação na ordem definida

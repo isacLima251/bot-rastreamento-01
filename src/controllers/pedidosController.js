@@ -5,6 +5,7 @@ const logService = require('../services/logService');
 const subscriptionService = require('../services/subscriptionService');
 const envioController = require('./envioController');
 const logger = require('../logger');
+const { getSequelize, getModels } = require('../database/database');
 const { body, validationResult } = require('express-validator');
 const multer = require('multer');
 const path = require('path');
@@ -190,22 +191,26 @@ exports.atualizarPedido = async (req, res) => {
 };
 
 // APAGA um pedido e seu histórico
-exports.deletarPedido = (req, res) => {
-    const db = req.db;
+exports.deletarPedido = async (req, res) => {
     const clienteId = req.user.id;
     const { id } = req.params;
-    db.serialize(() => {
-        db.run('DELETE FROM historico_mensagens WHERE pedido_id = ? AND cliente_id = ?', [id, clienteId]);
-        db.run('DELETE FROM pedidos WHERE id = ? AND cliente_id = ?', [id, clienteId], function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            if (this.changes === 0) return res.status(404).json({ error: `Pedido com ID ${id} não encontrado.` });
-
-            // Notifica o frontend
-            req.broadcast(clienteId, { type: 'pedido_deletado', pedidoId: id });
-
-            res.json({ message: `Pedido com ID ${id} deletado com sucesso.` });
-        });
-    });
+    const sequelize = getSequelize();
+    const { Pedido, Historico } = getModels();
+    const t = await sequelize.transaction();
+    try {
+        await Historico.destroy({ where: { pedido_id: id, cliente_id: clienteId }, transaction: t });
+        const deleted = await Pedido.destroy({ where: { id, cliente_id: clienteId }, transaction: t });
+        if (!deleted) {
+            await t.rollback();
+            return res.status(404).json({ error: `Pedido com ID ${id} não encontrado.` });
+        }
+        await t.commit();
+        req.broadcast(clienteId, { type: 'pedido_deletado', pedidoId: id });
+        res.json({ message: `Pedido com ID ${id} deletado com sucesso.` });
+    } catch (err) {
+        await t.rollback();
+        res.status(500).json({ error: err.message });
+    }
 };
 
 // BUSCA O HISTÓRICO de mensagens

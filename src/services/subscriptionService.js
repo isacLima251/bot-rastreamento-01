@@ -1,5 +1,6 @@
 const moment = require('moment');
 const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
+const { getSequelize, getModels } = require('../database/database');
 
 function getUserSubscription(db, userId) {
     return new Promise((resolve, reject) => {
@@ -25,28 +26,30 @@ function incrementUsage(db, subscriptionId) {
 
 const pedidoService = require('./pedidoService');
 
-function resetUsageIfNeeded(db, subscriptionId) {
-    return new Promise((resolve, reject) => {
-        db.get('SELECT usage, renewal_date, user_id FROM subscriptions WHERE id = ?', [subscriptionId], (err, sub) => {
-            if (err) return reject(err);
-            if (!sub) return resolve();
-            const now = moment();
-            if (!sub.renewal_date || moment(sub.renewal_date).isBefore(now)) {
-                const next = now.clone().add(1, 'month').startOf('day');
-                db.serialize(() => {
-                    db.run('BEGIN TRANSACTION');
-                    db.run('UPDATE subscriptions SET usage = 0, renewal_date = ? WHERE id = ?', [next.format('YYYY-MM-DD'), subscriptionId]);
-                    db.run('UPDATE pedidos SET checkCount = 0 WHERE cliente_id = ?', [sub.user_id]);
-                    db.run('COMMIT', (e) => {
-                        if (e) return reject(e);
-                        resolve();
-                    });
-                });
-            } else {
-                resolve();
-            }
-        });
-    });
+async function resetUsageIfNeeded(db, subscriptionId) {
+    const { Subscription, Pedido } = getModels();
+    const sequelize = getSequelize();
+    const sub = await Subscription.findByPk(subscriptionId, { raw: true });
+    if (!sub) return;
+    const now = moment();
+    if (!sub.renewal_date || moment(sub.renewal_date).isBefore(now)) {
+        const next = now.clone().add(1, 'month').startOf('day');
+        const t = await sequelize.transaction();
+        try {
+            await Subscription.update(
+                { usage: 0, renewal_date: next.format('YYYY-MM-DD') },
+                { where: { id: subscriptionId }, transaction: t }
+            );
+            await Pedido.update(
+                { checkCount: 0 },
+                { where: { cliente_id: sub.user_id }, transaction: t }
+            );
+            await t.commit();
+        } catch (e) {
+            await t.rollback();
+            throw e;
+        }
+    }
 }
 
 const { getModels } = require('../database/database');
