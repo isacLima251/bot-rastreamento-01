@@ -3,6 +3,7 @@ const whatsappService = require('../services/whatsappService');
 const logService = require('../services/logService');
 const subscriptionService = require('../services/subscriptionService');
 const envioController = require('./envioController');
+const logger = require('../logger');
 const { body, validationResult } = require('express-validator');
 const multer = require('multer');
 const path = require('path');
@@ -71,13 +72,24 @@ exports.listarPedidos = (req, res) => {
     const sqlPaginated = `${sql} ORDER BY dataUltimaMensagem DESC, id DESC LIMIT ? OFFSET ?`;
     const sqlCount = `SELECT COUNT(*) as total FROM pedidos${whereClause}`;
 
-    db.all(sqlPaginated, [...params, limit, offset], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        db.get(sqlCount, params, (err2, row) => {
-            if (err2) return res.status(500).json({ error: err2.message });
-            res.json({ data: rows, total: row.total });
+    try {
+        db.all(sqlPaginated, [...params, limit, offset], (err, rows) => {
+            if (err) {
+                logger.error('Erro ao listar pedidos', { err: err.message, params: req.query, userId: clienteId });
+                return res.status(500).json({ error: 'Falha ao listar pedidos' });
+            }
+            db.get(sqlCount, params, (err2, row) => {
+                if (err2) {
+                    logger.error('Erro ao contar pedidos', { err: err2.message, params: req.query, userId: clienteId });
+                    return res.status(500).json({ error: 'Falha ao listar pedidos' });
+                }
+                res.json({ data: rows, total: row.total });
+            });
         });
-    });
+    } catch (error) {
+        logger.error('Erro inesperado ao listar pedidos', { error: error.message, params: req.query, userId: clienteId });
+        res.status(500).json({ error: 'Falha ao listar pedidos' });
+    }
 };
 
 
