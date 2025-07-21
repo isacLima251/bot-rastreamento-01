@@ -56,51 +56,52 @@ exports.getAutomations = (db, clienteId = null) => {
     });
 };
 
-// Salva todas as configurações de automação recebidas do frontend
-exports.saveAutomations = (db, configs, clienteId = null) => {
-    return new Promise((resolve, reject) => {
-        const stmtSql = DB_CLIENT === 'postgres'
-            ? 'INSERT INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, ?, ?) ON CONFLICT (gatilho, cliente_id) DO UPDATE SET ativo = EXCLUDED.ativo, mensagem = EXCLUDED.mensagem'
-            : 'INSERT OR REPLACE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, ?, ?)';
-        const stmt = db.prepare(stmtSql);
-        const stepStmt = db.prepare('INSERT INTO automacao_passos (gatilho, cliente_id, ordem, tipo, conteudo, mediaUrl, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)');
+const { getModels, getSequelize } = require('../database/database');
 
-        db.serialize(() => {
-            db.run('BEGIN TRANSACTION');
-            for (const gatilho in configs) {
-                const config = configs[gatilho];
-                stmt.run(
-                    gatilho,
-                    clienteId,
-                    config.ativo ? 1 : 0,
-                    config.mensagem || null
-                );
-                db.run('DELETE FROM automacao_passos WHERE gatilho = ? AND cliente_id = ?', [gatilho, clienteId]);
-                if (Array.isArray(config.steps)) {
-                    config.steps.forEach(step => {
-                        stepStmt.run(
-                            gatilho,
-                            clienteId,
-                            step.ordem,
-                            step.tipo,
-                            step.conteudo || null,
-                            step.mediaUrl || null
-                        );
-                    });
+// Salva todas as configurações de automação recebidas do frontend
+exports.saveAutomations = async (db, configs, clienteId = null) => {
+    const sequelize = getSequelize();
+    const { Automacao, AutomacaoPasso } = getModels();
+
+    const transaction = await sequelize.transaction();
+
+    try {
+        for (const gatilho in configs) {
+            const config = configs[gatilho];
+
+            await Automacao.upsert({
+                gatilho,
+                cliente_id: clienteId,
+                ativo: config.ativo ? 1 : 0,
+                mensagem: config.mensagem || null
+            }, { transaction });
+
+            await AutomacaoPasso.destroy({
+                where: { gatilho, cliente_id: clienteId },
+                transaction
+            });
+
+            if (Array.isArray(config.steps)) {
+                for (const step of config.steps) {
+                    await AutomacaoPasso.create({
+                        gatilho,
+                        cliente_id: clienteId,
+                        ordem: step.ordem,
+                        tipo: step.tipo,
+                        conteudo: step.conteudo || null,
+                        mediaUrl: step.mediaUrl || null
+                    }, { transaction });
                 }
             }
-            db.run('COMMIT', (err) => {
-                if (err) return reject(err);
-                resolve({ message: 'Configurações salvas com sucesso.' });
-            });
-        });
+        }
 
-        stmt.finalize();
-        stepStmt.finalize();
-    });
+        await transaction.commit();
+        return { message: 'Configurações salvas com sucesso.' };
+    } catch (err) {
+        await transaction.rollback();
+        throw err;
+    }
 };
-
-const { getModels } = require('../database/database');
 
 // Cria registros padrão de automações para um novo usuário
 exports.createDefaultAutomations = async (db, clienteId, options = {}) => {
