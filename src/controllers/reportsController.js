@@ -34,11 +34,27 @@ exports.getReportSummary = async (req, res) => {
             statusDistributionRows,
             newContactsLast7DaysRows
         ] = await Promise.all([
-            runQuery(db, `SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('codigoRastreio')} IS NOT NULL AND ${q('statusInterno')} NOT IN ('entregue', 'pedido_cancelado')`, [clienteId]),
+            runQuery(
+                db,
+                `SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('codigoRastreio')} IS NOT NULL AND ${q('statusInterno')} NOT IN (?, ?)`,
+                [clienteId, 'entregue', 'pedido_cancelado']
+            ),
             runQuery(db, avgDeliveryQuery, [clienteId]),
-            runQuery(db, `SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('statusInterno')} = 'pedido_atrasado'`, [clienteId]),
-            runQuery(db, `SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('statusInterno')} = 'pedido_cancelado'`, [clienteId]),
-            runQuery(db, `SELECT ${q('statusInterno')} as statusInterno, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('statusInterno')} IS NOT NULL GROUP BY ${q('statusInterno')}` , [clienteId]),
+            runQuery(
+                db,
+                `SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('statusInterno')} = ?`,
+                [clienteId, 'pedido_atrasado']
+            ),
+            runQuery(
+                db,
+                `SELECT COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('statusInterno')} = ?`,
+                [clienteId, 'pedido_cancelado']
+            ),
+            runQuery(
+                db,
+                `SELECT ${q('statusInterno')} as statusInterno, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('statusInterno')} IS NOT NULL GROUP BY ${q('statusInterno')}`,
+                [clienteId]
+            ),
             runQuery(db, newContactsQuery, [clienteId])
         ]);
 
