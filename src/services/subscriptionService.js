@@ -1,4 +1,5 @@
 const moment = require('moment');
+const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
 
 function getUserSubscription(db, userId) {
     return new Promise((resolve, reject) => {
@@ -56,7 +57,8 @@ function createSubscription(db, userId, planId, options = {}) {
         return Subscription.create({ user_id: userId, plan_id: planId, status: 'active', usage: 0 }, { transaction: options.transaction });
     }
     return new Promise((resolve, reject) => {
-        const sql = 'INSERT INTO subscriptions (user_id, plan_id, status, usage) VALUES (?, ?, "active", 0)';
+        const returning = DB_CLIENT === 'postgres' ? ' RETURNING id' : '';
+        const sql = `INSERT INTO subscriptions (user_id, plan_id, status, usage) VALUES (?, ?, "active", 0)${returning}`;
         db.run(sql, [userId, planId], function(err) {
             if (err) return reject(err);
             resolve({ id: this.lastID });
@@ -66,9 +68,10 @@ function createSubscription(db, userId, planId, options = {}) {
 
 function updateUserPlan(db, userId, planId) {
     return new Promise((resolve, reject) => {
+        const returning = DB_CLIENT === 'postgres' ? ' RETURNING id' : '';
         const sql = `INSERT INTO subscriptions (user_id, plan_id, status, usage)
                      VALUES (?, ?, 'active', 0)
-                     ON CONFLICT(user_id) DO UPDATE SET plan_id = excluded.plan_id, status='active', usage=0, renewal_date=NULL`;
+                     ON CONFLICT(user_id) DO UPDATE SET plan_id = excluded.plan_id, status='active', usage=0, renewal_date=NULL${returning}`;
         db.run(sql, [userId, planId], function(err) {
             if (err) return reject(err);
             resolve({ id: this.lastID, changes: this.changes });

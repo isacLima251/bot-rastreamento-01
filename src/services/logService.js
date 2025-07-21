@@ -1,4 +1,5 @@
 const { getModels } = require('../database/database');
+const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
 
 const addLog = (db, clienteId, acao, detalhe = null, options = {}) => {
     if (options.transaction) {
@@ -6,7 +7,8 @@ const addLog = (db, clienteId, acao, detalhe = null, options = {}) => {
         return Log.create({ cliente_id: clienteId, acao, detalhe }, { transaction: options.transaction });
     }
     return new Promise((resolve, reject) => {
-        const sql = `INSERT INTO logs (cliente_id, acao, detalhe) VALUES (?, ?, ?)`;
+        const returning = DB_CLIENT === 'postgres' ? ' RETURNING id' : '';
+        const sql = `INSERT INTO logs (cliente_id, acao, detalhe) VALUES (?, ?, ?)${returning}`;
         db.run(sql, [clienteId, acao, detalhe], function(err) {
             if (err) return reject(err);
             resolve({ id: this.lastID });
