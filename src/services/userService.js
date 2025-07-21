@@ -4,6 +4,7 @@ const integrationConfigService = require('./integrationConfigService');
 const automationService = require('./automationService');
 const { ensureFreePlan } = require('./planService');
 const { getModels } = require('../database/database');
+const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
 
 function generateApiKey() {
     return crypto.randomBytes(20).toString('hex');
@@ -33,7 +34,8 @@ function createUser(db, email, password, isAdmin = 0, isActive = 1, needsPasswor
     return new Promise((resolve, reject) => {
         const hashed = bcrypt.hashSync(password, 10);
         const apiKey = generateApiKey();
-        const stmt = db.prepare('INSERT INTO users (email, password, api_key, is_admin, is_active, precisa_trocar_senha) VALUES (?, ?, ?, ?, ?, ?)');
+        const returning = DB_CLIENT === 'postgres' ? ' RETURNING id' : '';
+        const stmt = db.prepare(`INSERT INTO users (email, password, api_key, is_admin, is_active, precisa_trocar_senha) VALUES (?, ?, ?, ?, ?, ?)${returning}`);
         stmt.run(email, hashed, apiKey, isAdmin, isActive, needsPasswordChange, function(err) {
             if (err) return reject(err);
             const userId = this.lastID;
@@ -65,7 +67,7 @@ async function createUserWithSubscription(db, email, password) {
         const hashedPass = await bcrypt.hash(password, 10);
         const userResult = await new Promise((resolve, reject) => {
             tx.run(
-                'INSERT INTO users (email, password, is_active, precisa_trocar_senha) VALUES (?, ?, ?, ?)',
+                `INSERT INTO users (email, password, is_active, precisa_trocar_senha) VALUES (?, ?, ?, ?)${DB_CLIENT === 'postgres' ? ' RETURNING id' : ''}`,
                 [email, hashedPass, 1, 0],
                 function(err) {
                     if (err) return reject(err);

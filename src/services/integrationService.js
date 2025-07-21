@@ -1,9 +1,11 @@
 const crypto = require('crypto');
+const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
 
 function createIntegration(db, userId, platform, name, secretKey = null) {
     return new Promise((resolve, reject) => {
         const unique_path = crypto.randomBytes(16).toString('hex');
-        const sql = 'INSERT INTO integrations (user_id, platform, name, unique_path, secret_key) VALUES (?, ?, ?, ?, ?)';
+        const returning = DB_CLIENT === 'postgres' ? ' RETURNING id' : '';
+        const sql = `INSERT INTO integrations (user_id, platform, name, unique_path, secret_key) VALUES (?, ?, ?, ?, ?)${returning}`;
 
         db.run(sql, [userId, platform, name, unique_path, secretKey], function(err) {
             if (err) return reject(err);

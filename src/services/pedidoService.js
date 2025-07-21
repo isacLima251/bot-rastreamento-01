@@ -160,7 +160,7 @@ const updateCamposPedido = async (db, pedidoId, campos, clienteId = null) => {
  */
 const addMensagemHistorico = (db, pedidoId, mensagem, tipoMensagem, origem, clienteId = null, mediaUrl = null, messageType = 'texto') => {
     return new Promise((resolve, reject) => {
-        const sqlInsert = `INSERT INTO historico_mensagens (pedido_id, cliente_id, mensagem, tipo_mensagem, origem, media_url, message_type) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+        const sqlInsert = `INSERT INTO historico_mensagens (pedido_id, cliente_id, mensagem, tipo_mensagem, origem, media_url, message_type) VALUES (?, ?, ?, ?, ?, ?, ?)${DB_CLIENT === 'postgres' ? ' RETURNING id' : ''}`;
         const sanitizedMessage = (mensagem === undefined || mensagem === null) ? '' : mensagem;
         const params = [pedidoId, clienteId ?? null, sanitizedMessage, tipoMensagem, origem, mediaUrl, messageType];
 
@@ -279,7 +279,7 @@ const criarPedido = (db, dadosPedido, client, clienteId = null) => {
 
         const fotoUrl = await whatsappService.getProfilePicUrl();
 
-        const sql = `INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, ${q('codigoRastreio')}, notas, ${q('fotoPerfilUrl')}, ${q('dataCriacao')}, ${q('lastCheckedAt')}, ${q('statusChangeAt')}, ${q('checkCount')}, ${q('alertSent')}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        const sql = `INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, ${q('codigoRastreio')}, notas, ${q('fotoPerfilUrl')}, ${q('dataCriacao')}, ${q('lastCheckedAt')}, ${q('statusChangeAt')}, ${q('checkCount')}, ${q('alertSent')}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)${DB_CLIENT === 'postgres' ? ' RETURNING id' : ''}`;
         const params = [clienteId, nome, email || null, telefoneValidado, produto || null, codigoRastreio || null, notas || null, fotoUrl, new Date().toISOString(), null, null, 0, 0];
 
         db.run(sql, params, function (err) {
