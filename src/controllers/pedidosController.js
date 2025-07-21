@@ -1,4 +1,5 @@
 const pedidoService = require('../services/pedidoService');
+const { ALLOWED_UPDATE_FIELDS } = pedidoService;
 const whatsappService = require('../services/whatsappService');
 const logService = require('../services/logService');
 const subscriptionService = require('../services/subscriptionService');
@@ -162,6 +163,11 @@ exports.atualizarPedido = async (req, res) => {
         if (!dados.telefone) {
             return res.status(400).json({ error: "O número de telefone para atualização é inválido." });
         }
+    }
+
+    const camposDesconhecidos = Object.keys(dados).filter(key => !ALLOWED_UPDATE_FIELDS.includes(key));
+    if (camposDesconhecidos.length > 0) {
+        return res.status(400).json({ error: `Campos não permitidos: ${camposDesconhecidos.join(', ')}` });
     }
 
     try {

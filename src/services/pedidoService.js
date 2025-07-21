@@ -4,6 +4,32 @@ const logger = require('../logger');
 const { normalizeTelefone } = require("../utils/normalizeTelefone");
 const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
 const q = c => DB_CLIENT === 'postgres' ? `"${c}"` : c;
+
+// Campos permitidos para atualizações dinâmicas
+const ALLOWED_UPDATE_FIELDS = [
+    'nome',
+    'email',
+    'telefone',
+    'produto',
+    'codigoRastreio',
+    'dataPostagem',
+    'statusInterno',
+    'ultimaAtualizacao',
+    'ultimaLocalizacao',
+    'origemUltimaMovimentacao',
+    'destinoUltimaMovimentacao',
+    'descricaoUltimoEvento',
+    'mensagemUltimoStatus',
+    'notas',
+    'fotoPerfilUrl',
+    'mensagensNaoLidas',
+    'ultimaMensagem',
+    'dataUltimaMensagem',
+    'lastCheckedAt',
+    'statusChangeAt',
+    'checkCount',
+    'alertSent'
+];
 /**
  * Busca todos os pedidos do banco de dados.
  */
@@ -118,7 +144,10 @@ const updateCamposPedido = async (db, pedidoId, campos, clienteId = null) => {
     }
     try {
         // Filtra os campos para remover qualquer chave cujo valor seja undefined
-        const camposValidos = Object.keys(campos || {}).filter(key => campos[key] !== undefined);
+        // e que não esteja na lista de campos permitidos
+        const camposValidos = Object.keys(campos || {}).filter(
+            key => campos[key] !== undefined && ALLOWED_UPDATE_FIELDS.includes(key)
+        );
 
         // Se não houver campos válidos, não há o que atualizar
         if (camposValidos.length === 0) {
@@ -306,4 +335,5 @@ module.exports = {
     criarPedido,
     getPedidosComCodigoAtivo,
     normalizeTelefone,
+    ALLOWED_UPDATE_FIELDS,
 };
