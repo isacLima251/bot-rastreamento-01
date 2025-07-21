@@ -1,5 +1,6 @@
 const DEFAULT_MESSAGES = require('../constants/defaultMessages');
 const whatsappService = require('./whatsappService');
+const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
 
 // Busca todas as automações e seus passos em formato acessível
 exports.getAutomations = (db, clienteId = null) => {
@@ -58,7 +59,10 @@ exports.getAutomations = (db, clienteId = null) => {
 // Salva todas as configurações de automação recebidas do frontend
 exports.saveAutomations = (db, configs, clienteId = null) => {
     return new Promise((resolve, reject) => {
-        const stmt = db.prepare('INSERT OR REPLACE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, ?, ?)');
+        const stmtSql = DB_CLIENT === 'postgres'
+            ? 'INSERT INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, ?, ?) ON CONFLICT (gatilho, cliente_id) DO UPDATE SET ativo = EXCLUDED.ativo, mensagem = EXCLUDED.mensagem'
+            : 'INSERT OR REPLACE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, ?, ?)';
+        const stmt = db.prepare(stmtSql);
         const stepStmt = db.prepare('INSERT INTO automacao_passos (gatilho, cliente_id, ordem, tipo, conteudo, mediaUrl, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)');
 
         db.serialize(() => {
@@ -120,9 +124,10 @@ exports.createDefaultAutomations = async (db, clienteId, options = {}) => {
     }
 
     return new Promise((resolve, reject) => {
-        const stmt = db.prepare(
-            'INSERT OR IGNORE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, 1, ?)'
-        );
+        const defaultSql = DB_CLIENT === 'postgres'
+            ? 'INSERT INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, 1, ?) ON CONFLICT DO NOTHING'
+            : 'INSERT OR IGNORE INTO automacoes (gatilho, cliente_id, ativo, mensagem) VALUES (?, ?, 1, ?)';
+        const stmt = db.prepare(defaultSql);
         const stepStmt = db.prepare(
             'INSERT INTO automacao_passos (gatilho, cliente_id, ordem, tipo, conteudo, mediaUrl, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
         );
