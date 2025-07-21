@@ -112,6 +112,10 @@ const findPedidoByCodigo = (db, codigo, clienteId) => {
  * Atualiza um ou mais campos de um pedido específico.
  */
 const updateCamposPedido = async (db, pedidoId, campos, clienteId = null) => {
+    if (!pedidoId) {
+        logger.error('updateCamposPedido called without a valid pedidoId');
+        return Promise.reject(new Error('Invalid pedidoId'));
+    }
     try {
         // Filtra os campos para remover qualquer chave cujo valor seja undefined
         const camposValidos = Object.keys(campos || {}).filter(key => campos[key] !== undefined);
