@@ -895,8 +895,36 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         if (!statusPieChartCanvas || typeof Chart === 'undefined') return;
         if (statusChart) statusChart.destroy();
 
+        const container = statusPieChartCanvas.parentElement;
+        if (!Array.isArray(data) || data.length === 0) {
+            statusPieChartCanvas.style.display = 'none';
+            if (container) {
+                container.querySelector('.status-chart-empty')?.remove();
+                const msg = document.createElement('p');
+                msg.className = 'info-mensagem status-chart-empty';
+                msg.textContent = 'Sem dados de status';
+                container.appendChild(msg);
+            }
+            return;
+        }
+
         const labels = data.map(item => item.statusInterno ? (item.statusInterno.charAt(0).toUpperCase() + item.statusInterno.slice(1).replace(/_/g, ' ')) : 'Não definido');
-        const counts = data.map(item => item.count);
+        const counts = data.map(item => Number(item.count) || 0);
+
+        if (counts.every(c => c === 0)) {
+            statusPieChartCanvas.style.display = 'none';
+            if (container) {
+                container.querySelector('.status-chart-empty')?.remove();
+                const msg = document.createElement('p');
+                msg.className = 'info-mensagem status-chart-empty';
+                msg.textContent = 'Sem dados de status';
+                container.appendChild(msg);
+            }
+            return;
+        }
+
+        statusPieChartCanvas.style.display = 'block';
+        if (container) container.querySelector('.status-chart-empty')?.remove();
 
         const backgroundColors = [
             '#3b82f6',
