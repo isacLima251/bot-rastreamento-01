@@ -36,6 +36,12 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    if (!dateStr || isNaN(d)) return '-';
+    return d.toLocaleDateString('pt-BR');
+}
+
 let stepCounter = 0;
 
 function addStep(cardElOrType, maybeType, data = {}) {
@@ -1008,7 +1014,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
             const statusClass = `status-${(pedido.status || '').toLowerCase().replace(/ /g, '-')}`;
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${new Date(pedido.createdAt).toLocaleDateString('pt-BR')}</td>
+                <td>${formatDate(pedido.createdAt)}</td>
                 <td>${escapeHtml(pedido.nome || '-')}</td>
                 <td>${escapeHtml(pedido.produto || 'Não informado')}</td>
                 <td>${escapeHtml(pedido.codigoRastreio || 'N/A')}</td>
@@ -1049,7 +1055,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                     const statusClass = `status-${status.toLowerCase().replace(/ /g, '-')}`;
 
                     row.innerHTML = `
-                        <td>${new Date(pedido.createdAt).toLocaleDateString('pt-BR')}</td>
+                        <td>${formatDate(pedido.createdAt)}</td>
                         <td>${escapeHtml(pedido.nome || '-')}</td>
                         <td>${escapeHtml(pedido.produto || 'Não informado')}</td>
                         <td>${escapeHtml(pedido.codigoRastreio || 'N/A')}</td>
