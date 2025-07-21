@@ -207,6 +207,28 @@ POST https://seu-servidor/api/postback/<unique_path>
 
 Nosso servidor já reconhece automaticamente webhooks da Hotmart e da Kiwify, convertendo os campos para esse formato padronizado. Em outras plataformas, mantenha os nomes o mais próximo possível do exemplo acima.
 
+## 📝 Logs do Venom e PM2
+
+O Venom costuma imprimir mensagens de status no console, que o PM2 grava em
+`bot-rastreamento-error.log`. Elas não representam erros.
+
+As opções definidas em `src/whatsappSessions.js` já desativam vários desses
+logs (`logQR: false`, `updatesLog: false`, `disableSpins` e `disableWelcome`).
+Se desejar unificar os arquivos de log do PM2, crie um `ecosystem.config.js`
+apontando `error_file` para `/dev/stdout`:
+
+```js
+module.exports = {
+  apps: [{
+    name: 'bot-rastreamento',
+    script: 'server.js',
+    error_file: '/dev/stdout',
+    out_file: '/dev/stdout',
+    merge_logs: true
+  }]
+};
+```
+
 ---
 
 ## ⚖️ Licença
