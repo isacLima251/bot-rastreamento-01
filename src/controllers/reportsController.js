@@ -19,7 +19,7 @@ exports.getReportSummary = async (req, res) => {
         const clienteId = req.user.id;
 
         const avgDeliveryQuery = DB_CLIENT === 'postgres'
-            ? `SELECT AVG(EXTRACT(EPOCH FROM (COALESCE("ultimaAtualizacao", CURRENT_TIMESTAMP) - COALESCE("dataPostagem", "dataCriacao"))) / 86400) as "avgDays" FROM pedidos WHERE cliente_id = ? AND "statusInterno" = 'entregue' AND "ultimaAtualizacao" IS NOT NULL`
+            ? `SELECT AVG(EXTRACT(EPOCH FROM (COALESCE(CAST("ultimaAtualizacao" AS TIMESTAMP), CURRENT_TIMESTAMP) - COALESCE(CAST("dataPostagem" AS TIMESTAMP), "dataCriacao"))) / 86400) as "avgDays" FROM pedidos WHERE cliente_id = ? AND "statusInterno" = 'entregue' AND "ultimaAtualizacao" IS NOT NULL`
             : "SELECT AVG(julianday(COALESCE(ultimaAtualizacao, CURRENT_TIMESTAMP)) - julianday(COALESCE(dataPostagem, dataCriacao))) as avgDays FROM pedidos WHERE cliente_id = ? AND statusInterno = 'entregue' AND ultimaAtualizacao IS NOT NULL";
 
         const newContactsQuery = DB_CLIENT === 'postgres'
