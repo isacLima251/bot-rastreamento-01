@@ -137,6 +137,17 @@ node scripts/migrateSqliteToPostgres.js
 O script conecta-se aos bancos SQLite e PostgreSQL utilizando as bibliotecas `sqlite3` e `pg`,
 transferindo cada registro sem remover os dados originais.
 
+### 4. Testar rastreamento no terminal
+
+Para verificar rapidamente se sua chave do Site Rastreio está funcionando,
+execute o script `testRastreamento.js` passando um código de rastreio. O script
+mostra os dados retornados pela API diretamente no terminal:
+
+```bash
+node scripts/testRastreamento.js AM123456789BR
+```
+
+
 ---
 
 ## 📚 Estrutura do Projeto
