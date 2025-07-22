@@ -147,6 +147,15 @@ mostra os dados retornados pela API diretamente no terminal:
 node scripts/testRastreamento.js AM123456789BR
 ```
 
+### 5. Sincronizar chave de rastreio para todos os usuários
+
+Se os usuários já foram criados antes de definir `SITERASTREIO_API_KEY`, execute
+o script abaixo para gravar essa chave em todas as contas existentes:
+
+```bash
+node scripts/setRastreioApiKey.js
+```
+
 
 ---
 

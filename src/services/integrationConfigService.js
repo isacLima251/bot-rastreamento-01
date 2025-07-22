@@ -34,14 +34,25 @@ function updateConfig(db, userId, fields) {
 }
 
 const { getModels } = require('../database/database');
+const DEFAULT_API_KEY = process.env.SITERASTREIO_API_KEY || null;
 
 function createDefault(db, userId, options = {}) {
+    const baseData = { user_id: userId };
+    if (DEFAULT_API_KEY) {
+        baseData.rastreio_api_key = DEFAULT_API_KEY;
+    }
+
     if (options.transaction) {
         const { IntegrationSetting } = getModels();
-        return IntegrationSetting.create({ user_id: userId }, { transaction: options.transaction });
+        return IntegrationSetting.create(baseData, { transaction: options.transaction });
     }
+
+    const columns = Object.keys(baseData).join(', ');
+    const placeholders = Object.keys(baseData).map(() => '?').join(', ');
+    const values = Object.values(baseData);
+
     return new Promise((resolve, reject) => {
-        db.run('INSERT INTO integration_settings (user_id) VALUES (?)', [userId], function(err) {
+        db.run(`INSERT INTO integration_settings (${columns}) VALUES (${placeholders})`, values, function(err) {
             if (err) return reject(err);
             resolve();
         });
