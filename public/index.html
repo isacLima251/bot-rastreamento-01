@@ -499,6 +499,7 @@
                                         <th>Produto</th>
                                         <th>Código de Rastreio</th>
                                         <th>Status</th>
+                                        <th>Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="corpo-tabela-relatorio">
@@ -560,6 +561,16 @@
             <h3 id="modal-aviso-titulo"></h3>
             <p id="modal-aviso-texto"></p>
             <button id="btn-modal-aviso-ok" class="btn-primary" style="width: 100%;">Entendi</button>
+        </div>
+    </div>
+    <div id="modal-verificar" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Detalhes do Rastreio</h3>
+            <div id="verificar-conteudo">A carregar...</div>
+            <div class="modal-acoes">
+                <button type="button" id="btn-verificar-cancelar" class="btn-cancelar">Cancelar</button>
+                <button type="button" id="btn-verificar-enviar" class="btn-salvar">Enviar para o Cliente</button>
+            </div>
         </div>
     </div>
 

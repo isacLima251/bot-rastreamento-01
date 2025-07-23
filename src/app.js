@@ -149,6 +149,7 @@ function createExpressApp(db, sessionManager) {
   app.post('/api/pedidos/:id/enviar-midia', planCheck, pedidosController.upload.single('file'), pedidosController.enviarMidia);
   app.post('/api/pedidos/:id/atualizar-foto', planCheck, pedidosController.atualizarFotoDoPedido);
   app.put('/api/pedidos/:id/marcar-como-lido', planCheck, pedidosController.marcarComoLido);
+  app.get('/api/pedidos/:id/verificar-rastreio', planCheck, pedidosController.verificarRastreioManual);
 
   app.post('/api/upload', planCheck, uploadController.upload.single('file'), uploadController.uploadFile);
 

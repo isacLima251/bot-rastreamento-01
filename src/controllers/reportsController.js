@@ -106,7 +106,7 @@ exports.getClientesComRastreio = async (req, res) => {
 
         const createdAtAlias = DB_CLIENT === 'postgres' ? '"createdAt"' : 'createdAt';
 
-        const sql = `SELECT nome, produto, ${q('codigoRastreio')},
+        const sql = `SELECT id, nome, produto, ${q('codigoRastreio')},
                             ${q('statusInterno')} AS status,
                             ${q('dataCriacao')} AS ${createdAtAlias}
                      FROM pedidos

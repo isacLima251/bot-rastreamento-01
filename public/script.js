@@ -259,6 +259,10 @@ const modalPlatformSelect = document.getElementById('modal-platform-select');
 const btnClosePlatformModal = document.getElementById('btn-close-platform-modal');
 const platformGrid = document.getElementById('platform-grid');
 const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
+const modalVerificarEl = document.getElementById('modal-verificar');
+const verificarConteudoEl = document.getElementById('verificar-conteudo');
+const btnVerificarCancelarEl = document.getElementById('btn-verificar-cancelar');
+const btnVerificarEnviarEl = document.getElementById('btn-verificar-enviar');
     if (loggedUserEl) loggedUserEl.textContent = userData.email || 'Usuário';
 
 
@@ -1009,7 +1013,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         tabelaCorpo.innerHTML = '';
 
         if (!rows || rows.length === 0) {
-            tabelaCorpo.innerHTML = '<tr><td colspan="5">Nenhum cliente com rastreamento encontrado.</td></tr>';
+            tabelaCorpo.innerHTML = '<tr><td colspan="6">Nenhum cliente com rastreamento encontrado.</td></tr>';
             return;
         }
 
@@ -1022,6 +1026,7 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                 <td>${escapeHtml(pedido.produto || 'Não informado')}</td>
                 <td>${escapeHtml(pedido.codigoRastreio || 'N/A')}</td>
                 <td><span class="status-badge ${statusClass}">${escapeHtml(pedido.status)}</span></td>
+                <td><button class="btn-verificar" data-id="${pedido.id}">Verificar</button></td>
             `;
             tabelaCorpo.appendChild(row);
         });
@@ -1067,14 +1072,14 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                     tabelaCorpo.appendChild(row);
                 });
             } else {
-                tabelaCorpo.innerHTML = `<tr><td colspan="5">Nenhum cliente com rastreamento encontrado.</td></tr>`;
+                tabelaCorpo.innerHTML = `<tr><td colspan="6">Nenhum cliente com rastreamento encontrado.</td></tr>`;
             }
         })
         .catch(error => {
             console.error("Erro detalhado ao carregar relatório:", error);
             const tabelaCorpo = document.getElementById('corpo-tabela-relatorio');
             if (tabelaCorpo) {
-                tabelaCorpo.innerHTML = `<tr><td colspan="5">Não foi possível carregar o relatório. Erro: ${error.message}</td></tr>`;
+                tabelaCorpo.innerHTML = `<tr><td colspan="6">Não foi possível carregar o relatório. Erro: ${error.message}</td></tr>`;
             }
         });
     }
@@ -1933,6 +1938,26 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
         modalPlatformSelect.classList.remove('active');
     }
 
+    function openVerifyModal(pedidoId) {
+        if (!modalVerificarEl || !verificarConteudoEl) return;
+        verificarConteudoEl.textContent = 'A carregar...';
+        modalVerificarEl.classList.add('active');
+        authFetch(`/api/pedidos/${pedidoId}/verificar-rastreio`)
+            .then(r => r.json())
+            .then(data => {
+                verificarConteudoEl.innerHTML = `
+                    <p><strong>Status Atual:</strong> ${escapeHtml(data.statusInterno || '-')}</p>
+                    <p><strong>Data e Hora da Última Atualização:</strong> ${escapeHtml(data.ultimaAtualizacao || '-')}</p>
+                    <p><strong>Localização Atual:</strong> ${escapeHtml(data.ultimaLocalizacao || '-')}</p>
+                    <h4>Histórico Completo dos Eventos:</h4>
+                    <ul>${(data.eventos || []).map(ev => `<li>${escapeHtml(ev.date || ev.dtHrCriado || '')} - ${escapeHtml(ev.description || ev.descricao || ev.descricaoFrontEnd || '')} (${escapeHtml(ev.location || ev.unidade?.endereco?.cidade || '')})</li>`).join('')}</ul>
+                `;
+            })
+            .catch(err => {
+                verificarConteudoEl.innerHTML = `<p>Erro ao consultar rastreio: ${escapeHtml(err.message)}</p>`;
+            });
+    }
+
     const integrationsListEl = document.getElementById('integrations-list');
     if (integrationsListEl) {
         integrationsListEl.addEventListener('click', (e) => {
@@ -1973,6 +1998,8 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
     if (modalPlatformSelect) modalPlatformSelect.addEventListener('click', (e) => {
         if (e.target === modalPlatformSelect) closePlatformModal();
     });
+    if (btnVerificarCancelarEl) btnVerificarCancelarEl.addEventListener('click', () => modalVerificarEl.classList.remove('active'));
+    if (modalVerificarEl) modalVerificarEl.addEventListener('click', (e) => { if (e.target === modalVerificarEl) modalVerificarEl.classList.remove('active'); });
     if (btnCancelSetup) btnCancelSetup.addEventListener('click', showIntegrationsList);
 
     if (trackingSearchInputEl) {
@@ -1995,6 +2022,12 @@ const btnCopySetupWebhook = document.getElementById('btn-copy-setup-webhook');
                 navigator.clipboard.writeText(code);
                 showNotification('Código copiado!', 'success');
             }
+        }
+
+        const verifyBtn = e.target.closest('.btn-verificar');
+        if (verifyBtn) {
+            const id = verifyBtn.dataset.id;
+            if (id) openVerifyModal(id);
         }
     });
 
