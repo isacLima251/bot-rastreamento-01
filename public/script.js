@@ -252,6 +252,8 @@ const authFetch = async (url, options = {}) => {
 const modalUpgradeEl = document.getElementById('modal-upgrade');
 const btnUpgradePlansEl = document.getElementById('btn-upgrade-plans');
 const planStatusEl = document.getElementById('plan-status');
+// Armazena o nome do plano do usuário para controlar funcionalidades
+let userPlanName = 'Grátis';
 const btnImportarCsv = document.getElementById('btn-importar-csv');
 const csvFileInput = document.getElementById('csv-file-input');
 const btnAddIntegration = document.getElementById('btn-add-integration');
@@ -1068,13 +1070,16 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
                     const status = pedido.status || 'indefinido';
                     const statusClass = `status-${status.toLowerCase().replace(/ /g, '-')}`;
 
+                    const isFreePlan = userPlanName === 'Grátis';
+                    const disabledAttribute = isFreePlan ? 'disabled title="Funcionalidade disponível apenas em planos pagos."' : '';
+
                     row.innerHTML = `
                         <td>${formatDate(pedido.createdAt)}</td>
                         <td>${escapeHtml(pedido.nome || '-')}</td>
                         <td>${escapeHtml(pedido.produto || 'Não informado')}</td>
                         <td>${escapeHtml(pedido.codigoRastreio || 'N/A')}</td>
                         <td><span class="status-badge ${statusClass}">${escapeHtml(status)}</span></td>
-                        <td><button class="btn-verificar" data-id="${pedido.id}">Verificar</button></td>
+                        <td><button class="btn-verificar" data-id="${pedido.id}" ${disabledAttribute}>Verificar</button></td>
                     `;
                     tabelaCorpo.appendChild(row);
                 });
@@ -1099,6 +1104,8 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
             const resp = await authFetch('/api/subscription');
             if (!resp.ok) throw new Error('Falha ao carregar assinatura');
             const { subscription } = await resp.json();
+            // Guarda o nome do plano para uso em outras partes da interface
+            userPlanName = subscription.plan_name;
             const limite = subscription.monthly_limit === -1 ? 'Ilimitado' : subscription.monthly_limit;
             const percent = subscription.monthly_limit === -1 ? 0 : Math.min(100, Math.round((subscription.usage / subscription.monthly_limit) * 100));
             planStatusEl.innerHTML = `<div>Plano Atual: ${subscription.plan_name} — Uso este mês: ${subscription.usage} / ${limite} pedidos</div><div class="plan-progress"><div class="plan-progress-bar" style="width:${percent}%"></div></div>`;
