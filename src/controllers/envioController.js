@@ -40,14 +40,20 @@ function personalizarMensagem(mensagem, pedido) {
 
     let dataAtualizacaoRaw = '';
     let dataAtualizacaoFormatada = '';
+    let horaAtualizacao = '';
+    let dataAtualizacaoData = '';
     if (pedido.ultimaAtualizacao) {
         try {
             const data = new Date(pedido.ultimaAtualizacao);
             dataAtualizacaoRaw = data.toISOString();
             dataAtualizacaoFormatada = data.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            horaAtualizacao = data.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
+            dataAtualizacaoData = data.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
         } catch (e) {
             dataAtualizacaoRaw = pedido.ultimaAtualizacao;
             dataAtualizacaoFormatada = pedido.ultimaAtualizacao;
+            horaAtualizacao = pedido.ultimaAtualizacao;
+            dataAtualizacaoData = pedido.ultimaAtualizacao;
         }
     }
 
@@ -77,6 +83,9 @@ function personalizarMensagem(mensagem, pedido) {
         .replace(/{{data_postagem_formatada}}/g, dataPostagemFormatada || '')
         .replace(/{{data_atualizacao_formatada}}/g, dataAtualizacaoFormatada || '')
         .replace(/{{data_atualizacao}}/g, dataAtualizacaoRaw || '')
+        .replace(/{{data_atualizacao_data}}/g, dataAtualizacaoData || '')
+        .replace(/{{hora_atualizacao}}/g, horaAtualizacao || '')
+        .replace(/{{descricao_ultimo_evento}}/g, pedido.descricaoUltimoEvento || '')
         .replace(/{{cidade_etapa_origem}}/g, pedido.origemUltimaMovimentacao || '')
         .replace(/{{cidade_etapa_destino}}/g, pedido.destinoUltimaMovimentacao || '')
         .replace(/{{link_rastreio}}/g, linkRastreio)

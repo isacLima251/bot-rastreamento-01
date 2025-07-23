@@ -157,6 +157,13 @@ o script abaixo para gravar essa chave em todas as contas existentes:
 node scripts/setRastreioApiKey.js
 ```
 
+## 💬 Personalização das Mensagens
+
+Use variáveis nos textos das automações para inserir dados do pedido de forma dinâmica:
+
+- `{{descricao_ultimo_evento}}` – descrição completa da última movimentação.
+- `{{data_atualizacao_data}}` – data da última atualização (dd/mm/aaaa).
+- `{{hora_atualizacao}}` – hora da última atualização (HH:mm).
 
 ---
 
