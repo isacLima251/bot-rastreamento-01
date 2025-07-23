@@ -1779,10 +1779,25 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
 
     if (btnEnviarResumoEl) btnEnviarResumoEl.addEventListener('click', () => {
         if (!currentTrackingData) return;
-        const pedido = todosOsPedidos.find(p => p.id === currentTrackingPedidoId) || {};
-        const nome = pedido.nome ? pedido.nome.split(' ')[0] : 'Cliente';
-        const msg = `Olá, ${nome}! \ud83d\udce6\nSegue a última atualização do seu pedido:\n\nStatus: ${currentTrackingData.statusInterno || '-'}\nLocal: ${currentTrackingData.ultimaLocalizacao || '-'}\nData: ${currentTrackingData.ultimaAtualizacao || '-'}`;
-        enviarMensagemFormatada(msg);
+
+        const pedido = todosOsPedidos.find(p => p.id === currentTrackingPedidoId);
+        const primeiroNome = pedido ? pedido.nome.split(' ')[0] : 'Cliente';
+
+        let statusPrincipal = '';
+        if (currentTrackingData.origemUltimaMovimentacao && currentTrackingData.destinoUltimaMovimentacao) {
+            statusPrincipal = `Seu pedido saiu de ${currentTrackingData.origemUltimaMovimentacao} e está a caminho de ${currentTrackingData.destinoUltimaMovimentacao}.`;
+        } else {
+            statusPrincipal = `O status do seu pedido é "${currentTrackingData.statusInterno}" na cidade de ${currentTrackingData.ultimaLocalizacao}.`;
+        }
+
+        const dataRaw = new Date(currentTrackingData.ultimaAtualizacao);
+        const dataFormatada = dataRaw && !isNaN(dataRaw)
+            ? dataRaw.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+            : (currentTrackingData.ultimaAtualizacao || '-');
+
+        const textoResumo = `Olá, ${primeiroNome}! 📦\n${statusPrincipal}\n\nÚltima atualização: ${dataFormatada}\nEm breve chegará em sua residência!`;
+
+        enviarMensagemFormatada(textoResumo);
     });
 
     if (btnEnviarHistoricoEl) btnEnviarHistoricoEl.addEventListener('click', () => {
