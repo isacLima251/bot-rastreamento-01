@@ -440,6 +440,13 @@ exports.verificarRastreioManual = async (req, res) => {
     const clienteId = req.user.id;
     const { id } = req.params;
 
+    // Verificação de plano: impede uso para assinaturas gratuitas
+    if (req.subscription && req.subscription.plan_name === 'Grátis') {
+        return res.status(403).json({
+            error: 'Esta funcionalidade não está disponível no plano Grátis. Por favor, faça um upgrade.'
+        });
+    }
+
     try {
         const pedido = await pedidoService.getPedidoById(db, id, clienteId);
         if (!pedido) return res.status(404).json({ error: 'Pedido não encontrado.' });
