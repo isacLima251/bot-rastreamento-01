@@ -4,6 +4,8 @@ const whatsappService = require('../services/whatsappService');
 const logService = require('../services/logService');
 const subscriptionService = require('../services/subscriptionService');
 const envioController = require('./envioController');
+const rastreamentoService = require('../services/rastreamentoService');
+const integrationService = require('../services/integrationConfigService');
 const logger = require('../logger');
 const { body, validationResult } = require('express-validator');
 const multer = require('multer');
@@ -429,6 +431,48 @@ exports.importarPedidos = async (req, res) => {
     } catch (error) {
         console.error("Erro na importação em massa:", error);
         res.status(500).json({ error: "Erro interno no servidor durante a importação." });
+    }
+};
+
+// Verifica o rastreio de um pedido sob demanda
+exports.verificarRastreioManual = async (req, res) => {
+    const db = req.db;
+    const clienteId = req.user.id;
+    const { id } = req.params;
+
+    try {
+        const pedido = await pedidoService.getPedidoById(db, id, clienteId);
+        if (!pedido) return res.status(404).json({ error: 'Pedido não encontrado.' });
+        if (!pedido.codigoRastreio) {
+            return res.status(400).json({ error: 'Pedido não possui código de rastreio.' });
+        }
+
+        const config = await integrationService.getConfig(db, clienteId);
+        const apiKey = config && config.rastreio_api_key;
+        const dadosRastreio = await rastreamentoService.rastrearCodigo(pedido.codigoRastreio, apiKey);
+
+        const updateData = {
+            lastCheckedAt: new Date().toISOString(),
+            checkCount: (pedido.checkCount || 0) + 1
+        };
+
+        if (dadosRastreio.statusInterno && dadosRastreio.statusInterno !== pedido.statusInterno) {
+            Object.assign(updateData, {
+                statusInterno: dadosRastreio.statusInterno,
+                ultimaLocalizacao: dadosRastreio.ultimaLocalizacao,
+                ultimaAtualizacao: dadosRastreio.ultimaAtualizacao,
+                origemUltimaMovimentacao: dadosRastreio.origemUltimaMovimentacao,
+                destinoUltimaMovimentacao: dadosRastreio.destinoUltimaMovimentacao,
+                descricaoUltimoEvento: dadosRastreio.descricaoUltimoEvento,
+                statusChangeAt: new Date().toISOString()
+            });
+        }
+
+        await pedidoService.updateCamposPedido(db, id, updateData, clienteId);
+        res.json(dadosRastreio);
+    } catch (error) {
+        console.error('Erro ao verificar rastreio manualmente:', error);
+        res.status(500).json({ error: 'Falha ao consultar o rastreio.' });
     }
 };
 
