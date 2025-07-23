@@ -52,17 +52,18 @@ PUPPETEER_SKIP_DOWNLOAD=1 npm install
 cp .env.example .env
 ```
 
-Edite o `.env` com suas chaves e URLs de callback. As principais variáveis são:
+### Configuração do .env
+
+Edite o arquivo copiado preenchendo suas chaves e URLs de callback. As principais variáveis usadas pelos scripts de rastreamento são:
 - `JWT_SECRET` – **obrigatório**. Chave usada para assinar os tokens JWT. O servidor não inicia se ela estiver vazia
-- `SITERASTREIO_API_KEY` – chave da API do Site Rastreio
+- `SITERASTREIO_API_KEY` – chave da API do Site Rastreio. Necessária para rodar `scripts/testRastreamento.js`
 - `TICTO_SECRET` – token para validar os webhooks da Ticto (enviado no header `X-Ticto-Token`)
 - `PORT` – porta em que o servidor irá rodar (padrão 3000)
 - `DB_PATH` – caminho para o arquivo SQLite (opcional)
 - `APP_URL` – URL base para gerar links nos e-mails enviados
 - `RESEND_API_KEY` – chave para o serviço de e-mails Resend
-
-- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` e `POSTGRES_HOST` podem ser definidos para usar PostgreSQL em container.
-- `DB_CLIENT` deve ser `postgres` para conectar ao banco no docker-compose.
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` e `POSTGRES_HOST` podem ser definidos para usar PostgreSQL em container
+- `DB_CLIENT` deve ser `postgres` para conectar ao banco no docker-compose
 
 Após configurar o `.env`, execute as migrações para criar as tabelas:
 
