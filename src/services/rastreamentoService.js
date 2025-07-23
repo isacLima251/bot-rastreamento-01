@@ -56,9 +56,24 @@ async function rastrearCodigo(codigo, apiKey = null) {
             }
         }
 
+        // Fallback quando os dados de origem/destino nao sao encontrados na descricao
+        if (!origem) {
+            origem = ultimoEvento.unidade?.endereco?.cidade || null;
+        }
+
+        if (!destino) {
+            destino = ultimoEvento.unidadeDestino?.endereco?.cidade || null;
+        }
+
+        const ultimaLocalizacao =
+            ultimoEvento.location ||
+            ultimoEvento.unidadeDestino?.endereco?.cidade ||
+            ultimoEvento.unidade?.endereco?.cidade ||
+            '-';
+
         return {
             statusInterno: ultimoEvento.status || ultimoEvento.descricaoFrontEnd || 'Desconhecido',
-            ultimaLocalizacao: ultimoEvento.location || ultimoEvento.unidade?.endereco?.cidade || '-',
+            ultimaLocalizacao: ultimaLocalizacao,
             ultimaAtualizacao: `${ultimoEvento.date || ''} ${ultimoEvento.time || ''}`.trim() || ultimoEvento.dtHrCriado?.date || '-',
             origemUltimaMovimentacao: origem,
             destinoUltimaMovimentacao: destino,
