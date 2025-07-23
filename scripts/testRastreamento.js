@@ -27,7 +27,15 @@ const { rastrearCodigo } = require('../src/services/rastreamentoService');
     }
 
     if (ultimaAtualizacao) {
-      mensagem += `\nAtualizado em: ${ultimaAtualizacao}`;
+      const data = new Date(ultimaAtualizacao);
+      const formatada = !isNaN(data)
+        ? data.toLocaleString('pt-BR', {
+            timeZone: 'America/Sao_Paulo',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        : ultimaAtualizacao;
+      mensagem += `\nAtualizado em: ${formatada}`;
     }
 
     console.log(mensagem);
