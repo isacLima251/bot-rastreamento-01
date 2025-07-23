@@ -24,32 +24,52 @@ function incrementUsage(db, subscriptionId) {
 }
 
 const pedidoService = require('./pedidoService');
+const { getModels, getSequelize } = require('../database/database');
 
-function resetUsageIfNeeded(db, subscriptionId) {
-    return new Promise((resolve, reject) => {
-        db.get('SELECT usage, renewal_date, user_id FROM subscriptions WHERE id = ?', [subscriptionId], (err, sub) => {
+async function resetUsageIfNeeded(db, subscriptionId) {
+    const sub = await new Promise((resolve, reject) => {
+        db.get('SELECT usage, renewal_date, user_id FROM subscriptions WHERE id = ?', [subscriptionId], (err, row) => {
             if (err) return reject(err);
-            if (!sub) return resolve();
-            const now = moment();
-            if (!sub.renewal_date || moment(sub.renewal_date).isBefore(now)) {
-                const next = now.clone().add(1, 'month').startOf('day');
-                db.serialize(() => {
-                    db.run('BEGIN TRANSACTION');
-                    db.run('UPDATE subscriptions SET usage = 0, renewal_date = ? WHERE id = ?', [next.format('YYYY-MM-DD'), subscriptionId]);
-                    db.run('UPDATE pedidos SET checkCount = 0 WHERE cliente_id = ?', [sub.user_id]);
-                    db.run('COMMIT', (e) => {
-                        if (e) return reject(e);
-                        resolve();
-                    });
-                });
-            } else {
-                resolve();
-            }
+            resolve(row);
         });
     });
+
+    if (!sub) return;
+
+    const now = moment();
+    if (sub.renewal_date && !moment(sub.renewal_date).isBefore(now)) {
+        return;
+    }
+
+    const next = now.clone().add(1, 'month').startOf('day');
+
+    if (DB_CLIENT === 'postgres') {
+        const sequelize = getSequelize();
+        const { Subscription, Pedido } = getModels();
+        const t = await sequelize.transaction();
+        try {
+            await Subscription.update({ usage: 0, renewal_date: next.format('YYYY-MM-DD') }, { where: { id: subscriptionId }, transaction: t });
+            await Pedido.update({ checkCount: 0 }, { where: { cliente_id: sub.user_id }, transaction: t });
+            await t.commit();
+        } catch (err) {
+            await t.rollback();
+            throw err;
+        }
+    } else {
+        await new Promise((resolve, reject) => {
+            db.serialize(() => {
+                db.run('BEGIN TRANSACTION');
+                db.run('UPDATE subscriptions SET usage = 0, renewal_date = ? WHERE id = ?', [next.format('YYYY-MM-DD'), subscriptionId]);
+                db.run('UPDATE pedidos SET checkCount = 0 WHERE cliente_id = ?', [sub.user_id]);
+                db.run('COMMIT', (e) => {
+                    if (e) return reject(e);
+                    resolve();
+                });
+            });
+        });
+    }
 }
 
-const { getModels } = require('../database/database');
 
 function createSubscription(db, userId, planId, options = {}) {
     if (options.transaction) {
