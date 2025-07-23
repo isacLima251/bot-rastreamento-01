@@ -1780,8 +1780,9 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
     if (btnEnviarResumoEl) btnEnviarResumoEl.addEventListener('click', () => {
         if (!currentTrackingData) return;
 
-        const pedido = todosOsPedidos.find(p => p.id === currentTrackingPedidoId);
-        const primeiroNome = pedido ? pedido.nome.split(' ')[0] : 'Cliente';
+        const pedido = todosOsPedidos.find(p => p.id === currentTrackingPedidoId) ||
+                       trackingDataCache.find(p => p.id === currentTrackingPedidoId);
+        const primeiroNome = pedido && pedido.nome ? pedido.nome.split(' ')[0] : 'Cliente';
 
         let statusPrincipal = '';
         if (currentTrackingData.origemUltimaMovimentacao && currentTrackingData.destinoUltimaMovimentacao) {
@@ -1802,7 +1803,8 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
 
     if (btnEnviarHistoricoEl) btnEnviarHistoricoEl.addEventListener('click', () => {
         if (!currentTrackingData) return;
-        const pedido = todosOsPedidos.find(p => p.id === currentTrackingPedidoId) || {};
+        const pedido = todosOsPedidos.find(p => p.id === currentTrackingPedidoId) ||
+                       trackingDataCache.find(p => p.id === currentTrackingPedidoId) || {};
         const nome = pedido.nome ? pedido.nome.split(' ')[0] : 'Cliente';
         const eventos = (currentTrackingData.eventos || []).map(ev => {
             const rawDate = ev.dtHrCriado?.date || ev.date || ev.dtHrCriado || '';

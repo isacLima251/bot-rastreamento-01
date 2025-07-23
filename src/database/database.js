@@ -101,7 +101,7 @@ function defineModels(sequelize) {
     fotoPerfilUrl: DataTypes.STRING,
     dataCriacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     mensagensNaoLidas: { type: DataTypes.INTEGER, defaultValue: 0 },
-    ultimaMensagem: DataTypes.STRING,
+    ultimaMensagem: DataTypes.TEXT,
     dataUltimaMensagem: DataTypes.DATE,
     lastCheckedAt: DataTypes.DATE,
     statusChangeAt: DataTypes.DATE,
