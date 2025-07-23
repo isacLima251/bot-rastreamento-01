@@ -1951,7 +1951,23 @@ const btnVerificarEnviarEl = document.getElementById('btn-verificar-enviar');
                     <p><strong>Data e Hora da Última Atualização:</strong> ${escapeHtml(data.ultimaAtualizacao || '-')}</p>
                     <p><strong>Localização Atual:</strong> ${escapeHtml(data.ultimaLocalizacao || '-')}</p>
                     <h4>Histórico Completo dos Eventos:</h4>
-                    <ul>${(data.eventos || []).map(ev => `<li>${escapeHtml(ev.date || ev.dtHrCriado || '')} - ${escapeHtml(ev.description || ev.descricao || ev.descricaoFrontEnd || '')} (${escapeHtml(ev.location || ev.unidade?.endereco?.cidade || '')})</li>`).join('')}</ul>
+                    <ul class="timeline">
+                        ${(data.eventos || []).map(ev => {
+                            const rawDate = ev.dtHrCriado?.date || ev.date || ev.dtHrCriado || '';
+                            const d = rawDate ? new Date(rawDate) : null;
+                            const formatted = d && !isNaN(d) ? d.toLocaleString('pt-BR') : rawDate;
+                            return `
+                                <li class="timeline-item">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-date">${escapeHtml(formatted || '-')}</div>
+                                    <div class="timeline-content">
+                                        ${escapeHtml(ev.descricao || ev.description || ev.descricaoFrontEnd || '')}
+                                        <span>Local: ${escapeHtml(ev.unidade?.endereco?.cidade || ev.location || 'N/A')} - ${escapeHtml(ev.unidade?.endereco?.uf || ev.locationUf || 'N/A')}</span>
+                                    </div>
+                                </li>
+                            `;
+                        }).join('')}
+                    </ul>
                 `;
             })
             .catch(err => {
