@@ -5,7 +5,10 @@ const variableTooltips = {
     '{{cidade_etapa_origem}}': 'Mostra a cidade de ONDE o pacote saiu na última movimentação registrada pelos Correios.',
     '{{cidade_etapa_destino}}': 'Mostra a cidade para ONDE o pacote está indo na última movimentação registrada.',
     '{{data_postagem_formatada}}': 'A data em que o pedido foi postado, no formato dd/mm/aaaa.',
-    '{{data_atualizacao_formatada}}': 'A data e a hora da última atualização do rastreio, no formato dd/mm/aaaa HH:mm.'
+    '{{data_atualizacao_formatada}}': 'A data e a hora da última atualização do rastreio, no formato dd/mm/aaaa HH:mm.',
+    '{{descricao_ultimo_evento}}': 'Texto completo do último evento registrado no rastreio.',
+    '{{data_atualizacao_data}}': 'Apenas a data da última atualização do rastreio, no formato dd/mm/aaaa.',
+    '{{hora_atualizacao}}': 'Somente a hora da última atualização do rastreio, no formato HH:mm.'
 };
 
 function highlightVariables(textarea) {
