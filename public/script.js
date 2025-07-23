@@ -263,6 +263,10 @@ const modalVerificarEl = document.getElementById('modal-verificar');
 const verificarConteudoEl = document.getElementById('verificar-conteudo');
 const btnVerificarCancelarEl = document.getElementById('btn-verificar-cancelar');
 const btnVerificarEnviarEl = document.getElementById('btn-verificar-enviar');
+const modalOpcoesEnvioEl = document.getElementById('modal-opcoes-envio');
+const btnEnviarResumoEl = document.getElementById('btn-enviar-resumo');
+const btnEnviarHistoricoEl = document.getElementById('btn-enviar-historico');
+const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
     if (loggedUserEl) loggedUserEl.textContent = userData.email || 'Usuário';
 
 
@@ -282,6 +286,8 @@ const btnVerificarEnviarEl = document.getElementById('btn-verificar-enviar');
     const contactsLimit = 10;
     let contactsTotal = 0;
     let integrationsCache = [];
+    let currentTrackingData = null;
+    let currentTrackingPedidoId = null;
 
 
      const accordionHeaders = document.querySelectorAll('.accordion-header');
@@ -1746,6 +1752,55 @@ const btnVerificarEnviarEl = document.getElementById('btn-verificar-enviar');
         });
     }
 
+    async function enviarMensagemFormatada(mensagem) {
+        if (currentWhatsappStatus !== 'CONNECTED') {
+            showNotification('O WhatsApp precisa estar conectado para enviar mensagens.', 'error');
+            return;
+        }
+        if (!currentTrackingPedidoId) return;
+        try {
+            const response = await authFetch(`/api/pedidos/${currentTrackingPedidoId}/enviar-mensagem`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mensagem })
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || 'Falha ao enviar mensagem.');
+            modalOpcoesEnvioEl.classList.remove('active');
+            modalVerificarEl.classList.remove('active');
+            const pedidoAtivo = todosOsPedidos.find(p => p.id === currentTrackingPedidoId);
+            if (pedidoAtivo) await selecionarPedidoErenderizarDetalhes(pedidoAtivo);
+            loadSubscriptionStatus();
+            showNotification('Mensagem enviada com sucesso!', 'success');
+        } catch (err) {
+            showNotification(err.message, 'error');
+        }
+    }
+
+    if (btnEnviarResumoEl) btnEnviarResumoEl.addEventListener('click', () => {
+        if (!currentTrackingData) return;
+        const pedido = todosOsPedidos.find(p => p.id === currentTrackingPedidoId) || {};
+        const nome = pedido.nome ? pedido.nome.split(' ')[0] : 'Cliente';
+        const msg = `Olá, ${nome}! \ud83d\udce6\nSegue a última atualização do seu pedido:\n\nStatus: ${currentTrackingData.statusInterno || '-'}\nLocal: ${currentTrackingData.ultimaLocalizacao || '-'}\nData: ${currentTrackingData.ultimaAtualizacao || '-'}`;
+        enviarMensagemFormatada(msg);
+    });
+
+    if (btnEnviarHistoricoEl) btnEnviarHistoricoEl.addEventListener('click', () => {
+        if (!currentTrackingData) return;
+        const pedido = todosOsPedidos.find(p => p.id === currentTrackingPedidoId) || {};
+        const nome = pedido.nome ? pedido.nome.split(' ')[0] : 'Cliente';
+        const eventos = (currentTrackingData.eventos || []).map(ev => {
+            const rawDate = ev.dtHrCriado?.date || ev.date || ev.dtHrCriado || '';
+            const d = rawDate ? new Date(rawDate) : null;
+            const formatted = d && !isNaN(d) ? d.toLocaleString('pt-BR') : rawDate;
+            const desc = ev.descricao || ev.description || ev.descricaoFrontEnd || '';
+            const loc = `${ev.unidade?.endereco?.cidade || ev.location || 'N/A'} - ${ev.unidade?.endereco?.uf || ev.locationUf || 'N/A'}`;
+            return `\u2022 ${formatted}: ${desc} (${loc})`;
+        }).join('\n');
+        const msg = `Olá, ${nome}! \ud83d\udce6\nSegue o histórico completo de rastreamento do seu pedido:\n\n${eventos}`;
+        enviarMensagemFormatada(msg);
+    });
+
     if (notificacaoCloseBtnEl) {
         notificacaoCloseBtnEl.addEventListener('click', () => {
             clearTimeout(notificacaoTimer);
@@ -1943,9 +1998,12 @@ const btnVerificarEnviarEl = document.getElementById('btn-verificar-enviar');
         if (!modalVerificarEl || !verificarConteudoEl) return;
         verificarConteudoEl.textContent = 'A carregar...';
         modalVerificarEl.classList.add('active');
+        currentTrackingPedidoId = pedidoId;
+        currentTrackingData = null;
         authFetch(`/api/pedidos/${pedidoId}/verificar-rastreio`)
             .then(r => r.json())
             .then(data => {
+                currentTrackingData = data;
                 verificarConteudoEl.innerHTML = `
                     <p><strong>Status Atual:</strong> ${escapeHtml(data.statusInterno || '-')}</p>
                     <p><strong>Data e Hora da Última Atualização:</strong> ${escapeHtml(data.ultimaAtualizacao || '-')}</p>
@@ -1972,6 +2030,7 @@ const btnVerificarEnviarEl = document.getElementById('btn-verificar-enviar');
             })
             .catch(err => {
                 verificarConteudoEl.innerHTML = `<p>Erro ao consultar rastreio: ${escapeHtml(err.message)}</p>`;
+                currentTrackingData = null;
             });
     }
 
@@ -2017,6 +2076,12 @@ const btnVerificarEnviarEl = document.getElementById('btn-verificar-enviar');
     });
     if (btnVerificarCancelarEl) btnVerificarCancelarEl.addEventListener('click', () => modalVerificarEl.classList.remove('active'));
     if (modalVerificarEl) modalVerificarEl.addEventListener('click', (e) => { if (e.target === modalVerificarEl) modalVerificarEl.classList.remove('active'); });
+    if (btnVerificarEnviarEl) btnVerificarEnviarEl.addEventListener('click', () => {
+        if (!currentTrackingData || !currentTrackingPedidoId) return;
+        modalOpcoesEnvioEl.classList.add('active');
+    });
+    if (btnEnvioCancelarEl) btnEnvioCancelarEl.addEventListener('click', () => modalOpcoesEnvioEl.classList.remove('active'));
+    if (modalOpcoesEnvioEl) modalOpcoesEnvioEl.addEventListener('click', (e) => { if (e.target === modalOpcoesEnvioEl) modalOpcoesEnvioEl.classList.remove('active'); });
     if (btnCancelSetup) btnCancelSetup.addEventListener('click', showIntegrationsList);
 
     if (trackingSearchInputEl) {
