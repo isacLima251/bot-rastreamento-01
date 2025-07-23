@@ -38,30 +38,49 @@ function personalizarMensagem(mensagem, pedido) {
     const nomeCompleto = pedido.nome || '';
     const primeiroNome = nomeCompleto.split(' ')[0];
 
-    let dataFormatada = '';
+    let dataAtualizacaoRaw = '';
+    let dataAtualizacaoFormatada = '';
     if (pedido.ultimaAtualizacao) {
         try {
             const data = new Date(pedido.ultimaAtualizacao);
-            dataFormatada = data.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-        } catch(e) {
-            dataFormatada = pedido.ultimaAtualizacao;
+            dataAtualizacaoRaw = data.toISOString();
+            dataAtualizacaoFormatada = data.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        } catch (e) {
+            dataAtualizacaoRaw = pedido.ultimaAtualizacao;
+            dataAtualizacaoFormatada = pedido.ultimaAtualizacao;
         }
     }
 
-    const linkRastreio = pedido.codigoRastreio 
+    let dataPostagemFormatada = '';
+    if (pedido.dataPostagem) {
+        try {
+            const data = new Date(pedido.dataPostagem);
+            dataPostagemFormatada = data.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        } catch (e) {
+            dataPostagemFormatada = pedido.dataPostagem;
+        }
+    }
+
+    const linkRastreio = pedido.codigoRastreio
         ? `https://rastreamento.correios.com.br/app/index.php?objetos=${pedido.codigoRastreio}`
         : '';
+
+    const statusRastreio = pedido.statusInterno || 'Status não disponível';
 
     return mensagem
         .replace(/{{nome_cliente}}/g, nomeCompleto)
         .replace(/{{primeiro_nome}}/g, primeiroNome)
         .replace(/{{produto_nome}}/g, pedido.produto || '')
         .replace(/{{codigo_rastreio}}/g, pedido.codigoRastreio || '')
-        .replace(/{{status_atual}}/g, pedido.statusInterno || 'Status não disponível')
-        .replace(/{{data_atualizacao}}/g, dataFormatada || 'Data não disponível')
+        .replace(/{{status_rastreio}}/g, statusRastreio)
+        .replace(/{{status_atual}}/g, statusRastreio)
+        .replace(/{{data_postagem_formatada}}/g, dataPostagemFormatada || '')
+        .replace(/{{data_atualizacao_formatada}}/g, dataAtualizacaoFormatada || '')
+        .replace(/{{data_atualizacao}}/g, dataAtualizacaoRaw || '')
         .replace(/{{cidade_etapa_origem}}/g, pedido.origemUltimaMovimentacao || '')
         .replace(/{{cidade_etapa_destino}}/g, pedido.destinoUltimaMovimentacao || '')
-        .replace(/{{link_rastreio}}/g, linkRastreio);
+        .replace(/{{link_rastreio}}/g, linkRastreio)
+        .replace(/{{telefone}}/g, pedido.telefone || '');
 }
 
 async function enviarMensagensComRegras(db, broadcast, sessions) {
