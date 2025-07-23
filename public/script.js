@@ -1068,6 +1068,7 @@ const btnVerificarEnviarEl = document.getElementById('btn-verificar-enviar');
                         <td>${escapeHtml(pedido.produto || 'Não informado')}</td>
                         <td>${escapeHtml(pedido.codigoRastreio || 'N/A')}</td>
                         <td><span class="status-badge ${statusClass}">${escapeHtml(status)}</span></td>
+                        <td><button class="btn-verificar" data-id="${pedido.id}">Verificar</button></td>
                     `;
                     tabelaCorpo.appendChild(row);
                 });
