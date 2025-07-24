@@ -9,6 +9,7 @@ const q = c => DB_CLIENT === 'postgres' ? `"${c}"` : c;
 const ALLOWED_UPDATE_FIELDS = [
     'nome',
     'email',
+    'cidade',
     'telefone',
     'produto',
     'codigoRastreio',
@@ -299,7 +300,7 @@ const marcarComoLido = (db, pedidoId, clienteId = null) => {
  */
 const criarPedido = (db, dadosPedido, client, clienteId = null) => {
     return new Promise(async (resolve, reject) => {
-        const { nome, telefone, email, produto, codigoRastreio, notas } = dadosPedido;
+        const { nome, telefone, email, cidade, produto, codigoRastreio, notas } = dadosPedido;
         const telefoneValidado = normalizeTelefone(telefone);
 
         if (!telefoneValidado || !nome) {
@@ -308,13 +309,13 @@ const criarPedido = (db, dadosPedido, client, clienteId = null) => {
 
         const fotoUrl = await whatsappService.getProfilePicUrl();
 
-        const sql = `INSERT INTO pedidos (cliente_id, nome, email, telefone, produto, ${q('codigoRastreio')}, notas, ${q('fotoPerfilUrl')}, ${q('dataCriacao')}, ${q('lastCheckedAt')}, ${q('statusChangeAt')}, ${q('checkCount')}, ${q('alertSent')}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)${DB_CLIENT === 'postgres' ? ' RETURNING id' : ''}`;
-        const params = [clienteId, nome, email || null, telefoneValidado, produto || null, codigoRastreio || null, notas || null, fotoUrl, new Date().toISOString(), null, null, 0, 0];
+        const sql = `INSERT INTO pedidos (cliente_id, nome, email, cidade, telefone, produto, ${q('codigoRastreio')}, notas, ${q('fotoPerfilUrl')}, ${q('dataCriacao')}, ${q('lastCheckedAt')}, ${q('statusChangeAt')}, ${q('checkCount')}, ${q('alertSent')}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)${DB_CLIENT === 'postgres' ? ' RETURNING id' : ''}`;
+        const params = [clienteId, nome, email || null, cidade || null, telefoneValidado, produto || null, codigoRastreio || null, notas || null, fotoUrl, new Date().toISOString(), null, null, 0, 0];
 
         db.run(sql, params, function (err) {
             if (err) return reject(err);
             resolve({
-                id: this.lastID, nome, telefone: telefoneValidado, email, produto, codigoRastreio, notas, fotoPerfilUrl: fotoUrl
+                id: this.lastID, nome, telefone: telefoneValidado, email, cidade, produto, codigoRastreio, notas, fotoPerfilUrl: fotoUrl
             });
         });
     });

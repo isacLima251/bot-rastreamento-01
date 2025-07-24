@@ -123,3 +123,25 @@ exports.getClientesComRastreio = async (req, res) => {
     }
 };
 
+exports.getCityPerformance = async (req, res) => {
+    try {
+        const db = req.db;
+        const clienteId = req.user.id;
+        const limit = parseInt(req.query.limit, 10) || 5;
+
+        const vendasQuery = `SELECT ${q('cidade')} as cidade, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('cidade')} IS NOT NULL AND ${q('cidade')} != '' AND ${q('statusInterno')} != 'pedido_cancelado' GROUP BY ${q('cidade')} ORDER BY count DESC LIMIT ?`;
+
+        const cancelamentosQuery = `SELECT ${q('cidade')} as cidade, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('cidade')} IS NOT NULL AND ${q('cidade')} != '' AND ${q('statusInterno')} = 'pedido_cancelado' GROUP BY ${q('cidade')} ORDER BY count DESC LIMIT ?`;
+
+        const [vendas, cancelamentos] = await Promise.all([
+            runQuery(db, vendasQuery, [clienteId, limit]),
+            runQuery(db, cancelamentosQuery, [clienteId, limit])
+        ]);
+
+        res.json({ topSales: vendas, topCancelled: cancelamentos });
+    } catch (err) {
+        console.error('Erro ao obter dados por cidade:', err);
+        res.status(500).json({ error: 'Falha ao gerar relatório por cidade.' });
+    }
+};
+
