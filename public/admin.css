@@ -5,6 +5,7 @@
   --text-color: #1f2937;
   --text-secondary: #6b7280;
   --border-color: #e5e7eb;
+  --hover-bg: #f3f4f6;
 }
 
 * {
@@ -278,4 +279,18 @@ body {
 .status-badge.inactive {
   background-color: #fee2e2;
   color: #991b1b;
+}
+
+.plan-progress {
+  margin-top: 6px;
+  height: 6px;
+  background-color: var(--hover-bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.plan-progress-bar {
+  height: 100%;
+  background-color: var(--primary-color);
+  width: 0%;
 }

@@ -105,6 +105,7 @@ function createExpressApp(db, sessionManager) {
   });
 
   app.get('/api/admin/clients', adminCheck, adminController.listClients);
+  app.get('/api/admin/clients/:id', adminCheck, adminController.getClientDetails);
   app.post('/api/admin/clients', adminCheck, adminController.createClient);
   app.put('/api/admin/clients/:id', adminCheck, adminController.updateClient);
   app.put('/api/admin/clients/:id/active', adminCheck, adminController.toggleActive);
