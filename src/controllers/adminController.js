@@ -117,3 +117,41 @@ exports.loginAs = async (req, res) => {
     }
 };
 
+exports.getClientDetails = async (req, res) => {
+    const id = parseInt(req.params.id);
+    try {
+        const user = await userService.findUserById(req.db, id);
+        if (!user || user.is_admin) {
+            return res.status(404).json({ error: 'Cliente não encontrado' });
+        }
+
+        const subscription = await subscriptionService.getUserSubscription(req.db, id);
+
+        const query = (sql, params = []) => new Promise((resolve, reject) => {
+            req.db.all(sql, params, (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows);
+            });
+        });
+
+        const pedidos = await query(
+            'SELECT id, codigoRastreio, statusInterno FROM pedidos WHERE cliente_id = ? ORDER BY id DESC LIMIT 20',
+            [id]
+        );
+        const logs = await query(
+            'SELECT id, acao, data_criacao FROM logs WHERE cliente_id = ? ORDER BY data_criacao DESC LIMIT 20',
+            [id]
+        );
+
+        res.json({
+            client: { id: user.id, email: user.email, is_active: !!user.is_active },
+            subscription,
+            pedidos,
+            logs,
+        });
+    } catch (err) {
+        console.error('Erro ao obter detalhes do cliente:', err);
+        res.status(500).json({ error: 'Falha ao obter detalhes do cliente' });
+    }
+};
+

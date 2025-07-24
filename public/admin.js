@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.clients.forEach(c => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${c.email}</td>
+                        <td><a href="/client-details.html?id=${c.id}" class="client-link">${c.email}</a></td>
                         <td><span class="status-badge ${c.is_active ? 'active' : 'inactive'}">${c.is_active ? 'Ativo' : 'Inativo'}</span></td>
                         <td>${c.requests}</td>
                     `;
@@ -132,9 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(() => loadClients());
     }
 
-    function viewDetails(id) {
-        alert('Funcionalidade em desenvolvimento.');
-    }
 
     function loginAs(id) {
         authFetch(`/api/admin/login-as/${id}`)

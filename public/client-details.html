@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Cliente</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div style="padding:20px;">
+        <a href="/admin">&larr; Voltar</a>
+        <h1 id="client-email">Cliente</h1>
+
+        <div class="card-table" id="subscription-card">
+            <div class="card-header">
+                <h3>Plano e Assinatura</h3>
+            </div>
+            <div class="card-body" style="padding:10px;">
+                <div id="subscription-info"></div>
+                <div class="plan-progress"><div class="plan-progress-bar" id="usage-bar"></div></div>
+                <p id="renewal-date"></p>
+            </div>
+        </div>
+
+        <div class="card-table" id="actions-card" style="margin-top:20px;">
+            <div class="card-header">
+                <h3>Ações Administrativas</h3>
+            </div>
+            <div class="card-body" style="padding:10px; display:flex; gap:10px;">
+                <button class="btn-primary" id="impersonate-btn">Entrar como Cliente</button>
+                <button class="btn-primary" id="toggle-active-btn"></button>
+                <button class="btn-icon btn-delete" id="delete-btn" title="Excluir">🗑</button>
+            </div>
+        </div>
+
+        <div class="card-table" style="margin-top:20px;">
+            <div class="card-header">
+                <h3>Últimos Pedidos</h3>
+            </div>
+            <div class="card-body">
+                <table id="orders-table">
+                    <thead>
+                        <tr><th>Código</th><th>Status</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-table" style="margin-top:20px;">
+            <div class="card-header">
+                <h3>Logs Recentes</h3>
+            </div>
+            <div class="card-body">
+                <table id="logs-table">
+                    <thead>
+                        <tr><th>Ação</th><th>Data</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="client-details.js"></script>
+</body>
+</html>
