@@ -6,7 +6,8 @@
     "start": "node server.js",
     "create-admin": "node criar-admin.js",
     "clean-users": "node limpar-usuarios.js",
-    "migrate": "sequelize-cli db:migrate"
+    "migrate": "sequelize-cli db:migrate",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "sequelize-cli": "^6.6.3"
+    "sequelize-cli": "^6.6.3",
+    "supertest": "^6.3.4"
   }
 }
