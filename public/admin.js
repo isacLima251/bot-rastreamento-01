@@ -66,13 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 document.getElementById('total-users').textContent = data.totalUsers;
                 document.getElementById('mrr').textContent = data.mrr.toFixed(2);
-                const plansDiv = document.getElementById('plans-stats');
-                plansDiv.innerHTML = '';
+
+                const plansBody = document.getElementById('plans-stats-body');
+                plansBody.innerHTML = '';
                 data.activeByPlan.forEach(p => {
-                    const card = document.createElement('div');
-                    card.className = 'dashboard-card';
-                    card.innerHTML = `<h3>${p.name}</h3><p>${p.count}</p>`;
-                    plansDiv.appendChild(card);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${p.name}</td><td>${p.count}</td>`;
+                    plansBody.appendChild(tr);
                 });
             });
     }

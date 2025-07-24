@@ -17,18 +17,41 @@
     </nav>
     <div style="margin-left:200px;padding:20px;">
         <section id="view-dashboard">
-            <h1>Dashboard</h1>
-            <div class="dashboard-cards">
-                <div class="dashboard-card">
-                    <h3>Total de Usuários</h3>
-                    <p id="total-users">0</p>
+            <div class="page-header">
+                <h1>Dashboard do Administrador</h1>
+                <p>Visão geral das métricas da plataforma.</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" id="icon-users">👥</div>
+                    <div class="stat-info">
+                        <p>Total de Utilizadores</p>
+                        <h2 id="total-users">0</h2>
+                    </div>
                 </div>
-                <div class="dashboard-card">
-                    <h3>MRR</h3>
-                    <p>R$ <span id="mrr">0</span></p>
+                <div class="stat-card">
+                    <div class="stat-icon" id="icon-mrr">💰</div>
+                    <div class="stat-info">
+                        <p>Receita Mensal (MRR)</p>
+                        <h2>R$ <span id="mrr">0.00</span></h2>
+                    </div>
                 </div>
             </div>
-            <div id="plans-stats" class="dashboard-plans"></div>
+
+            <div class="card-table">
+                <h3>Assinantes por Plano</h3>
+                <table id="plans-stats-table">
+                    <thead>
+                        <tr>
+                            <th>Plano</th>
+                            <th>Assinantes Ativos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plans-stats-body">
+                    </tbody>
+                </table>
+            </div>
         </section>
         <section id="view-clients" class="hidden">
             <h1>Gerenciamento de Clientes</h1>
