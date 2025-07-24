@@ -71,6 +71,7 @@ exports.receberPostback = async (req, res) => {
                     telefone: dados.clientPhone,
                     email: dados.clientEmail,
                     produto: dados.productName,
+                    cidade: dados.clientCity,
                 }, req.venomClient, nossoUsuario.id);
 
                 // AVISA O FRONTEND QUE UM NOVO CONTATO FOI CRIADO

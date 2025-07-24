@@ -86,6 +86,7 @@ function defineModels(sequelize) {
     cliente_id: DataTypes.INTEGER,
     nome: DataTypes.STRING,
     email: DataTypes.STRING,
+    cidade: DataTypes.STRING,
     telefone: { type: DataTypes.STRING, allowNull: false },
     produto: DataTypes.STRING,
     codigoRastreio: DataTypes.STRING,

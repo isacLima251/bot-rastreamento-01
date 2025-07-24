@@ -242,6 +242,8 @@ const authFetch = async (url, options = {}) => {
     const btnConfirmacaoConfirmarEl = document.getElementById('btn-confirmacao-confirmar');
     const newContactsChartCanvas = document.getElementById('new-contacts-chart');
     const statusPieChartCanvas = document.getElementById('status-pie-chart');
+    const citiesSalesChartCanvas = document.getElementById('cities-sales-chart');
+    const citiesCancelChartCanvas = document.getElementById('cities-cancel-chart');
     const trackingTableBodyEl = document.getElementById('corpo-tabela-relatorio');
     const trackingSearchInputEl = document.getElementById('filtro-relatorio');
     const integrationHistoryBodyEl = document.getElementById('integration-history-body');
@@ -282,6 +284,8 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
     let filtroAtivo = 'todos';
     let contactsChart = null;
     let statusChart = null;
+    let citiesSalesChart = null;
+    let citiesCancelChart = null;
     let integrationCurrentPage = 1;
     const integrationLimit = 5;
     let contactsCurrentPage = 1;
@@ -989,6 +993,58 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
             }
         });
     }
+
+    function createCitiesSalesChart(data) {
+        if (!citiesSalesChartCanvas || typeof Chart === 'undefined') return;
+        if (citiesSalesChart) citiesSalesChart.destroy();
+        const container = citiesSalesChartCanvas.parentElement;
+        if (!Array.isArray(data) || data.length === 0) {
+            citiesSalesChartCanvas.style.display = 'none';
+            if (container) {
+                container.querySelector('.cities-sales-empty')?.remove();
+                const msg = document.createElement('p');
+                msg.className = 'info-mensagem cities-sales-empty';
+                msg.textContent = 'Sem dados';
+                container.appendChild(msg);
+            }
+            return;
+        }
+        const labels = data.map(item => item.cidade || 'N/A');
+        const counts = data.map(item => Number(item.count) || 0);
+        citiesSalesChartCanvas.style.display = 'block';
+        if (container) container.querySelector('.cities-sales-empty')?.remove();
+        citiesSalesChart = new Chart(citiesSalesChartCanvas, {
+            type: 'bar',
+            data: { labels, datasets: [{ label: 'Vendas', data: counts, backgroundColor: 'rgba(34,197,94,0.5)', borderColor: 'rgba(34,197,94,1)', borderWidth: 1 }] },
+            options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
+        });
+    }
+
+    function createCitiesCancelChart(data) {
+        if (!citiesCancelChartCanvas || typeof Chart === 'undefined') return;
+        if (citiesCancelChart) citiesCancelChart.destroy();
+        const container = citiesCancelChartCanvas.parentElement;
+        if (!Array.isArray(data) || data.length === 0) {
+            citiesCancelChartCanvas.style.display = 'none';
+            if (container) {
+                container.querySelector('.cities-cancel-empty')?.remove();
+                const msg = document.createElement('p');
+                msg.className = 'info-mensagem cities-cancel-empty';
+                msg.textContent = 'Sem dados';
+                container.appendChild(msg);
+            }
+            return;
+        }
+        const labels = data.map(item => item.cidade || 'N/A');
+        const counts = data.map(item => Number(item.count) || 0);
+        citiesCancelChartCanvas.style.display = 'block';
+        if (container) container.querySelector('.cities-cancel-empty')?.remove();
+        citiesCancelChart = new Chart(citiesCancelChartCanvas, {
+            type: 'bar',
+            data: { labels, datasets: [{ label: 'Cancelamentos', data: counts, backgroundColor: 'rgba(239,68,68,0.5)', borderColor: 'rgba(239,68,68,1)', borderWidth: 1 }] },
+            options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
+        });
+    }
     async function loadReportData() {
         try {
             const response = await authFetch('/api/reports/summary');
@@ -1007,6 +1063,13 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
 
             createContactsChart(data.newContactsLast7Days);
             createStatusChart(data.statusDistribution);
+
+            const cityResp = await authFetch('/api/reports/city-performance');
+            if (cityResp.ok) {
+                const cityData = await cityResp.json();
+                createCitiesSalesChart(cityData.topSales);
+                createCitiesCancelChart(cityData.topCancelled);
+            }
         } catch (error) {
             console.error("Erro ao carregar dados do relatório:", error);
             showNotification(error.message, 'error');

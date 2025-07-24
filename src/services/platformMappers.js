@@ -7,6 +7,7 @@ function mapHotmart(payload) {
 
     const buyer = payload.buyer || payload.customer || {};
     const telefone = (buyer.phone?.ddd || '') + (buyer.phone?.number || buyer.phone?.local_number || buyer.phone || '');
+    const cidade = buyer.city || buyer.address?.city || payload.client_city || payload.city;
 
     return {
         eventType: evento,
@@ -14,7 +15,8 @@ function mapHotmart(payload) {
         clientEmail: buyer.email,
         clientPhone: telefone,
         productName: payload.product?.name || payload.product_name,
-        trackingCode: payload.tracking_code || payload.purchase?.tracking_code || payload.data?.tracking?.code
+        trackingCode: payload.tracking_code || payload.purchase?.tracking_code || payload.data?.tracking?.code,
+        clientCity: cidade
     };
 }
 
@@ -27,6 +29,7 @@ function mapKiwify(payload) {
 
     const cliente = payload.customer || payload.cliente || {};
     const telefone = (cliente.phone?.ddd || '') + (cliente.phone?.number || cliente.phone || payload.phone || '');
+    const cidade = cliente.city || cliente.address?.city || payload.client_city || payload.city;
 
     return {
         eventType: evento,
@@ -34,7 +37,8 @@ function mapKiwify(payload) {
         clientEmail: cliente.email || payload.email,
         clientPhone: telefone,
         productName: payload.product?.name || payload.product_name || payload.produto,
-        trackingCode: payload.tracking_code || payload.codigo_rastreio
+        trackingCode: payload.tracking_code || payload.codigo_rastreio,
+        clientCity: cidade
     };
 }
 
@@ -48,13 +52,16 @@ function mapBraip(payload) {
         eventType = 'VENDA_CANCELADA';
     }
 
+    const cidade = payload.client_city || payload.city;
+
     return {
         eventType,
         clientEmail: payload.client_email,
         clientName: payload.client_name,
         clientPhone: payload.client_cel,
         productName: payload.product_name,
-        trackingCode: payload.tracking_code
+        trackingCode: payload.tracking_code,
+        clientCity: cidade
     };
 }
 
@@ -67,6 +74,7 @@ function mapGeneric(payload) {
 
     const customer = payload.customer || payload.buyer || {};
     const telefone = (customer.phone?.ddd || '') + (customer.phone?.number || customer.phone || '');
+    const cidade = customer.city || customer.address?.city || payload.client_city || payload.city;
 
     return {
         eventType: evento,
@@ -74,7 +82,8 @@ function mapGeneric(payload) {
         clientEmail: customer.email,
         clientPhone: telefone,
         productName: payload.product?.name || payload.product_name,
-        trackingCode: payload.tracking_code || payload.codigoRastreio || payload.codigo_rastreio
+        trackingCode: payload.tracking_code || payload.codigoRastreio || payload.codigo_rastreio,
+        clientCity: cidade
     };
 }
 
