@@ -62,11 +62,25 @@ async function sendVideo(client, telefone, videoUrl, caption = '') {
 }
 
 /**
- * Retorna a URL do avatar padrão.
- * A busca pela foto real do contato foi removida.
+ * Obtém a foto de perfil real do contato, retornando uma
+ * imagem padrão caso não seja possível buscar no WhatsApp.
+ *
+ * @param {object} client Instância do venom-bot já autenticada
+ * @param {string} telefone Número do contato em qualquer formato
+ * @returns {string} URL da foto do perfil ou do avatar padrão
  */
-async function getProfilePicUrl() {
-    return DEFAULT_AVATAR_URL;
+async function getProfilePicUrl(client, telefone) {
+    if (!client || !telefone) return DEFAULT_AVATAR_URL;
+
+    try {
+        const numero = normalizeTelefone(telefone);
+        if (!numero) return DEFAULT_AVATAR_URL;
+        const wid = `${numero}@c.us`;
+        const url = await client.getProfilePicFromServer(wid);
+        return url || DEFAULT_AVATAR_URL;
+    } catch (err) {
+        return DEFAULT_AVATAR_URL;
+    }
 }
 
 module.exports = {

@@ -307,7 +307,7 @@ const criarPedido = (db, dadosPedido, client, clienteId = null) => {
             return reject(new Error("Nome e um número de celular válido são obrigatórios."));
         }
 
-        const fotoUrl = await whatsappService.getProfilePicUrl();
+        const fotoUrl = await whatsappService.getProfilePicUrl(client, telefoneValidado);
 
         const sql = `INSERT INTO pedidos (cliente_id, nome, email, cidade, telefone, produto, ${q('codigoRastreio')}, notas, ${q('fotoPerfilUrl')}, ${q('dataCriacao')}, ${q('lastCheckedAt')}, ${q('statusChangeAt')}, ${q('checkCount')}, ${q('alertSent')}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)${DB_CLIENT === 'postgres' ? ' RETURNING id' : ''}`;
         const params = [clienteId, nome, email || null, cidade || null, telefoneValidado, produto || null, codigoRastreio || null, notas || null, fotoUrl, new Date().toISOString(), null, null, 0, 0];

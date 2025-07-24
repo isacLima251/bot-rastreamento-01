@@ -349,7 +349,7 @@ exports.atualizarFotoDoPedido = async (req, res) => {
             return res.status(404).json({ error: "Pedido não encontrado." });
         }
 
-        const fotoUrl = await whatsappService.getProfilePicUrl();
+        const fotoUrl = await whatsappService.getProfilePicUrl(client, pedido.telefone);
 
         await pedidoService.updateCamposPedido(db, id, { fotoPerfilUrl: fotoUrl }, clienteId);
         req.broadcast(clienteId, { type: 'pedido_atualizado', pedidoId: id });
