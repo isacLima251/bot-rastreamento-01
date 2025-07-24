@@ -129,9 +129,9 @@ exports.getCityPerformance = async (req, res) => {
         const clienteId = req.user.id;
         const limit = parseInt(req.query.limit, 10) || 5;
 
-        const vendasQuery = `SELECT ${q('cidade')} as cidade, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('cidade')} IS NOT NULL AND ${q('cidade')} != '' AND ${q('statusInterno')} != 'pedido_cancelado' GROUP BY ${q('cidade')} ORDER BY count DESC LIMIT ?`;
+        const vendasQuery = `SELECT COALESCE(NULLIF(${q('cidade')}, ''), 'N/D') as cidade, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('statusInterno')} != 'pedido_cancelado' GROUP BY cidade ORDER BY count DESC LIMIT ?`;
 
-        const cancelamentosQuery = `SELECT ${q('cidade')} as cidade, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('cidade')} IS NOT NULL AND ${q('cidade')} != '' AND ${q('statusInterno')} = 'pedido_cancelado' GROUP BY ${q('cidade')} ORDER BY count DESC LIMIT ?`;
+        const cancelamentosQuery = `SELECT COALESCE(NULLIF(${q('cidade')}, ''), 'N/D') as cidade, COUNT(*) as count FROM pedidos WHERE cliente_id = ? AND ${q('statusInterno')} = 'pedido_cancelado' GROUP BY cidade ORDER BY count DESC LIMIT ?`;
 
         const [vendas, cancelamentos] = await Promise.all([
             runQuery(db, vendasQuery, [clienteId, limit]),

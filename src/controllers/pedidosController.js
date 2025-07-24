@@ -114,7 +114,7 @@ exports.criarPedido = [
         const db = req.db;
         const client = req.venomClient;
         const clienteId = req.user.id;
-        const { nome, telefone, produto, codigoRastreio } = req.body;
+        const { nome, telefone, produto, codigoRastreio, cidade } = req.body;
 
         try {
             const sub = await subscriptionService.getUserSubscription(req.db, clienteId);
@@ -132,7 +132,12 @@ exports.criarPedido = [
                 return res.status(409).json({ error: `Este número (${telefoneNormalizado}) já está cadastrado.` });
             }
 
-            const pedidoCriado = await pedidoService.criarPedido(db, { ...req.body, telefone: telefoneNormalizado }, client, clienteId);
+            const dadosPedido = {
+                ...req.body,
+                telefone: telefoneNormalizado,
+                cidade: cidade && cidade.trim() ? cidade.trim() : null
+            };
+            const pedidoCriado = await pedidoService.criarPedido(db, dadosPedido, client, clienteId);
             pedidoCriado.cliente_id = clienteId;
 
             await subscriptionService.incrementUsage(db, sub.id);
@@ -416,7 +421,12 @@ exports.importarPedidos = async (req, res) => {
                 continue;
             }
 
-            const pedidoCriado = await pedidoService.criarPedido(db, { ...pedidoData, telefone: telefoneNormalizado }, client, clienteId);
+            const pedidoDadosImport = {
+                ...pedidoData,
+                telefone: telefoneNormalizado,
+                cidade: pedidoData.cidade && pedidoData.cidade.trim() ? pedidoData.cidade.trim() : null
+            };
+            const pedidoCriado = await pedidoService.criarPedido(db, pedidoDadosImport, client, clienteId);
             await subscriptionService.incrementUsage(db, sub.id);
             sucessos++;
         }
