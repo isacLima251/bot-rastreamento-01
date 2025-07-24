@@ -1013,10 +1013,27 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
         const counts = data.map(item => Number(item.count) || 0);
         citiesSalesChartCanvas.style.display = 'block';
         if (container) container.querySelector('.cities-sales-empty')?.remove();
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#3b82f6';
         citiesSalesChart = new Chart(citiesSalesChartCanvas, {
             type: 'bar',
-            data: { labels, datasets: [{ label: 'Vendas', data: counts, backgroundColor: 'rgba(34,197,94,0.5)', borderColor: 'rgba(34,197,94,1)', borderWidth: 1 }] },
-            options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Vendas',
+                    data: counts,
+                    backgroundColor: primaryColor,
+                    borderColor: primaryColor,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, ticks: { precision: 0 } }
+                }
+            }
         });
     }
 
@@ -1028,10 +1045,13 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
             citiesCancelChartCanvas.style.display = 'none';
             if (container) {
                 container.querySelector('.cities-cancel-empty')?.remove();
-                const msg = document.createElement('p');
-                msg.className = 'info-mensagem cities-cancel-empty';
-                msg.textContent = 'Sem dados';
-                container.appendChild(msg);
+                const placeholder = document.createElement('div');
+                placeholder.className = 'placeholder-view cities-cancel-empty';
+                placeholder.style.padding = '20px';
+                placeholder.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <p style="margin-top: 10px;">Nenhum cancelamento registrado.</p>`;
+                container.appendChild(placeholder);
             }
             return;
         }
