@@ -89,7 +89,7 @@ exports.getStats = async (req, res) => {
     try {
         const [totalUsersRow, activeByPlanRows, mrrRow] = await Promise.all([
             runQuery('SELECT COUNT(id) as count FROM users WHERE is_admin = 0'),
-            runQuery(`SELECT p.name, COUNT(s.id) as count FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.status = 'active' GROUP BY s.plan_id`),
+            runQuery(`SELECT p.name, COUNT(s.id) as count FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.status = 'active' GROUP BY s.plan_id, p.name`),
             runQuery(`SELECT SUM(p.price) as mrr FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.status = 'active'`)
         ]);
 
