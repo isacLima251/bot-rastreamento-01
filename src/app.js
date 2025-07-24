@@ -156,6 +156,7 @@ function createExpressApp(db, sessionManager) {
   app.post('/api/webhook-site-rastreio', webhookRastreioController.receberWebhook);
   app.get('/api/automations', planCheck, automationsController.listarAutomacoes);
   app.post('/api/automations', planCheck, automationsController.salvarAutomacoes);
+  app.post('/api/automations/test', planCheck, automationsController.testarAutomacao);
 
   app.get('/api/reports/summary', planCheck, reportsController.getReportSummary);
   app.get('/api/reports/tracking', planCheck, reportsController.getTrackingReport);

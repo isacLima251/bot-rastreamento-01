@@ -179,5 +179,10 @@ async function enviarMensagemBoasVindas(db, pedido, broadcast, client) {
     }
 }
 
-module.exports = { enviarMensagensComRegras, enviarMensagemBoasVindas };
+module.exports = {
+    enviarMensagensComRegras,
+    enviarMensagemBoasVindas,
+    personalizarMensagem,
+    enviarPassos
+};
 
