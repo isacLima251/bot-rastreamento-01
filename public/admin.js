@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const views = {
         dashboard: document.getElementById('view-dashboard'),
         clients: document.getElementById('view-clients'),
-        automation: document.getElementById('view-automation'),
         config: document.getElementById('view-config')
     };
 
@@ -34,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('nav-dashboard').addEventListener('click', () => show('dashboard'));
     document.getElementById('nav-clients').addEventListener('click', () => show('clients'));
-    document.getElementById('nav-automation').addEventListener('click', () => show('automation'));
     document.getElementById('nav-config').addEventListener('click', () => show('config'));
 
     const plansSelect = document.getElementById('client-plan');
@@ -65,9 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const plansDiv = document.getElementById('plans-stats');
                 plansDiv.innerHTML = '';
                 data.activeByPlan.forEach(p => {
-                    const div = document.createElement('div');
-                    div.textContent = `${p.name}: ${p.count}`;
-                    plansDiv.appendChild(div);
+                    const card = document.createElement('div');
+                    card.className = 'dashboard-card';
+                    card.innerHTML = `<h3>${p.name}</h3><p>${p.count}</p>`;
+                    plansDiv.appendChild(card);
                 });
             });
     }
@@ -81,22 +80,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.clients.forEach(c => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `<td>${c.email}</td><td>${c.is_active ? 'Sim' : 'Não'}</td><td>${c.requests}</td>`;
-                const actionsTd = document.createElement('td');
-                const toggleBtn = document.createElement('button');
-                toggleBtn.textContent = c.is_active ? 'Desativar' : 'Ativar';
-                toggleBtn.addEventListener('click', () => toggleActive(c.id, !c.is_active));
-                const editBtn = document.createElement('button');
-                editBtn.textContent = 'Editar';
-                editBtn.addEventListener('click', () => openModal(c));
-                const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = 'Excluir';
-                deleteBtn.addEventListener('click', () => deleteClient(c.id));
-                actionsTd.appendChild(toggleBtn);
-                actionsTd.appendChild(editBtn);
-                actionsTd.appendChild(deleteBtn);
-                tr.appendChild(actionsTd);
-                tbody.appendChild(tr);
-            });
+                    const actionsTd = document.createElement('td');
+                    const toggleBtn = document.createElement('button');
+                    toggleBtn.textContent = c.is_active ? 'Desativar' : 'Ativar';
+                    toggleBtn.addEventListener('click', () => toggleActive(c.id, !c.is_active));
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = 'Editar';
+                    editBtn.addEventListener('click', () => openModal(c));
+                    const detailsBtn = document.createElement('button');
+                    detailsBtn.textContent = 'Ver Detalhes';
+                    detailsBtn.addEventListener('click', () => viewDetails(c.id));
+                    const loginAsBtn = document.createElement('button');
+                    loginAsBtn.textContent = 'Entrar como';
+                    loginAsBtn.addEventListener('click', () => loginAs(c.id));
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Excluir';
+                    deleteBtn.addEventListener('click', () => deleteClient(c.id));
+                    actionsTd.appendChild(toggleBtn);
+                    actionsTd.appendChild(editBtn);
+                    actionsTd.appendChild(detailsBtn);
+                    actionsTd.appendChild(loginAsBtn);
+                    actionsTd.appendChild(deleteBtn);
+                    tr.appendChild(actionsTd);
+                    tbody.appendChild(tr);
+                });
         });
     }
 
@@ -118,6 +125,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('Deseja realmente excluir este cliente?')) return;
         authFetch(`/api/admin/clients/${id}`, { method: 'DELETE' })
             .then(() => loadClients());
+    }
+
+    function viewDetails(id) {
+        alert('Funcionalidade em desenvolvimento.');
+    }
+
+    function loginAs(id) {
+        authFetch(`/api/admin/login-as/${id}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    window.location.href = '/painel';
+                }
+            });
     }
 
     document.getElementById('btn-new-client').addEventListener('click', () => openModal(null));
@@ -144,10 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPlans();
     fetchStats();
     loadClients();
-
-    document.querySelectorAll('.btn-add-step').forEach(btn => {
-        btn.addEventListener('click', () => addStep(btn.dataset.stepType));
-    });
 
     // Função utilitária para adicionar mensagens no chat
     window.appendMessage = function({ remetente, mensagem, mediaUrl, mediaType }) {
@@ -196,89 +214,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-// ----- Automation Builder Functions (global) -----
-let stepCounter = 0;
-
-function addStep(type) {
-    stepCounter++;
-    const container = document.getElementById('steps-container');
-    const stepCard = document.createElement('div');
-    stepCard.className = 'automation-step';
-    stepCard.id = `step-${stepCounter}`;
-    stepCard.dataset.type = type;
-    stepCard.innerHTML = `
-        <div class="step-header">
-            <h5>Passo <span class="step-order-number"></span>: ${capitalize(type)}</h5>
-            <div class="step-controls">
-                <button type="button" class="btn btn-light btn-sm btn-move-up">▲</button>
-                <button type="button" class="btn btn-light btn-sm btn-move-down">▼</button>
-                <button type="button" class="btn btn-danger btn-sm btn-remove">×</button>
-            </div>
-        </div>
-        <div class="form-group">
-            <label>${type === 'texto' ? 'Mensagem de Texto' : 'Legenda (opcional)'}</label>
-            <textarea class="form-control step-text-content" rows="3"></textarea>
-        </div>
-        <div class="form-group step-file-content" style="display: ${type === 'texto' ? 'none' : 'block'};">
-            <label>Selecione o arquivo</label>
-            <input type="file" class="form-control-file step-file-input">
-            <div class="file-name-display"></div>
-        </div>
-    `;
-    container.appendChild(stepCard);
-
-    const btnUp = stepCard.querySelector('.btn-move-up');
-    if (btnUp) btnUp.addEventListener('click', () => moveStep(btnUp, 'up'));
-    const btnDown = stepCard.querySelector('.btn-move-down');
-    if (btnDown) btnDown.addEventListener('click', () => moveStep(btnDown, 'down'));
-    const btnRemove = stepCard.querySelector('.btn-remove');
-    if (btnRemove) btnRemove.addEventListener('click', () => removeStep(btnRemove));
-    const fileInput = stepCard.querySelector('.step-file-input');
-    if (fileInput) fileInput.addEventListener('change', () => displayFileName(fileInput));
-
-    updateStepNumbers();
-}
-
-function removeStep(buttonElement) {
-    buttonElement.closest('.automation-step').remove();
-    updateStepNumbers();
-}
-
-function moveStep(buttonElement, direction) {
-    const stepCard = buttonElement.closest('.automation-step');
-    const container = stepCard.parentNode;
-    if (direction === 'up') {
-        const previousSibling = stepCard.previousElementSibling;
-        if (previousSibling) container.insertBefore(stepCard, previousSibling);
-    } else {
-        const nextSibling = stepCard.nextElementSibling;
-        if (nextSibling) container.insertBefore(nextSibling, stepCard);
-    }
-    updateStepNumbers();
-}
-
-function displayFileName(inputElement) {
-    const fileNameDisplay = inputElement.nextElementSibling;
-    if (inputElement.files.length > 0) {
-        fileNameDisplay.textContent = `Arquivo selecionado: ${inputElement.files[0].name}`;
-    } else {
-        fileNameDisplay.textContent = '';
-    }
-}
-
-function updateStepNumbers() {
-    const allSteps = document.querySelectorAll('#steps-container .automation-step');
-    allSteps.forEach((step, index) => {
-        const orderSpan = step.querySelector('.step-order-number');
-        if (orderSpan) {
-            orderSpan.textContent = index + 1;
-        }
-        step.dataset.order = index + 1;
-    });
-}
-
-function capitalize(s) {
-    if (!s) return '';
-    return s.charAt(0).toUpperCase() + s.slice(1);
-}
 

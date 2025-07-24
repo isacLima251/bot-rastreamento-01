@@ -110,6 +110,7 @@ function createExpressApp(db, sessionManager) {
   app.put('/api/admin/clients/:id/active', adminCheck, adminController.toggleActive);
   app.delete('/api/admin/clients/:id', adminCheck, adminController.deleteClient);
   app.get('/api/admin/stats', adminCheck, adminController.getStats);
+  app.get('/api/admin/login-as/:id', adminCheck, adminController.loginAs);
 
   app.get('/api/subscription', async (req, res) => {
     try {
