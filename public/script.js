@@ -2120,7 +2120,7 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
         });
     }
 
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', async (e) => {
         const btn = e.target.closest('.btn-copy-code');
         if (btn) {
             const code = btn.dataset.code;
@@ -2134,6 +2134,27 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
         if (verifyBtn) {
             const id = verifyBtn.dataset.id;
             if (id) openVerifyModal(id);
+        }
+
+        const testBtn = e.target.closest('.btn-test-automation');
+        if (testBtn) {
+            const card = testBtn.closest('.automation-card');
+            const gatilho = card ? card.dataset.automationId : null;
+            if (!gatilho) return;
+            const codigo = prompt('Informe um código de rastreio para teste:');
+            if (!codigo) return;
+            try {
+                const resp = await authFetch('/api/automations/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gatilho, codigoRastreio: codigo })
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.error || 'Erro ao enviar teste');
+                showNotification(data.message || 'Teste enviado!', 'success');
+            } catch (err) {
+                showNotification(err.message, 'error');
+            }
         }
     });
 
