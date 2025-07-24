@@ -18,6 +18,7 @@ const settingsController = require('./controllers/settingsController');
 const subscriptionService = require('./services/subscriptionService');
 const userService = require('./services/userService');
 const planService = require('./services/planService');
+const fotoPerfilController = require('./controllers/fotoPerfilController');
 const userController = require('./controllers/userController');
 const authMiddleware = require('./middleware/auth');
 const planCheck = require('./middleware/planCheck');
@@ -150,6 +151,8 @@ function createExpressApp(db, sessionManager) {
   app.post('/api/pedidos/:id/atualizar-foto', planCheck, pedidosController.atualizarFotoDoPedido);
   app.put('/api/pedidos/:id/marcar-como-lido', planCheck, pedidosController.marcarComoLido);
   app.get('/api/pedidos/:id/verificar-rastreio', planCheck, pedidosController.verificarRastreioManual);
+
+  app.get('/api/foto-perfil/:numero', planCheck, fotoPerfilController.obterFoto);
 
   app.post('/api/upload', planCheck, uploadController.upload.single('file'), uploadController.uploadFile);
 
