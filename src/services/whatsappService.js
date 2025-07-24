@@ -1,5 +1,6 @@
 // --- FUNÇÕES DE AJUDA ---
 const path = require('path');
+const axios = require('axios');
 
 const { normalizeTelefone } = require("../utils/normalizeTelefone");
 function resolveMediaPath(url) {
@@ -67,9 +68,10 @@ async function sendVideo(client, telefone, videoUrl, caption = '') {
  *
  * @param {object} client Instância do venom-bot já autenticada
  * @param {string} telefone Número do contato em qualquer formato
- * @returns {string} URL da foto do perfil ou do avatar padrão
+ * @param {boolean} [asBase64=false] Quando verdadeiro retorna os dados em Base64
+ * @returns {string} URL ou Base64 da foto do perfil, ou do avatar padrão
  */
-async function getProfilePicUrl(client, telefone) {
+async function getProfilePicUrl(client, telefone, asBase64 = false) {
     if (!client || !telefone) return DEFAULT_AVATAR_URL;
 
     try {
@@ -77,7 +79,16 @@ async function getProfilePicUrl(client, telefone) {
         if (!numero) return DEFAULT_AVATAR_URL;
         const wid = `${numero}@c.us`;
         const url = await client.getProfilePicFromServer(wid);
-        return url || DEFAULT_AVATAR_URL;
+        if (!url) return DEFAULT_AVATAR_URL;
+
+        if (asBase64) {
+            const response = await axios.get(url, { responseType: 'arraybuffer' });
+            const mime = response.headers['content-type'] || 'image/jpeg';
+            const b64 = Buffer.from(response.data, 'binary').toString('base64');
+            return `data:${mime};base64,${b64}`;
+        }
+
+        return url;
     } catch (err) {
         return DEFAULT_AVATAR_URL;
     }
