@@ -37,7 +37,7 @@ function createExpressApp(db, sessionManager) {
         directives: {
           ...helmet.contentSecurityPolicy.getDefaultDirectives(),
           "script-src": ["'self'", 'https://cdn.jsdelivr.net'],
-          "img-src": ["'self'", 'data:', 'blob:', 'https://i.imgur.com', 'https://static.whatsapp.net', 'https://pps.whatsapp.net'],
+          "img-src": ["'self'", 'data:', 'blob:', 'https://i.imgur.com', 'https://static.whatsapp.net', 'https://pps.whatsapp.net', 'https://user-images.githubusercontent.com'],
           "media-src": ["'self'", 'data:', 'blob:'],
           "connect-src": ["'self'", 'wss:', 'ws:'],
         },
