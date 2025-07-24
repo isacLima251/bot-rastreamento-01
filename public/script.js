@@ -619,11 +619,16 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
 
         // 1. PREENCHER A COLUNA 2: JANELA DE CHAT
         const safeName = escapeHtml(pedido.nome || '');
+        const primeiraLetra = pedido.nome ? pedido.nome.charAt(0).toUpperCase() : '?';
+        const cor = corAvatar(pedido.nome || '');
+        const fotoHtml = pedido.fotoPerfilUrl
+            ? `<img src="${pedido.fotoPerfilUrl}" alt="Foto de ${safeName}" onerror="this.parentElement.innerHTML = '<div class=\\'avatar-fallback\\' style=\\'background-color:${cor};\\'>${primeiraLetra}</div>';">`
+            : `<div class="avatar-fallback" style="background-color:${cor};">${primeiraLetra}</div>`;
         const chatHeaderHtml = `
             <div class="chat-header-main">
                 <div class="contact-info-main">
                     <div class="avatar-container small">
-                        <img src="${pedido.fotoPerfilUrl || 'https://i.imgur.com/z28n3Nz.png'}" alt="Foto de ${safeName}" onerror="this.src='https://i.imgur.com/z28n3Nz.png';">
+                        ${fotoHtml}
                     </div>
                     <h3>${safeName}</h3>
                 </div>

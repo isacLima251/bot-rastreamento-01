@@ -72,14 +72,14 @@ async function sendVideo(client, telefone, videoUrl, caption = '') {
  * @returns {string} URL ou Base64 da foto do perfil, ou do avatar padrão
  */
 async function getProfilePicUrl(client, telefone, asBase64 = false) {
-    if (!client || !telefone) return DEFAULT_AVATAR_URL;
+    if (!client || !telefone) return null;
 
     try {
         const numero = normalizeTelefone(telefone);
-        if (!numero) return DEFAULT_AVATAR_URL;
+        if (!numero) return null;
         const wid = `${numero}@c.us`;
         const url = await client.getProfilePicFromServer(wid);
-        if (!url) return DEFAULT_AVATAR_URL;
+        if (!url) return null;
 
         if (asBase64) {
             const response = await axios.get(url, { responseType: 'arraybuffer' });
@@ -90,7 +90,7 @@ async function getProfilePicUrl(client, telefone, asBase64 = false) {
 
         return url;
     } catch (err) {
-        return DEFAULT_AVATAR_URL;
+        return null;
     }
 }
 
