@@ -54,14 +54,33 @@
             </div>
         </section>
         <section id="view-clients" class="hidden">
-            <h1>Gerenciamento de Clientes</h1>
-            <button id="btn-new-client" class="btn-primary">Novo Cliente</button>
-            <table id="clients-table" style="width:100%;margin-top:20px;border-collapse:collapse;">
-                <thead>
-                    <tr><th>Email</th><th>Ativo</th><th>Uso do Plano</th><th>Ações</th></tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <div class="page-header">
+                <div>
+                    <h1>Gerenciamento de Clientes</h1>
+                    <p>Adicione, edite ou remova clientes da plataforma.</p>
+                </div>
+                <button id="btn-new-client" class="btn-primary">Novo Cliente</button>
+            </div>
+
+            <div class="card-table">
+                <div class="card-header">
+                    <h3>Todos os Clientes</h3>
+                </div>
+                <div class="card-body">
+                    <table id="clients-table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Ativo</th>
+                                <th>Uso do Plano</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
         <section id="view-config" class="hidden">
             <h1>Configurações</h1>

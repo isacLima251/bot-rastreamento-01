@@ -213,3 +213,69 @@ body {
   padding: 8px;
   border-bottom: 1px solid var(--border-color);
 }
+
+/* Novos estilos para gerenciamento de clientes */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0 16px 0;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 10px;
+}
+
+.card-body {
+  padding: 0;
+}
+
+#clients-table th,
+#clients-table td {
+  padding: 12px;
+}
+
+#clients-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-icon {
+  background-color: transparent;
+  border: none;
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon:hover {
+  background-color: #e5e7eb;
+}
+
+.btn-delete:hover {
+  color: #b91c1c;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.inactive {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
