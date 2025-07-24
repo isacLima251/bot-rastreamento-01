@@ -12,38 +12,33 @@
         <ul>
             <li><button class="nav-btn active" id="nav-dashboard">Dashboard</button></li>
             <li><button class="nav-btn" id="nav-clients">Clientes</button></li>
-            <li><button class="nav-btn" id="nav-automation">Automações</button></li>
             <li><button class="nav-btn" id="nav-config">Configurações</button></li>
         </ul>
     </nav>
     <div style="margin-left:200px;padding:20px;">
         <section id="view-dashboard">
             <h1>Dashboard</h1>
-            <p>Total de usuários: <span id="total-users">0</span></p>
-            <div id="plans-stats"></div>
-            <p>MRR: R$ <span id="mrr">0</span></p>
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <h3>Total de Usuários</h3>
+                    <p id="total-users">0</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>MRR</h3>
+                    <p>R$ <span id="mrr">0</span></p>
+                </div>
+            </div>
+            <div id="plans-stats" class="dashboard-plans"></div>
         </section>
         <section id="view-clients" class="hidden">
             <h1>Gerenciamento de Clientes</h1>
             <button id="btn-new-client" class="btn-primary">Novo Cliente</button>
             <table id="clients-table" style="width:100%;margin-top:20px;border-collapse:collapse;">
                 <thead>
-                    <tr><th>Email</th><th>Ativo</th><th>Requests</th><th>Ações</th></tr>
+                    <tr><th>Email</th><th>Ativo</th><th>Uso do Plano</th><th>Ações</th></tr>
                 </thead>
                 <tbody></tbody>
             </table>
-        </section>
-        <section id="view-automation" class="hidden">
-            <h1>Construtor de Automações</h1>
-            <div id="automation-builder">
-                <div id="steps-container"></div>
-                <div id="add-step-buttons" class="mt-3">
-                    <span>Adicionar novo passo:</span>
-                    <button type="button" class="btn btn-primary btn-add-step" data-step-type="texto">Texto</button>
-                    <button type="button" class="btn btn-info btn-add-step" data-step-type="midia">Mídia</button>
-                    <button type="button" class="btn btn-secondary btn-add-step" data-step-type="arquivo">Arquivo</button>
-                </div>
-            </div>
         </section>
         <section id="view-config" class="hidden">
             <h1>Configurações</h1>

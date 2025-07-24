@@ -1,5 +1,6 @@
 const userService = require('../services/userService');
 const subscriptionService = require('../services/subscriptionService');
+const jwt = require('jsonwebtoken');
 
 exports.listClients = async (req, res) => {
     try {
@@ -100,6 +101,19 @@ exports.getStats = async (req, res) => {
     } catch (err) {
         console.error('Erro ao coletar métricas:', err);
         res.status(500).json({ error: 'Falha ao coletar métricas' });
+    }
+};
+
+exports.loginAs = async (req, res) => {
+    const id = parseInt(req.params.id);
+    try {
+        const user = await userService.findUserById(req.db, id);
+        if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+        const token = jwt.sign({ id: user.id, email: user.email, is_admin: user.is_admin, precisa_trocar_senha: user.precisa_trocar_senha }, process.env.JWT_SECRET, { expiresIn: '12h' });
+        res.json({ token });
+    } catch (err) {
+        console.error('Erro ao gerar token de impersonação:', err);
+        res.status(500).json({ error: 'Falha ao gerar token' });
     }
 };
 
