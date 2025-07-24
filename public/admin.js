@@ -26,14 +26,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function show(view) {
         Object.values(views).forEach(v => v.classList.add('hidden'));
-        views[view].classList.remove('hidden');
+        if (views[view]) {
+            views[view].classList.remove('hidden');
+        }
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById('nav-' + view).classList.add('active');
+        const nav = document.getElementById('nav-' + view);
+        if (nav) nav.classList.add('active');
     }
 
-    document.getElementById('nav-dashboard').addEventListener('click', () => show('dashboard'));
-    document.getElementById('nav-clients').addEventListener('click', () => show('clients'));
-    document.getElementById('nav-config').addEventListener('click', () => show('config'));
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.id.replace('nav-', '');
+            show(target);
+        });
+    });
 
     const plansSelect = document.getElementById('client-plan');
     let plans = [];
