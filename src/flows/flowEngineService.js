@@ -1,5 +1,6 @@
 const { getModels } = require('../database/database');
-const whatsappService = require('./whatsappService');
+// Corrige caminho do serviço de WhatsApp
+const whatsappService = require('../services/whatsappService');
 
 async function sendNode(client, telefone, node) {
   if (!node) return;
