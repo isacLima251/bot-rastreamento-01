@@ -38,7 +38,11 @@ function shouldCheck(pedido, nowSP) {
 
     for (const t of times) {
         const target = new Date(nowSP);
-        target.setUTCHours(t.h, t.m, 0, 0);
+        // We want to compare using the local Sao Paulo time. Previously
+        // `setUTCHours` was used which shifted the comparison by the
+        // timezone offset, causing the check to run three hours off.
+        // Using `setHours` keeps the value in local time.
+        target.setHours(t.h, t.m, 0, 0);
 
         const diff = nowSP.getTime() - target.getTime();
         if (diff >= 0 && diff < 5 * 60 * 1000) {
