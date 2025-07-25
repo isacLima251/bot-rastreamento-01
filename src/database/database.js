@@ -154,6 +154,37 @@ function defineModels(sequelize) {
     mediaUrl: DataTypes.STRING
   }, { tableName: 'automacao_passos', timestamps: true });
 
+  const Flow = sequelize.define('Flow', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    cliente_id: { type: DataTypes.INTEGER, allowNull: false },
+    nome: { type: DataTypes.STRING, allowNull: false },
+    gatilho: { type: DataTypes.STRING, allowNull: false },
+    ativo: { type: DataTypes.INTEGER, defaultValue: 1 }
+  }, { tableName: 'flows', timestamps: true });
+
+  const FlowNode = sequelize.define('FlowNode', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    flow_id: { type: DataTypes.INTEGER, allowNull: false },
+    tipo: { type: DataTypes.STRING, allowNull: false },
+    conteudo: DataTypes.TEXT,
+    next_node_id: DataTypes.INTEGER
+  }, { tableName: 'flow_nodes', timestamps: true });
+
+  const NodeOption = sequelize.define('NodeOption', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    node_id: { type: DataTypes.INTEGER, allowNull: false },
+    label: { type: DataTypes.STRING, allowNull: false },
+    next_node_id: DataTypes.INTEGER
+  }, { tableName: 'node_options', timestamps: true });
+
+  const UserFlowState = sequelize.define('UserFlowState', {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    cliente_id: { type: DataTypes.INTEGER, allowNull: false },
+    telefone: { type: DataTypes.STRING, allowNull: false },
+    flow_id: { type: DataTypes.INTEGER, allowNull: false },
+    node_id: DataTypes.INTEGER
+  }, { tableName: 'user_flow_state', timestamps: true });
+
   const Integration = sequelize.define('Integration', {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     user_id: { type: DataTypes.INTEGER, allowNull: false },
@@ -188,7 +219,12 @@ function defineModels(sequelize) {
   Automacao.hasMany(AutomacaoPasso, { foreignKey: 'gatilho', sourceKey: 'gatilho' });
   AutomacaoPasso.belongsTo(Automacao, { foreignKey: 'gatilho', targetKey: 'gatilho' });
 
-  return { User, Plan, Subscription, Pedido, Historico, Log, Automacao, AutomacaoPasso, Integration, IntegrationSetting, UserSetting };
+  Flow.hasMany(FlowNode, { foreignKey: 'flow_id' });
+  FlowNode.belongsTo(Flow, { foreignKey: 'flow_id' });
+  FlowNode.hasMany(NodeOption, { foreignKey: 'node_id' });
+  NodeOption.belongsTo(FlowNode, { foreignKey: 'node_id' });
+
+  return { User, Plan, Subscription, Pedido, Historico, Log, Automacao, AutomacaoPasso, Integration, IntegrationSetting, UserSetting, Flow, FlowNode, NodeOption, UserFlowState };
 }
 
 let sequelize;

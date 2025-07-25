@@ -375,7 +375,8 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
         });
 
         if (viewId === 'contacts-view') loadContacts();
-        if (viewId === 'automations-view') loadAutomations();
+       if (viewId === 'automations-view') loadAutomations();
+        if (viewId === 'flows-view') loadFlows();
         if (viewId === 'integrations-view') {
             showIntegrationsList();
             loadIntegrationInfo();
@@ -1363,6 +1364,25 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
         } catch (err) {
             plansListEl.innerHTML = '<p class="info-mensagem" style="color: red;">Erro ao carregar os planos. Tente novamente mais tarde.</p>';
             console.error(err);
+        }
+    }
+
+    async function loadFlows() {
+        const listEl = document.getElementById('flows-list');
+        if (!listEl) return;
+        listEl.innerHTML = '<p class="info-mensagem">A carregar...</p>';
+        try {
+            const resp = await authFetch('/api/flows');
+            if (!resp.ok) throw new Error('Falha ao carregar fluxos.');
+            const flows = await resp.json();
+            listEl.innerHTML = '';
+            flows.forEach(f => {
+                const div = document.createElement('div');
+                div.textContent = `${f.nome} (gatilho: ${f.gatilho})`;
+                listEl.appendChild(div);
+            });
+        } catch (err) {
+            listEl.innerHTML = '<p class="info-mensagem" style="color:red">Erro ao carregar fluxos.</p>';
         }
     }
 
