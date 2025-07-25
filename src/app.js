@@ -7,7 +7,7 @@ const pedidosController = require('./controllers/pedidosController');
 const envioController = require('./controllers/envioController');
 const rastreamentoController = require('./controllers/rastreamentoController');
 const automationsController = require('./controllers/automationsController');
-const flowsController = require('./flows/flowController');
+const flowController = require('./controllers/flowController');
 const integrationsController = require('./controllers/integrationsController');
 const logsController = require('./controllers/logsController');
 const paymentController = require('./controllers/paymentController');
@@ -164,11 +164,10 @@ function createExpressApp(db, sessionManager) {
   app.get('/api/automations', planCheck, automationsController.listarAutomacoes);
   app.post('/api/automations', planCheck, automationsController.salvarAutomacoes);
   app.post('/api/automations/test', planCheck, automationsController.testarAutomacao);
-  app.get('/api/flows', planCheck, flowsController.listarFlows);
-  app.post('/api/flows', planCheck, flowsController.criarFlow);
-  app.get('/api/flows/:id', planCheck, flowsController.getFlow);
-  app.put('/api/flows/:id', planCheck, flowsController.atualizarFlow);
-  app.delete('/api/flows/:id', planCheck, flowsController.deletarFlow);
+  app.get('/api/flows', planCheck, flowController.getAll);
+  app.post('/api/flows', planCheck, flowController.create);
+  app.put('/api/flows/:id', planCheck, flowController.update);
+  app.delete('/api/flows/:id', planCheck, flowController.destroy);
 
   app.get('/api/reports/summary', planCheck, reportsController.getReportSummary);
   app.get('/api/reports/tracking', planCheck, reportsController.getTrackingReport);
