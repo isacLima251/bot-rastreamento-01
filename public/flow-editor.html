@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Editor de Fluxo</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="page-container">
+        <header class="page-header">
+            <div>
+                <input type="text" id="flow-name" placeholder="Nome do Fluxo" />
+            </div>
+            <div>
+                <button id="btn-back" class="btn-secondary">Voltar</button>
+                <button id="btn-save-flow" class="btn-primary">Salvar Fluxo</button>
+            </div>
+        </header>
+
+        <div class="settings-card">
+            <div class="settings-card-body">
+                <label for="flow-trigger">Palavra-chave Gatilho</label>
+                <input type="text" id="flow-trigger" placeholder="Ex: suporte" />
+            </div>
+        </div>
+
+        <div id="nodes-container" class="steps-container" style="margin-top:20px;"></div>
+        <div class="add-step-buttons">
+            <span></span>
+            <button type="button" id="btn-add-node" class="btn-secondary">+ Adicionar Passo</button>
+        </div>
+    </div>
+
+    <script src="flow-editor.js"></script>
+</body>
+</html>
