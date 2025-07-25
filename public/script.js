@@ -1367,6 +1367,8 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
         }
     }
 
+    let flowsCache = [];
+
     async function loadFlows() {
         const listEl = document.getElementById('flows-list');
         if (!listEl) return;
@@ -1374,12 +1376,34 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
         try {
             const resp = await authFetch('/api/flows');
             if (!resp.ok) throw new Error('Falha ao carregar fluxos.');
-            const flows = await resp.json();
+            flowsCache = await resp.json();
             listEl.innerHTML = '';
-            flows.forEach(f => {
-                const div = document.createElement('div');
-                div.textContent = `${f.nome} (gatilho: ${f.gatilho})`;
-                listEl.appendChild(div);
+            if (!flowsCache.length) {
+                listEl.innerHTML = '<p class="info-mensagem">Nenhum fluxo cadastrado.</p>';
+                return;
+            }
+            flowsCache.forEach(f => {
+                const card = document.createElement('div');
+                card.className = 'flow-card';
+                card.dataset.flowId = f.id;
+                card.innerHTML = `
+                    <div class="flow-info">
+                        <h4>${escapeHtml(f.nome)}</h4>
+                        <p>Gatilho: ${escapeHtml(f.gatilho)}</p>
+                    </div>
+                    <div class="flow-actions">
+                        <label class="switch">
+                            <input type="checkbox" class="flow-toggle" ${f.ativo ? 'checked' : ''}>
+                            <span class="slider round"></span>
+                        </label>
+                        <button class="btn-icon btn-edit-flow" title="Editar">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311a1.464 1.464 0 0 1-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413-1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>
+                        </button>
+                        <button class="btn-icon btn-delete-flow" title="Excluir">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
+                        </button>
+                    </div>`;
+                listEl.appendChild(card);
             });
         } catch (err) {
             listEl.innerHTML = '<p class="info-mensagem" style="color:red">Erro ao carregar fluxos.</p>';
@@ -1988,6 +2012,211 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
         logoutBtnEl.addEventListener('click', () => {
             localStorage.removeItem('token');
             window.location.href = '/login';
+        });
+    }
+
+    // ---- Fluxos ----
+    const flowsListView = document.getElementById('flows-list-view');
+    const flowEditorView = document.getElementById('flow-editor-view');
+    const btnNewFlow = document.getElementById('btn-new-flow');
+    const btnCancelFlow = document.getElementById('btn-cancel-flow');
+    const btnSaveFlow = document.getElementById('btn-save-flow');
+    const flowNameInput = document.getElementById('flow-name');
+    const flowTriggerInput = document.getElementById('flow-trigger');
+    const flowActiveInput = document.getElementById('flow-active');
+    const nodesContainer = document.getElementById('nodes-container');
+    let editingFlowId = null;
+
+    function showFlowsList() {
+        if (flowEditorView) flowEditorView.classList.add('hidden');
+        if (flowsListView) flowsListView.classList.remove('hidden');
+        editingFlowId = null;
+    }
+
+    function showFlowEditor(flow) {
+        if (!flowEditorView || !flowsListView) return;
+        flowsListView.classList.add('hidden');
+        flowEditorView.classList.remove('hidden');
+        document.getElementById('flow-editor-title').textContent = flow ? 'Editar Fluxo' : 'Novo Fluxo';
+        editingFlowId = flow ? flow.id : null;
+        if (flow) {
+            flowNameInput.value = flow.nome || '';
+            flowTriggerInput.value = flow.gatilho || '';
+            flowActiveInput.checked = !!flow.ativo;
+        } else {
+            flowNameInput.value = '';
+            flowTriggerInput.value = '';
+            flowActiveInput.checked = true;
+        }
+        nodesContainer.innerHTML = '';
+        const nodes = flow && Array.isArray(flow.FlowNodes) ? flow.FlowNodes : [];
+        nodes.forEach(n => createFlowStep({
+            tipo: n.tipo,
+            conteudo: n.conteudo,
+            options: n.NodeOptions || []
+        }));
+        if (!nodes.length) createFlowStep();
+        updateStepNumbers();
+        updateOptionTargets();
+    }
+
+    function createOptionItem(stepEl, data = {}) {
+        const div = document.createElement('div');
+        div.className = 'option-item';
+        div.innerHTML = `
+            <input type="text" class="option-label" placeholder="Texto do botão">
+            <select class="option-next"></select>
+            <button type="button" class="btn-icon btn-remove-option" title="Remover">&times;</button>
+        `;
+        div.querySelector('.option-label').value = data.label || '';
+        div.querySelector('.option-next').value = data.next_node_id || '';
+        div.querySelector('.btn-remove-option').addEventListener('click', () => {
+            div.remove();
+            updateOptionTargets();
+        });
+        stepEl.querySelector('.options-container').appendChild(div);
+    }
+
+    function createFlowStep(data = {}) {
+        const step = document.createElement('div');
+        step.className = 'flow-step';
+        step.innerHTML = `
+            <div class="step-header">
+                <h5>Passo <span class="step-number"></span></h5>
+                <button type="button" class="btn-icon btn-remove-step" title="Remover">&times;</button>
+            </div>
+            <textarea class="step-message" rows="3" placeholder="Mensagem"></textarea>
+            <select class="step-type" style="margin-top:10px;">
+                <option value="message">Enviar Mensagem</option>
+                <option value="question">Fazer Pergunta com Opções</option>
+            </select>
+            <div class="options-container" style="display:none"></div>
+            <button type="button" class="btn-secondary btn-add-option" style="margin-top:10px; display:none">Adicionar Opção</button>
+        `;
+        step.querySelector('.step-message').value = data.conteudo || '';
+        step.querySelector('.step-type').value = data.tipo === 'pergunta' || data.tipo === 'question' ? 'question' : 'message';
+        const removeBtn = step.querySelector('.btn-remove-step');
+        removeBtn.addEventListener('click', () => { step.remove(); updateStepNumbers(); updateOptionTargets(); });
+        const typeSelect = step.querySelector('.step-type');
+        const optionsContainer = step.querySelector('.options-container');
+        const addOptionBtn = step.querySelector('.btn-add-option');
+        const toggleType = () => {
+            const isQuestion = typeSelect.value === 'question';
+            optionsContainer.style.display = isQuestion ? 'block' : 'none';
+            addOptionBtn.style.display = isQuestion ? 'inline-block' : 'none';
+        };
+        typeSelect.addEventListener('change', toggleType);
+        addOptionBtn.addEventListener('click', () => { createOptionItem(step); updateOptionTargets(); });
+        toggleType();
+        (data.options || []).forEach(o => createOptionItem(step, o));
+        nodesContainer.appendChild(step);
+    }
+
+    function updateStepNumbers() {
+        nodesContainer.querySelectorAll('.flow-step').forEach((el, idx) => {
+            const numEl = el.querySelector('.step-number');
+            if (numEl) numEl.textContent = idx + 1;
+        });
+    }
+
+    function updateOptionTargets() {
+        const stepEls = Array.from(nodesContainer.querySelectorAll('.flow-step'));
+        const optionsHTML = ['<option value="">Fim do Fluxo</option>'];
+        stepEls.forEach((el, idx) => optionsHTML.push(`<option value="${idx + 1}">Passo ${idx + 1}</option>`));
+        stepEls.forEach(el => {
+            el.querySelectorAll('.option-next').forEach(sel => {
+                const current = sel.value;
+                sel.innerHTML = optionsHTML.join('');
+                sel.value = current;
+            });
+        });
+    }
+
+    function collectFlowData() {
+        const nodes = [];
+        nodesContainer.querySelectorAll('.flow-step').forEach((el) => {
+            const type = el.querySelector('.step-type').value === 'question' ? 'pergunta' : 'mensagem';
+            const node = { tipo: type, conteudo: el.querySelector('.step-message').value };
+            if (type === 'pergunta') {
+                node.options = [];
+                el.querySelectorAll('.option-item').forEach(optEl => {
+                    node.options.push({
+                        label: optEl.querySelector('.option-label').value,
+                        next_node_id: optEl.querySelector('.option-next').value || null
+                    });
+                });
+            }
+            nodes.push(node);
+        });
+        return {
+            nome: flowNameInput.value.trim(),
+            gatilho: flowTriggerInput.value.trim(),
+            ativo: flowActiveInput.checked ? 1 : 0,
+            nodes
+        };
+    }
+
+    async function saveCurrentFlow() {
+        const data = collectFlowData();
+        if (!data.nome || !data.gatilho) { showNotification('Preencha nome e gatilho', 'error'); return; }
+        btnSaveFlow.disabled = true;
+        btnSaveFlow.textContent = 'Salvando...';
+        try {
+            const resp = await authFetch(editingFlowId ? `/api/flows/${editingFlowId}` : '/api/flows', {
+                method: editingFlowId ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!resp.ok) throw new Error('Falha ao salvar');
+            showNotification('Fluxo salvo!', 'success');
+            showFlowsList();
+            loadFlows();
+        } catch (err) {
+            showNotification(err.message, 'error');
+        } finally {
+            btnSaveFlow.disabled = false;
+            btnSaveFlow.textContent = 'Salvar Fluxo';
+        }
+    }
+
+    if (btnNewFlow) btnNewFlow.addEventListener('click', () => showFlowEditor());
+    if (btnCancelFlow) btnCancelFlow.addEventListener('click', showFlowsList);
+    if (btnSaveFlow) btnSaveFlow.addEventListener('click', saveCurrentFlow);
+
+    const flowsListEl = document.getElementById('flows-list');
+    if (flowsListEl) flowsListEl.addEventListener('click', async (e) => {
+        const editBtn = e.target.closest('.btn-edit-flow');
+        const deleteBtn = e.target.closest('.btn-delete-flow');
+        const toggle = e.target.closest('.flow-toggle');
+        const card = e.target.closest('.flow-card');
+        if (!card) return;
+        const id = card.dataset.flowId;
+        if (editBtn) {
+            const flow = flowsCache.find(f => String(f.id) === String(id));
+            if (flow) showFlowEditor(flow);
+        }
+        if (deleteBtn) {
+            showConfirmationModal('Deseja realmente excluir este fluxo?', async () => {
+                try {
+                    const resp = await authFetch(`/api/flows/${id}`, { method: 'DELETE' });
+                    if (!resp.ok) throw new Error('Falha ao excluir');
+                    loadFlows();
+                } catch (err) { showNotification(err.message, 'error'); }
+            });
+        }
+        if (toggle) {
+            const ativo = toggle.checked ? 1 : 0;
+            try {
+                await authFetch(`/api/flows/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ativo }) });
+            } catch (err) { showNotification('Falha ao atualizar', 'error'); }
+        }
+    });
+
+    if (document.getElementById('btn-add-node')) {
+        document.getElementById('btn-add-node').addEventListener('click', () => {
+            createFlowStep();
+            updateStepNumbers();
+            updateOptionTargets();
         });
     }
 

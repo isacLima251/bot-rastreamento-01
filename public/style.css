@@ -1880,3 +1880,63 @@ input:checked ~ .toggle-label { color: var(--success-color); font-weight: 600; }
 .timeline-date { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; }
 .timeline-content { font-weight: 500; }
 .timeline-content span { display: block; font-weight: 400; color: var(--text-secondary); font-size: 0.9rem; }
+
+/* === Estilos para Fluxos de Conversa === */
+.flows-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.flow-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flow-card h4 {
+    margin: 0 0 4px 0;
+    font-size: 1.1rem;
+}
+
+.flow-card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.flow-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.flow-step {
+    border: 1px solid #dee2e6;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.flow-step .step-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.option-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+}
+.option-item input,
+.option-item select {
+    flex: 1;
+}
