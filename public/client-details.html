@@ -19,6 +19,10 @@
                 <div id="subscription-info"></div>
                 <div class="plan-progress"><div class="plan-progress-bar" id="usage-bar"></div></div>
                 <p id="renewal-date"></p>
+                <div style="margin-top:10px; display:flex; gap:10px;">
+                    <button class="btn-primary" id="change-plan-btn">Alterar Plano</button>
+                    <button class="btn-primary" id="adjust-usage-btn">Ajustar Uso</button>
+                </div>
             </div>
         </div>
 
@@ -58,6 +62,16 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+    <div id="plan-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Alterar Plano</h3>
+            <select id="plan-select"></select>
+            <div class="modal-acoes" style="margin-top:10px;">
+                <button type="button" class="btn-cancelar" id="plan-cancel">Cancelar</button>
+                <button type="button" class="btn-salvar" id="plan-save">Salvar</button>
             </div>
         </div>
     </div>
