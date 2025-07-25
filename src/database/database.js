@@ -1,6 +1,10 @@
 const { Sequelize, DataTypes, QueryTypes } = require('sequelize');
 const path = require('path');
 const logger = require('../logger');
+const defineFlow = require('../flows/flow.model');
+const defineFlowNode = require('../flows/flowNode.model');
+const defineNodeOption = require('../flows/nodeOption.model');
+const defineUserFlowState = require('../flows/userFlowState.model');
 
 const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../../whatsship.db');
@@ -154,36 +158,10 @@ function defineModels(sequelize) {
     mediaUrl: DataTypes.STRING
   }, { tableName: 'automacao_passos', timestamps: true });
 
-  const Flow = sequelize.define('Flow', {
-    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    cliente_id: { type: DataTypes.INTEGER, allowNull: false },
-    nome: { type: DataTypes.STRING, allowNull: false },
-    gatilho: { type: DataTypes.STRING, allowNull: false },
-    ativo: { type: DataTypes.INTEGER, defaultValue: 1 }
-  }, { tableName: 'flows', timestamps: true });
-
-  const FlowNode = sequelize.define('FlowNode', {
-    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    flow_id: { type: DataTypes.INTEGER, allowNull: false },
-    tipo: { type: DataTypes.STRING, allowNull: false },
-    conteudo: DataTypes.TEXT,
-    next_node_id: DataTypes.INTEGER
-  }, { tableName: 'flow_nodes', timestamps: true });
-
-  const NodeOption = sequelize.define('NodeOption', {
-    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    node_id: { type: DataTypes.INTEGER, allowNull: false },
-    label: { type: DataTypes.STRING, allowNull: false },
-    next_node_id: DataTypes.INTEGER
-  }, { tableName: 'node_options', timestamps: true });
-
-  const UserFlowState = sequelize.define('UserFlowState', {
-    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    cliente_id: { type: DataTypes.INTEGER, allowNull: false },
-    telefone: { type: DataTypes.STRING, allowNull: false },
-    flow_id: { type: DataTypes.INTEGER, allowNull: false },
-    node_id: DataTypes.INTEGER
-  }, { tableName: 'user_flow_state', timestamps: true });
+  const Flow = defineFlow(sequelize, DataTypes);
+  const FlowNode = defineFlowNode(sequelize, DataTypes);
+  const NodeOption = defineNodeOption(sequelize, DataTypes);
+  const UserFlowState = defineUserFlowState(sequelize, DataTypes);
 
   const Integration = sequelize.define('Integration', {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },

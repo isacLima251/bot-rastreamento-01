@@ -4,7 +4,7 @@ const path = require('path');
 const whatsappService = require('./services/whatsappService');
 const pedidoService = require('./services/pedidoService');
 const settingsService = require('./services/settingsService');
-const flowEngine = require('./services/flowEngineService');
+const flowEngine = require('./flows/flowEngineService');
 const { processIncomingMessage } = require('./utils/messageUtils');
 
 function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
