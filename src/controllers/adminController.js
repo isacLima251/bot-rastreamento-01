@@ -155,3 +155,18 @@ exports.getClientDetails = async (req, res) => {
     }
 };
 
+exports.setUsage = async (req, res) => {
+    const id = parseInt(req.params.id);
+    const { usage } = req.body;
+    if (usage === undefined || isNaN(parseInt(usage))) {
+        return res.status(400).json({ error: 'Valor de uso inválido' });
+    }
+    try {
+        await subscriptionService.setUsage(req.db, id, parseInt(usage));
+        res.json({ message: 'Uso ajustado' });
+    } catch (err) {
+        console.error('Erro ao ajustar uso:', err);
+        res.status(500).json({ error: 'Falha ao ajustar uso' });
+    }
+};
+

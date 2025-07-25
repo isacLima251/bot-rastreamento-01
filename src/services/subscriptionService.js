@@ -120,6 +120,15 @@ function decrementUsage(db, subscriptionId) {
     });
 }
 
+function setUsage(db, userId, usage) {
+    return new Promise((resolve, reject) => {
+        db.run('UPDATE subscriptions SET usage = ? WHERE user_id = ?', [usage, userId], function(err) {
+            if (err) return reject(err);
+            resolve({ changes: this.changes });
+        });
+    });
+}
+
 module.exports = {
     getUserSubscription,
     incrementUsage,
@@ -128,5 +137,6 @@ module.exports = {
     updateUserPlan,
     updateSubscriptionStatus,
     decrementUsage,
+    setUsage,
 };
 
