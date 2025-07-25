@@ -297,15 +297,17 @@
     </div>
 </div>
             <div id="flows-view" class="view-container hidden">
-                <div id="flows-list-view" class="page-container">
+                <div class="page-container" id="flows-list-view">
                     <header class="page-header">
                         <div>
                             <h1>Fluxos de Conversa</h1>
-                            <p>Crie sequências interativas de mensagens.</p>
+                            <p>Crie e gira os seus chatbots interativos.</p>
                         </div>
-                        <button class="btn-primary" id="btn-new-flow">Criar Novo Fluxo</button>
+                        <button class="btn-primary" id="btn-create-new-flow">Criar Novo Fluxo</button>
                     </header>
-                    <div id="flows-list" class="flows-list"></div>
+                    <div id="flows-list-container" class="card-table">
+                        <div id="flows-list" class="flows-list"></div>
+                    </div>
                 </div>
 
                 <div id="flow-editor-view" class="page-container hidden">
