@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Construtor Visual de Fluxo</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reactflow@11.11.4/dist/style.css">
+    <style>
+        #root { width: 100%; height: 80vh; }
+        .toolbar { margin: 10px 0; display: flex; gap: 8px; }
+    </style>
+</head>
+<body>
+<div class="page-container">
+    <header class="page-header">
+        <div>
+            <input type="text" id="flow-name" placeholder="Nome do Fluxo" />
+        </div>
+        <div>
+            <button id="btn-save-flow" class="btn-primary">Salvar Fluxo</button>
+        </div>
+    </header>
+    <div class="settings-card">
+        <div class="settings-card-body">
+            <label for="flow-trigger">Palavra-chave Gatilho</label>
+            <input type="text" id="flow-trigger" placeholder="Ex: suporte" />
+        </div>
+    </div>
+    <div class="toolbar">
+        <button id="add-message" class="btn-secondary">+ Mensagem</button>
+        <button id="add-question" class="btn-secondary">+ Pergunta</button>
+    </div>
+    <div id="root"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reactflow@11.11.4/dist/umd/index.js"></script>
+<script type="module" src="visual.js"></script>
+</body>
+</html>
