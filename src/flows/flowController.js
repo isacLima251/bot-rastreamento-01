@@ -1,4 +1,4 @@
-const flowService = require('../services/flowService');
+const flowService = require('./flowService');
 
 exports.listarFlows = async (req, res) => {
   try {
