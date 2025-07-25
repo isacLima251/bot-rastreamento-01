@@ -2065,7 +2065,7 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
         div.className = 'option-item';
         div.innerHTML = `
             <input type="text" class="option-label" placeholder="Texto do botão">
-            <select class="option-next"></select>
+            <select class="option-next" title="Leva para o passo..."></select>
             <button type="button" class="btn-icon btn-remove-option" title="Remover">&times;</button>
         `;
         div.querySelector('.option-label').value = data.label || '';
@@ -2090,20 +2090,23 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
                 <option value="message">Enviar Mensagem</option>
                 <option value="question">Fazer Pergunta com Opções</option>
             </select>
-            <div class="options-container" style="display:none"></div>
-            <button type="button" class="btn-secondary btn-add-option" style="margin-top:10px; display:none">Adicionar Opção</button>
+            <div class="options-section" style="display:none">
+                <h6>Opções de Resposta (Botões)</h6>
+                <div class="options-container"></div>
+                <button type="button" class="btn-secondary btn-add-option" style="margin-top:10px;">+ Adicionar Opção</button>
+            </div>
         `;
         step.querySelector('.step-message').value = data.conteudo || '';
         step.querySelector('.step-type').value = data.tipo === 'pergunta' || data.tipo === 'question' ? 'question' : 'message';
         const removeBtn = step.querySelector('.btn-remove-step');
         removeBtn.addEventListener('click', () => { step.remove(); updateStepNumbers(); updateOptionTargets(); });
         const typeSelect = step.querySelector('.step-type');
+        const optionsSection = step.querySelector('.options-section');
         const optionsContainer = step.querySelector('.options-container');
         const addOptionBtn = step.querySelector('.btn-add-option');
         const toggleType = () => {
             const isQuestion = typeSelect.value === 'question';
-            optionsContainer.style.display = isQuestion ? 'block' : 'none';
-            addOptionBtn.style.display = isQuestion ? 'inline-block' : 'none';
+            optionsSection.style.display = isQuestion ? 'block' : 'none';
         };
         typeSelect.addEventListener('change', toggleType);
         addOptionBtn.addEventListener('click', () => { createOptionItem(step); updateOptionTargets(); });
@@ -2121,13 +2124,19 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
 
     function updateOptionTargets() {
         const stepEls = Array.from(nodesContainer.querySelectorAll('.flow-step'));
-        const optionsHTML = ['<option value="">Fim do Fluxo</option>'];
-        stepEls.forEach((el, idx) => optionsHTML.push(`<option value="${idx + 1}">Passo ${idx + 1}</option>`));
-        stepEls.forEach(el => {
+        stepEls.forEach((el, idx) => {
+            const optionsHTML = ['<option value="">Fim do Fluxo</option>'];
+            stepEls.forEach((other, oidx) => {
+                if (other !== el) optionsHTML.push(`<option value="${oidx + 1}">Passo ${oidx + 1}</option>`);
+            });
             el.querySelectorAll('.option-next').forEach(sel => {
                 const current = sel.value;
                 sel.innerHTML = optionsHTML.join('');
-                sel.value = current;
+                if ([...sel.options].some(opt => opt.value === current)) {
+                    sel.value = current;
+                } else {
+                    sel.value = '';
+                }
             });
         });
     }
