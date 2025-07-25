@@ -666,6 +666,11 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
                     <label>Código de Rastreio</label>
                     <span>${escapeHtml(pedido.codigoRastreio || 'Nenhum')}</span>
                 </div>
+                <div class="status-card">
+                    <h4>Atualização do Rastreio</h4>
+                    <textarea id="tracking-status-message" maxlength="250"></textarea>
+                    <button class="btn-primary" id="btn-enviar-atualizacao">Enviar Atualização</button>
+                </div>
                 <div class="detail-item-divider"></div>
                 <div class="detail-item-notes">
                     <div class="notes-header">
@@ -678,6 +683,45 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
                 </div>
             </div>
         `;
+
+        const statusTextarea = document.getElementById('tracking-status-message');
+        const btnEnviarAtualizacao = document.getElementById('btn-enviar-atualizacao');
+        if (statusTextarea) {
+            const rawDate = pedido.ultimaAtualizacao;
+            const formatted = rawDate ? new Date(rawDate).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : '-';
+            let defaultMsg = '';
+            if (pedido.origemUltimaMovimentacao && pedido.destinoUltimaMovimentacao) {
+                defaultMsg = `Última atualização: O pedido saiu de ${pedido.origemUltimaMovimentacao} e está a caminho de ${pedido.destinoUltimaMovimentacao} em ${formatted}.`;
+            } else {
+                defaultMsg = `Última atualização: O status do seu pedido é "${pedido.statusInterno || '-'}" em ${formatted}.`;
+            }
+            statusTextarea.value = defaultMsg;
+        }
+        if (btnEnviarAtualizacao) {
+            btnEnviarAtualizacao.addEventListener('click', async () => {
+                if (currentWhatsappStatus !== 'CONNECTED') {
+                    showNotification('O WhatsApp precisa estar conectado para enviar mensagens.', 'error');
+                    return;
+                }
+                const mensagem = statusTextarea.value.trim();
+                if (!mensagem) return;
+                try {
+                    const response = await authFetch(`/api/pedidos/${pedido.id}/enviar-mensagem`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mensagem })
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || 'Falha ao enviar mensagem.');
+                    const pedidoAtivo = todosOsPedidos.find(p => p.id === pedido.id);
+                    if (pedidoAtivo) await selecionarPedidoErenderizarDetalhes(pedidoAtivo);
+                    loadSubscriptionStatus();
+                    showNotification('Mensagem enviada com sucesso!', 'success');
+                } catch (err) {
+                    showNotification(err.message, 'error');
+                }
+            });
+        }
 
         // 3. BUSCAR E RENDERIZAR O HISTÓRICO
         try {
