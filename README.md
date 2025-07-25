@@ -180,6 +180,14 @@ meu-bot-rastreamento/
     └── middleware/         # Autenticação e checagem de planos
 ```
 
+## 🖌 Editor Visual de Fluxos
+
+O painel inclui um construtor de fluxos totalmente visual utilizando [React Flow](https://reactflow.dev).
+Ao clicar em **Criar Novo Fluxo** ou editar um existente, o navegador abre `flows/visual.html`.
+Nessa página é possível arrastar os blocos e conectar as saídas para montar o
+diagrama da conversa. Ao salvar, a estrutura é enviada para as rotas da API
+responsáveis por persistir os nós e as opções.
+
 ---
 
 ## 🔒 Requisitos
