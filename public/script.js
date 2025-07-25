@@ -2226,7 +2226,7 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
     }
 
     if (btnCreateNewFlow) btnCreateNewFlow.addEventListener('click', () => {
-        window.location.href = '/flows/builder.html';
+        window.location.href = '/flows/visual.html';
     });
     if (btnCancelFlow) btnCancelFlow.addEventListener('click', showFlowsList);
     if (btnSaveFlow) btnSaveFlow.addEventListener('click', saveCurrentFlow);
@@ -2240,8 +2240,7 @@ const btnEnvioCancelarEl = document.getElementById('btn-envio-cancelar');
         if (!card) return;
         const id = card.dataset.flowId;
         if (editBtn) {
-            const flow = flowsCache.find(f => String(f.id) === String(id));
-            if (flow) showFlowEditor(flow);
+            window.location.href = `/flows/visual.html?id=${id}`;
         }
         if (deleteBtn) {
             showConfirmationModal('Deseja realmente excluir este fluxo?', async () => {
