@@ -1940,3 +1940,12 @@ input:checked ~ .toggle-label { color: var(--success-color); font-weight: 600; }
 .option-item select {
     flex: 1;
 }
+
+.options-section {
+    margin-top: 10px;
+}
+.options-section h6 {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
