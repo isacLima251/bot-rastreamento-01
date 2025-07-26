@@ -24,6 +24,15 @@ function MessageNode({ data }) {
       />
       <Handle type="target" position={Position.Top} />
       <Handle type="source" position={Position.Bottom} />
+      {data.onAdd && (
+        <button
+          type="button"
+          className="add-node-btn"
+          onClick={(e) => data.onAdd(e)}
+        >
+          +
+        </button>
+      )}
     </div>
   );
 }
