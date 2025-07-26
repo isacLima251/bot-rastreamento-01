@@ -40,3 +40,45 @@
 .read-the-docs {
   color: #888;
 }
+
+.node-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px;
+  width: 200px;
+}
+
+.node-header {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.node-input,
+.node-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.options-section {
+  text-align: left;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.option-item .node-input {
+  flex: 1;
+  margin-right: 4px;
+}
+
+.btn-secondary {
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 4px 8px;
+  cursor: pointer;
+}
