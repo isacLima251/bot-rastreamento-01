@@ -13,6 +13,7 @@ async function createFlow(userId, flowData) {
     }, { transaction: tx });
 
     if (Array.isArray(flowData.nodes)) {
+      const created = [];
       for (const n of flowData.nodes) {
         const node = await FlowNode.create({
           flow_id: flow.id,
@@ -20,14 +21,18 @@ async function createFlow(userId, flowData) {
           message_text: n.message_text || null,
           is_start_node: n.is_start_node || false
         }, { transaction: tx });
-        if (Array.isArray(n.options)) {
-          for (const opt of n.options) {
-            await NodeOption.create({
-              source_node_id: node.id,
-              option_text: opt.option_text,
-              next_node_id: opt.next_node_id || null
-            }, { transaction: tx });
-          }
+        created.push({ tempId: n.client_id, id: node.id, options: n.options || [] });
+      }
+
+      const idMap = Object.fromEntries(created.map((c, idx) => [c.tempId || idx, c.id]));
+      for (const c of created) {
+        for (const opt of c.options) {
+          const target = idMap[opt.next_node_id];
+          await NodeOption.create({
+            source_node_id: c.id,
+            option_text: opt.option_text,
+            next_node_id: target || null
+          }, { transaction: tx });
         }
       }
     }
@@ -70,6 +75,7 @@ async function updateFlow(flowId, flowData) {
     await FlowNode.destroy({ where: { flow_id: flowId }, transaction: tx });
 
     if (Array.isArray(flowData.nodes)) {
+      const created = [];
       for (const n of flowData.nodes) {
         const node = await FlowNode.create({
           flow_id: flowId,
@@ -77,14 +83,18 @@ async function updateFlow(flowId, flowData) {
           message_text: n.message_text || null,
           is_start_node: n.is_start_node || false
         }, { transaction: tx });
-        if (Array.isArray(n.options)) {
-          for (const opt of n.options) {
-            await NodeOption.create({
-              source_node_id: node.id,
-              option_text: opt.option_text,
-              next_node_id: opt.next_node_id || null
-            }, { transaction: tx });
-          }
+        created.push({ tempId: n.client_id, id: node.id, options: n.options || [] });
+      }
+
+      const idMap = Object.fromEntries(created.map((c, idx) => [c.tempId || idx, c.id]));
+      for (const c of created) {
+        for (const opt of c.options) {
+          const target = idMap[opt.next_node_id];
+          await NodeOption.create({
+            source_node_id: c.id,
+            option_text: opt.option_text,
+            next_node_id: target || null
+          }, { transaction: tx });
         }
       }
     }

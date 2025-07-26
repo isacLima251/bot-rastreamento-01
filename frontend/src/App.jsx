@@ -84,6 +84,7 @@ function App() {
     nodes.forEach((n) => { nodeMap[n.id] = n; });
     const apiNodes = nodes.map((n) => {
       const item = {
+        client_id: n.id,
         node_type: n.type,
         message_text: '',
         is_start_node: n.type === 'start',
@@ -100,7 +101,7 @@ function App() {
       const srcIdx = indexMap[e.source];
       if (srcIdx == null) return;
       const srcNode = nodeMap[e.source];
-      const opt = { option_text: '', next_node_id: parseInt(e.target, 10) };
+      const opt = { option_text: '', next_node_id: e.target };
       if (srcNode.type === 'question') {
         const optIdx = parseInt((e.sourceHandle || '').replace('opt-', ''), 10);
         if (Array.isArray(srcNode.data.options) && !Number.isNaN(optIdx)) {
