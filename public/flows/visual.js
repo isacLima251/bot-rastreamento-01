@@ -2,6 +2,20 @@ const { useState, useCallback, useEffect, Fragment } = React;
 const { createRoot } = ReactDOM;
 const { ReactFlowProvider, ReactFlow, addEdge, applyNodeChanges, applyEdgeChanges, Background, Controls, MiniMap, Handle, Position } = window.ReactFlow;
 
+const token = localStorage.getItem('token');
+function authFetch(url, options = {}) {
+  options.headers = options.headers || {};
+  if (token) options.headers['Authorization'] = `Bearer ${token}`;
+  return fetch(url, options).then(resp => {
+    if (resp.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      return Promise.reject(new Error('Unauthorized'));
+    }
+    return resp;
+  });
+}
+
 function StartNode({ data }) {
   return (
     React.createElement('div', { className: 'rf-node' },
@@ -59,7 +73,7 @@ function FlowEditor({ flowId }) {
       addStart();
       return;
     }
-    fetch(`/api/flows/${flowId}`).then(r => r.json()).then(f => {
+    authFetch(`/api/flows/${flowId}`).then(r => r.json()).then(f => {
       const loadedNodes = [];
       const loadedEdges = [];
       (f.FlowNodes || []).forEach((n, idx) => {
@@ -108,7 +122,7 @@ function FlowEditor({ flowId }) {
     }
     const url = flowId ? `/api/flows/${flowId}` : '/api/flows';
     const method = flowId ? 'PUT' : 'POST';
-    fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    authFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
       .then(resp => { if (resp.ok) window.location.href = 'flows.html'; else alert('Falha ao salvar fluxo'); });
   };
 
