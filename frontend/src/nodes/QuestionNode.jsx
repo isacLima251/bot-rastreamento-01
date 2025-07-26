@@ -52,6 +52,15 @@ function QuestionNode({ data }) {
               onChange={(e) => handleOptionChange(idx, e.target.value)}
             />
             <Handle type="source" position={Position.Right} id={`opt-${idx}`} />
+            {data.onAdd && (
+              <button
+                type="button"
+                className="add-node-btn"
+                onClick={(e) => data.onAdd(e, `opt-${idx}`)}
+              >
+                +
+              </button>
+            )}
           </div>
         ))}
         <button type="button" className="btn-secondary" onClick={addOption}>
