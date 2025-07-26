@@ -4,7 +4,7 @@ const path = require('path');
 const whatsappService = require('./services/whatsappService');
 const pedidoService = require('./services/pedidoService');
 const settingsService = require('./services/settingsService');
-const flowEngine = require('./flows/flowEngineService');
+const flowEngine = require('./services/flows/flowEngineService');
 const { processIncomingMessage } = require('./utils/messageUtils');
 
 function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
@@ -46,6 +46,9 @@ function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
         const clienteId = userId;
         const { messageContent, messageType, mediaUrl } = await processIncomingMessage(client, message);
 
+        const handled = await flowEngine.processMessage(clienteId, pedido, messageContent, client);
+        if (handled) return;
+
         await pedidoService.addMensagemHistorico(
           db,
           pedido.id,
@@ -57,7 +60,6 @@ function createWhatsAppManager(app, { broadcastStatus, broadcastToUser }) {
           messageType
         );
         broadcastToUser(userId, { type: 'nova_mensagem', pedidoId: pedido.id });
-        await flowEngine.processMessage(clienteId, telefoneCliente, messageContent, client);
       } catch (error) {
         console.error('[onMessage] Erro ao processar mensagem:', error);
       }

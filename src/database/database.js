@@ -199,8 +199,8 @@ function defineModels(sequelize) {
 
   Flow.hasMany(FlowNode, { foreignKey: 'flow_id' });
   FlowNode.belongsTo(Flow, { foreignKey: 'flow_id' });
-  FlowNode.hasMany(NodeOption, { foreignKey: 'node_id' });
-  NodeOption.belongsTo(FlowNode, { foreignKey: 'node_id' });
+  FlowNode.hasMany(NodeOption, { foreignKey: 'source_node_id' });
+  NodeOption.belongsTo(FlowNode, { foreignKey: 'source_node_id' });
 
   return { User, Plan, Subscription, Pedido, Historico, Log, Automacao, AutomacaoPasso, Integration, IntegrationSetting, UserSetting, Flow, FlowNode, NodeOption, UserFlowState };
 }
