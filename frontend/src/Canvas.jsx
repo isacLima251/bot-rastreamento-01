@@ -1,36 +1,37 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import ReactFlow, {
   Background,
   Controls,
   ReactFlowProvider,
   addEdge,
-  useEdgesState,
-  useNodesState,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { StartNode, MessageNode, QuestionNode } from './nodes';
 
-function Canvas() {
+function Canvas({ nodes, setNodes, onNodesChange, edges, setEdges, onEdgesChange }) {
   const nodeTypes = {
     start: StartNode,
     message: MessageNode,
     question: QuestionNode,
   };
 
-  const initialNodes = [
-    {
-      id: 'start',
-      type: 'start',
-      position: { x: 0, y: 0 },
-      data: { keyword: '' },
-    },
-  ];
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-
-  const id = useRef(1);
+  const id = useRef(nodes.length + 1);
   const getId = () => `node_${id.current++}`;
+
+  const handleNodeChange = useCallback(
+    (nodeId, newData) => {
+      setNodes((nds) =>
+        nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...newData } } : n)),
+      );
+    },
+    [setNodes],
+  );
+
+  useEffect(() => {
+    setNodes((nds) =>
+      nds.map((n) => ({ ...n, data: { ...n.data, onChange: (d) => handleNodeChange(n.id, d) } })),
+    );
+  }, [setNodes, handleNodeChange]);
 
   const addNode = useCallback((type) => {
     const newNode = {
@@ -39,8 +40,12 @@ function Canvas() {
       position: { x: 250, y: 25 },
       data: {},
     };
+    newNode.data.onChange = (d) => handleNodeChange(newNode.id, d);
+    if (type === 'message') newNode.data.message = '';
+    if (type === 'question') newNode.data = { ...newNode.data, question: '', options: [] };
+    if (type === 'start') newNode.data.keyword = '';
     setNodes((nds) => nds.concat(newNode));
-  }, [setNodes]);
+  }, [setNodes, handleNodeChange]);
 
   const onConnect = useCallback((params) => {
     setEdges((eds) => addEdge(params, eds));
