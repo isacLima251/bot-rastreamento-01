@@ -70,6 +70,19 @@ Após configurar o `.env`, execute as migrações para criar as tabelas:
 ```bash
 npm run migrate
 ```
+
+### Compilar o frontend
+
+O construtor visual é um aplicativo React localizado na pasta `frontend`. Antes
+de iniciar o servidor, instale as dependências e gere os arquivos estáticos que
+serão servidos em `public/flows`:
+
+```bash
+cd frontend
+npm install
+npm run build
+```
+Se preferir, utilize o script equivalente na raiz do projeto (`npm run build-frontend`, se presente).
 ### Usando Docker
 
 ```bash
@@ -183,7 +196,8 @@ meu-bot-rastreamento/
 ## 🖌 Editor Visual de Fluxos
 
 O painel inclui um construtor de fluxos totalmente visual utilizando [React Flow](https://reactflow.dev).
-Ao clicar em **Criar Novo Fluxo** ou editar um existente, o navegador abre `flows/visual.html`.
+Ao clicar em **Criar Novo Fluxo** ou editar um existente, o navegador abre `public/flows/builder.html`.
+Esse arquivo já contém o JavaScript compilado a partir do projeto localizado em `frontend`.
 Nessa página é possível arrastar os blocos e conectar as saídas para montar o
 diagrama da conversa. Ao salvar, a estrutura é enviada para as rotas da API
 responsáveis por persistir os nós e as opções.
