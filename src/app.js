@@ -165,6 +165,7 @@ function createExpressApp(db, sessionManager) {
   app.post('/api/automations', planCheck, automationsController.salvarAutomacoes);
   app.post('/api/automations/test', planCheck, automationsController.testarAutomacao);
   app.get('/api/flows', planCheck, flowController.getAll);
+  app.get('/api/flows/:id', planCheck, flowController.getOne);
   app.post('/api/flows', planCheck, flowController.create);
   app.put('/api/flows/:id', planCheck, flowController.update);
   app.delete('/api/flows/:id', planCheck, flowController.destroy);

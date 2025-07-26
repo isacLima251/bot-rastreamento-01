@@ -47,11 +47,18 @@ function FlowEditor({ flowId }) {
   const onEdgesChange = useCallback(changes => setEdges(eds => applyEdgeChanges(changes, eds)), []);
   const onConnect = useCallback(params => setEdges(eds => addEdge(params, eds)), []);
 
+  const addStart = () => setNodes(nds => {
+    if (nds.some(n => n.type === 'start')) return nds;
+    return [...nds, { id: `n${nds.length+1}`, type: 'start', position: { x: 50, y: 40 }, data: { label: '' } }];
+  });
   const addMessage = () => setNodes(nds => [...nds, { id: `n${nds.length+1}`, type: 'message', position: { x: 250, y: nds.length*80 }, data: { label: 'Mensagem' } }]);
   const addQuestion = () => setNodes(nds => [...nds, { id: `n${nds.length+1}`, type: 'question', position: { x: 250, y: nds.length*80 }, data: { label: 'Pergunta', options: [{ text: 'Sim' }, { text: 'Não' }] } }]);
 
   useEffect(() => {
-    if (!flowId) return;
+    if (!flowId) {
+      addStart();
+      return;
+    }
     fetch(`/api/flows/${flowId}`).then(r => r.json()).then(f => {
       const loadedNodes = [];
       const loadedEdges = [];
@@ -70,6 +77,9 @@ function FlowEditor({ flowId }) {
           });
         }
       });
+      if (!loadedNodes.some(n => n.type === 'start')) {
+        loadedNodes.unshift({ id: `nstart`, type: 'start', position: { x: 50, y: 40 }, data: { label: '' } });
+      }
       setNodes(loadedNodes);
       setEdges(loadedEdges);
       document.getElementById('flow-name').value = f.name || '';
@@ -81,11 +91,11 @@ function FlowEditor({ flowId }) {
     return {
       name: document.getElementById('flow-name').value.trim(),
       trigger_keyword: document.getElementById('flow-trigger').value.trim(),
-      nodes: nodes.map((n, idx) => ({
+      nodes: nodes.map(n => ({
         node_type: n.type,
         message_text: n.data.label,
-        is_start_node: idx === 0,
-        options: edges.filter(e => e.source === n.id).map(e => ({ option_text: e.label || '', next_node_id: parseInt(e.target, 10) }))
+        is_start_node: n.type === 'start',
+        options: edges.filter(e => e.source === n.id).map(e => ({ option_text: e.label || '', next_node_id: e.target }))
       }))
     };
   };
@@ -104,6 +114,7 @@ function FlowEditor({ flowId }) {
 
   useEffect(() => {
     document.getElementById('btn-save-flow').addEventListener('click', save);
+    document.getElementById('add-start').addEventListener('click', addStart);
     document.getElementById('add-message').addEventListener('click', addMessage);
     document.getElementById('add-question').addEventListener('click', addQuestion);
   }, []);

@@ -48,6 +48,14 @@ async function getFlowsByUser(userId) {
   });
 }
 
+async function getFlowById(flowId, userId) {
+  const { Flow, FlowNode, NodeOption } = getModels();
+  return Flow.findOne({
+    where: { id: flowId, user_id: userId },
+    include: { model: FlowNode, include: NodeOption }
+  });
+}
+
 async function updateFlow(flowId, flowData) {
   const { Flow, FlowNode, NodeOption } = getModels();
   const sequelize = getSequelize();
@@ -94,4 +102,4 @@ async function deleteFlow(flowId) {
   return Flow.destroy({ where: { id: flowId } });
 }
 
-module.exports = { createFlow, getFlowsByUser, updateFlow, deleteFlow };
+module.exports = { createFlow, getFlowsByUser, getFlowById, updateFlow, deleteFlow };
